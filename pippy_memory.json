@@ -1,0 +1,23 @@
+{
+  "interests": [],
+  "mentioned_stocks": {
+    "GOING": 2,
+    "STOCK": 1,
+    "RIGHT": 1,
+    "NOW": 1,
+    "GO": 1
+  },
+  "expressed_preferences": [],
+  "frequent_questions": [],
+  "flagged_tickers": [],
+  "recurring_themes": {},
+  "session_count": 6,
+  "last_session": "2026-06-18T12:25:18.111147",
+  "last_morning_brief": {},
+  "last_close_summary": {},
+  "last_deep_dive": {},
+  "deep_dive_history": [],
+  "email_count": 0,
+  "last_email_sent": "",
+  "last_email_summary": ""
+}

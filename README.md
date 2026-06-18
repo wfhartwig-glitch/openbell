@@ -83,39 +83,76 @@ Sonnet.
 
 ---
 
+## GitHub Actions Setup
+
+Everything runs automatically in the cloud — no local machine needed.
+
+1. Go to **[github.com/wfhartwig-glitch/openbell/settings/secrets/actions](https://github.com/wfhartwig-glitch/openbell/settings/secrets/actions)**
+2. Click **New repository secret** and add each of these:
+
+| Secret | Value |
+|---|---|
+| `ANTHROPIC_API_KEY` | Your Anthropic API key (`sk-ant-…`) |
+| `GMAIL_ADDRESS` | Gmail address you're sending from |
+| `GMAIL_APP_PASSWORD` | 16-character Gmail App Password |
+| `TO_EMAIL` | Where to deliver the emails |
+| `NEWS_API_KEY` | Your NewsAPI key (optional but recommended) |
+
+3. Go to the **Actions** tab and manually trigger `OpenBell Morning Briefing` once to confirm it works end to end.
+
+After that, GitHub Actions fires on schedule — Pippy wakes up, fetches live data, writes the email, sends it, saves what it learned, and commits `pippy_memory.json` back to the repo. Every run makes it smarter.
+
+---
+
+## Architecture
+
+```
+GitHub Actions (cron scheduler)
+        ↓
+  openbell.py (CLI entrypoint)
+        ↓
+  Pippy agentic loop (Anthropic tool-use API)
+        ↓  calls tools from →  pippy_mcp.py
+        ↓
+  Gmail SMTP (sends email)
+        ↓
+  pippy_memory.json committed back to repo
+```
+
+**Pippy** is a fully autonomous agent. It decides which tools to call, in what order, based on the email type. It reads its own memory, fetches live data, writes the HTML email, sends it, and saves what it learned — all without being told step by step.
+
+**pippy_mcp.py** exposes all 13 tools two ways:
+- As plain Python functions imported by `openbell.py` for cloud runs
+- As a FastMCP server for the local `pippy.py` terminal agent
+
+**pippy_memory.json** is committed to this repo and is Pippy's persistent brain. Terminal sessions and cloud email runs share the same memory.
+
+---
+
 ## How it works
 
 | Section | Source |
 |---|---|
-| Futures snapshot | `yfinance` — ES=F, NQ=F, YM=F |
-| Top headlines | NewsAPI `/top-headlines?category=business` |
-| Economic events | MarketWatch calendar link (static note) |
-| What to Watch | Claude `claude-sonnet-4-6` |
-| Monthly picks | Claude `claude-sonnet-4-6`, cached in `picks_cache.json` |
-
-**Monthly picks caching:** On the 1st of each month the script calls Claude
-to generate 5 stock picks and saves them to `picks_cache.json` keyed by
-`YYYY-MM`. Every other day it reads straight from the cache — no extra API
-call. Delete the cache entry for the current month to force a refresh.
+| Futures / closing prices | `yfinance` — live index or futures tickers |
+| Top headlines | NewsAPI (preferred) or yfinance fallback |
+| Sector performance | `yfinance` — XLK, XLF, XLE, XLV, XLI, XLY, XLP, XLB, XLRE, XLU, XLC |
+| All narrative writing | Claude `claude-sonnet-4-6` via tool-use agentic loop |
+| Monthly picks | `yfinance` fundamentals scan, cached in `picks_cache.json` |
+| Deep dive topics | Claude chooses from 7 categories, rotated via `deep_dive_history` |
 
 ---
 
-## Running as a background service (macOS)
-
-Keep the scheduler alive after you close your terminal with `nohup`:
+## Running locally
 
 ```bash
-nohup python openbell.py > openbell.log 2>&1 &
-echo $! > openbell.pid   # save PID to stop it later
-```
+# Send one email right now
+python openbell.py morning
+python openbell.py close
+python openbell.py deepdive   # skips automatically if market is open
 
-To stop it:
-```bash
-kill $(cat openbell.pid)
+# Start the terminal agent
+python pippy.py
 ```
-
-Alternatively, add a launchd plist in `~/Library/LaunchAgents/` to have macOS
-start it automatically at login — see Apple's launchd documentation.
 
 ---
 

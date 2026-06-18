@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Pippy — terminal agent powered by claude -p (Max tokens, no API key needed).
-Each message calls `claude -p` with conversation history injected as context.
-MCP tools are registered in .claude/settings.json so Claude uses them automatically.
+Pippy — terminal agent powered by claude -p.
+Pulls latest memory from GitHub before each session and pushes updates after.
+MCP tools are registered via .claude/settings.json so claude -p uses them automatically.
 """
 
 import json
@@ -17,8 +17,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
-MEMORY_FILE = os.path.join(PROJECT_DIR, "pippy_memory.json")
+PROJECT_DIR  = os.path.dirname(os.path.abspath(__file__))
+MEMORY_FILE  = os.path.join(PROJECT_DIR, "pippy_memory.json")
 HISTORY_FILE = os.path.join(PROJECT_DIR, "pippy_history.json")
 
 DEFAULT_MEMORY = {
@@ -27,21 +27,68 @@ DEFAULT_MEMORY = {
     "expressed_preferences": [],
     "frequent_questions": [],
     "flagged_tickers": [],
-    "last_email_sent": "",
-    "last_email_summary": "",
+    "recurring_themes": {},
     "session_count": 0,
     "last_session": "",
+    "last_morning_brief": {},
+    "last_close_summary": {},
+    "last_deep_dive": {},
+    "deep_dive_history": [],
+    "email_count": 0,
+    "last_email_sent": "",
+    "last_email_summary": "",
 }
 
-SYSTEM_PROMPT = """You are Pippy, the AI brain behind OpenBell — a daily pre-market briefing email. You run in a terminal.
+SYSTEM_PROMPT = """You are Pippy, the AI brain behind OpenBell — a daily market briefing email. You run in a terminal.
 
 Non-negotiable rules:
 - No markdown ever. No **bold**, no headers, no asterisks. Plain text only.
-- Never mention WebSearch, permissions, tools, or internet access. Live data is fetched and injected into your prompt — just use it.
+- Never mention WebSearch, permissions, tools, or internet access. Live data is fetched and injected — just use it.
 - Never say you lack access to data that is already in the prompt context.
 - Talk in first person. You are Pippy, not an assistant.
 - Keep responses to 3-5 lines. Be direct and confident.
 - If live data is in the context, lead with it. Don't caveat it."""
+
+
+def git_pull():
+    """Pull latest memory from the remote repo before starting."""
+    try:
+        result = subprocess.run(
+            ["git", "pull", "--rebase", "--quiet"],
+            capture_output=True, text=True, cwd=PROJECT_DIR, timeout=15,
+        )
+        if result.returncode == 0:
+            print("  (synced memory from cloud)")
+        else:
+            print(f"  (git pull skipped: {result.stderr.strip()[:60]})")
+    except Exception:
+        pass
+
+
+def git_push_memory():
+    """Commit and push updated memory back to the repo."""
+    try:
+        subprocess.run(
+            ["git", "add", "pippy_memory.json"],
+            cwd=PROJECT_DIR, capture_output=True,
+        )
+        diff = subprocess.run(
+            ["git", "diff", "--staged", "--quiet"],
+            cwd=PROJECT_DIR,
+        )
+        if diff.returncode != 0:
+            subprocess.run(
+                ["git", "commit", "-m",
+                 f"Pippy memory update — terminal session {datetime.now().strftime('%Y-%m-%d %H:%M')}"],
+                cwd=PROJECT_DIR, capture_output=True,
+            )
+            subprocess.run(
+                ["git", "push"],
+                cwd=PROJECT_DIR, capture_output=True,
+            )
+            print("  (memory pushed to cloud)")
+    except Exception:
+        pass
 
 
 def load_memory() -> dict:
@@ -68,24 +115,23 @@ def load_history() -> list:
 
 
 def save_history(history: list) -> None:
-    # Keep last 20 turns to avoid prompt bloat
     with open(HISTORY_FILE, "w") as f:
         json.dump(history[-40:], f, indent=2)
 
 
-SKIP_WORDS = {"I","A","AN","THE","AND","OR","BUT","FOR","IN","ON","AT","TO","OF",
-              "IS","IT","MY","ME","DO","IF","SO","UP","AI","US","OK","AM","PM",
-              "ET","PE","YOY","EPS","CEO","CFO","IPO","GDP","FED","ETF","APP",
-              "WHAT","HOW","WHY","WHEN","WHO","CAN","WILL","DOES","HAS","ARE"}
+SKIP_WORDS = {
+    "I", "A", "AN", "THE", "AND", "OR", "BUT", "FOR", "IN", "ON", "AT", "TO", "OF",
+    "IS", "IT", "MY", "ME", "DO", "IF", "SO", "UP", "AI", "US", "OK", "AM", "PM",
+    "ET", "PE", "YOY", "EPS", "CEO", "CFO", "IPO", "GDP", "FED", "ETF", "APP",
+    "WHAT", "HOW", "WHY", "WHEN", "WHO", "CAN", "WILL", "DOES", "HAS", "ARE",
+}
 
 
 def fetch_live_data(user_message: str) -> str:
-    """Fetch relevant live data based on what the user asked."""
     msg   = user_message.upper()
     lower = user_message.lower()
     data_lines = []
 
-    # Only detect tickers the user actually typed in uppercase (not words we uppercased)
     tickers = [w for w in re.findall(r'\b[A-Z]{2,5}\b', user_message) if w not in SKIP_WORDS]
     for ticker in tickers[:2]:
         try:
@@ -113,15 +159,12 @@ def fetch_live_data(user_message: str) -> str:
         except Exception:
             continue
 
-    # Fetch market snapshot for market questions
-    market_words = ["market","futures","s&p","nasdaq","dow","spy","qqq","open","close","premarket","briefing"]
+    market_words = ["market", "futures", "s&p", "nasdaq", "dow", "spy", "qqq",
+                    "open", "close", "premarket", "briefing"]
     if any(w in lower for w in market_words) and not tickers:
         now_m  = datetime.now()
-        wday   = now_m.weekday()
         mins   = now_m.hour * 60 + now_m.minute
-        # CT market hours: 8:30 AM – 3:00 PM  (ET - 1h)
-        is_open = wday < 5 and (8*60+30) <= mins <= (15*60)
-        # Use live index tickers during hours, futures pre/post market
+        is_open = now_m.weekday() < 5 and (8 * 60 + 30) <= mins <= (15 * 60)
         indexes = {
             "S&P 500": "^GSPC" if is_open else "ES=F",
             "Nasdaq":  "^IXIC" if is_open else "NQ=F",
@@ -142,15 +185,14 @@ def fetch_live_data(user_message: str) -> str:
             except Exception:
                 continue
 
-    # Fetch headlines for news questions
-    news_words = ["news","headlines","happening","briefing","today"]
+    news_words = ["news", "headlines", "happening", "briefing", "today"]
     if any(w in lower for w in news_words):
-        skip = ["beginner","guide","how to","what is","explainer"]
+        skip = ["beginner", "guide", "how to", "what is", "explainer"]
         seen, titles = set(), []
-        for sym in ["SPY","QQQ","^VIX"]:
+        for sym in ["SPY", "QQQ", "^VIX"]:
             try:
                 for item in (yf.Ticker(sym).news or []):
-                    t = item.get("content",{}).get("title") or item.get("title","")
+                    t = item.get("content", {}).get("title") or item.get("title", "")
                     if t and t not in seen and len(t) > 20 and not any(k in t.lower() for k in skip):
                         seen.add(t)
                         titles.append(t)
@@ -166,7 +208,6 @@ def fetch_live_data(user_message: str) -> str:
 
 
 def build_prompt(history: list, user_message: str, mem: dict, live_data: str = "") -> str:
-    """Build the full prompt for claude -p including system, memory, live data, history."""
     mem_snippet = ""
     if mem.get("mentioned_stocks"):
         top = sorted(mem["mentioned_stocks"].items(), key=lambda x: x[1], reverse=True)[:8]
@@ -178,7 +219,7 @@ def build_prompt(history: list, user_message: str, mem: dict, live_data: str = "
     if mem.get("last_email_summary"):
         mem_snippet += f"Last email: {mem['last_email_summary']} "
     if mem.get("session_count"):
-        mem_snippet += f"Sessions: {mem['session_count']}."
+        mem_snippet += f"Sessions: {mem['session_count']}. Emails sent: {mem.get('email_count', 0)}."
 
     lines = [SYSTEM_PROMPT]
     if mem_snippet:
@@ -196,17 +237,14 @@ def build_prompt(history: list, user_message: str, mem: dict, live_data: str = "
 
 
 def update_memory(mem: dict, user_message: str) -> dict:
-    """Update memory based on what the user said."""
-    # Track tickers
     tickers = [w for w in re.findall(r'\b[A-Z]{1,5}\b', user_message.upper()) if w not in SKIP_WORDS]
     for t in tickers:
         mem["mentioned_stocks"][t] = mem["mentioned_stocks"].get(t, 0) + 1
         if mem["mentioned_stocks"][t] >= 3 and t not in mem["flagged_tickers"]:
             mem["flagged_tickers"].append(t)
 
-    # Track preferences
     lower = user_message.lower()
-    for kw in ["i like","i prefer","i love","i hate","i'm worried","worried about","i think","i believe"]:
+    for kw in ["i like", "i prefer", "i love", "i hate", "i'm worried", "worried about", "i think", "i believe"]:
         if kw in lower:
             snippet = user_message[:80].strip()
             if snippet not in mem["expressed_preferences"]:
@@ -216,27 +254,26 @@ def update_memory(mem: dict, user_message: str) -> dict:
 
 
 def call_claude(prompt: str) -> str:
-    """Call claude -p with the given prompt and return the response."""
     try:
         result = subprocess.run(
             ["claude", "-p", prompt],
-            capture_output=True,
-            text=True,
-            cwd=PROJECT_DIR,
-            timeout=120,
+            capture_output=True, text=True, cwd=PROJECT_DIR, timeout=120,
         )
         if result.returncode != 0 and result.stderr:
             return f"Error: {result.stderr.strip()}"
         return result.stdout.strip() or "[No response]"
     except subprocess.TimeoutExpired:
-        return "Timed out waiting for response. Try again."
+        return "Timed out. Try again."
     except FileNotFoundError:
-        return "Error: `claude` CLI not found. Make sure Claude Code is installed."
+        return "Error: `claude` CLI not found."
     except Exception as e:
-        return f"Error calling Claude: {e}"
+        return f"Error: {e}"
 
 
 def run():
+    # Sync latest memory from cloud before starting
+    git_pull()
+
     mem     = load_memory()
     history = load_history()
 
@@ -244,7 +281,7 @@ def run():
 
     opening_prompt = build_prompt(
         [],
-        "Greet me in one short sentence using first person — say 'I' not 'Pippy'. No market data, no prices. Just let me know you're here and ready.",
+        "Greet me in one short sentence. No market data or prices — just let me know you're here and ready.",
         mem,
     )
     opening = call_claude(opening_prompt)
@@ -256,7 +293,7 @@ def run():
             user_input = input("You: ").strip()
         except (EOFError, KeyboardInterrupt):
             print("\n\nPippy: Saved. Talk soon.")
-            _save_and_exit(mem, history)
+            _exit(mem, history)
 
         if not user_input:
             continue
@@ -270,6 +307,7 @@ def run():
                 json.dump(mem, f, indent=2)
             save_history(history)
             print("\nPippy: Saved. Talk soon.\n")
+            git_push_memory()
             sys.exit(0)
 
         if cmd == "forget":
@@ -280,21 +318,19 @@ def run():
             print("\nPippy: Memory and history wiped. Starting fresh.\n")
             continue
 
-        # Route shorthand commands to explicit instructions
         routed = {
-            "memory":   "Call load_memory and print a clean readable summary of everything you know about me.",
-            "picks":    "Call get_weekly_picks and display the results.",
-            "briefing": "Call fetch_market_snapshot and fetch_top_headlines, then give me a quick briefing.",
+            "memory":    "Summarize everything you know about me from memory in plain text — stocks, preferences, watchlist, last email.",
+            "picks":     "Call get_monthly_picks and display the results clearly.",
+            "briefing":  "Call fetch_market_snapshot and fetch_top_headlines, then give me a quick briefing.",
             "watchlist": "Show me my current flagged_tickers watchlist from memory.",
         }
         effective_input = routed.get(cmd, user_input)
 
-        # Update memory and fetch live data
         mem = update_memory(mem, user_input)
         print("  …", end="\r")
         live_data = fetch_live_data(effective_input)
-        prompt = build_prompt(history, effective_input, mem, live_data)
-        reply = call_claude(prompt)
+        prompt    = build_prompt(history, effective_input, mem, live_data)
+        reply     = call_claude(prompt)
         print(" " * 10, end="\r")
         print(f"\nPippy: {reply}\n")
 
@@ -302,8 +338,11 @@ def run():
         save_history(history)
 
 
-def _save_and_exit(mem, history):
+def _exit(mem, history):
+    with open(MEMORY_FILE, "w") as f:
+        json.dump(mem, f, indent=2)
     save_history(history)
+    git_push_memory()
     sys.exit(0)
 
 

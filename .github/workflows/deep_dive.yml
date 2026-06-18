@@ -1,0 +1,52 @@
+# Required GitHub Secrets (add at github.com/wfhartwig-glitch/openbell/settings/secrets/actions):
+#   ANTHROPIC_API_KEY
+#   GMAIL_ADDRESS
+#   GMAIL_APP_PASSWORD
+#   TO_EMAIL
+#   NEWS_API_KEY
+
+name: OpenBell Deep Dive
+
+on:
+  schedule:
+    # 8:30 AM CT = 14:30 UTC — runs every day; openbell.py skips if market is open
+    - cron: '30 14 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  send-deep-dive:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run deep dive if market closed
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GMAIL_ADDRESS:     ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          TO_EMAIL:          ${{ secrets.TO_EMAIL }}
+          NEWS_API_KEY:      ${{ secrets.NEWS_API_KEY }}
+        run: python openbell.py deepdive
+
+      - name: Commit updated Pippy memory
+        run: |
+          git config user.name "Pippy"
+          git config user.email "pippy@openbell.ai"
+          git add pippy_memory.json
+          git diff --staged --quiet || git commit -m "Pippy memory update — deep dive $(date +'%Y-%m-%d')"
+          git push
