@@ -1,8 +1,21 @@
 # OpenBell
 
-A daily pre-market briefing email agent. Every weekday at 9:30 AM ET it pulls
-live futures data, top business headlines, generates a plain-English market
-summary with Claude, and emails a clean briefing to your inbox.
+Three automated emails, every day. Morning briefing before the open, closing
+summary after the bell, and deep dives on weekends and holidays. Powered by
+Claude + yfinance.
+
+---
+
+## Email Schedule
+
+| Time (Central) | Day | Email |
+|---|---|---|
+| 8:30 AM CT | Weekdays | ☀️ Morning Briefing — futures, headlines, What to Watch, calendar, watchlist, monthly picks |
+| 3:00 PM CT | Weekdays | 📊 Market Close Summary — closing prices, Today's Story, top movers, sectors, watchlist EOD |
+| 8:30 AM CT | Weekends & holidays | 📚 Deep Dive — Claude-written deep dive on a company, sector, macro theme, or market topic |
+
+Market holidays (NYSE) are hardcoded for 2025 and 2026. On a holiday weekday
+the close job is skipped and the morning job sends a Deep Dive instead.
 
 ---
 
@@ -16,8 +29,11 @@ pip install -r requirements.txt
 cp .env.example .env
 # then edit .env with your keys (see sections below)
 
-# 3. Test it right now
-python openbell.py --now
+# 3. Test one email right now
+python openbell.py --now morning    # send a Morning Briefing immediately
+python openbell.py --now close      # send a Market Close Summary immediately
+python openbell.py --now deepdive   # send a Deep Dive immediately
+python openbell.py --now auto       # use schedule logic (market open? → morning, else → deep dive)
 
 # 4. Run the scheduler (stays running, fires at 09:30 weekdays)
 python openbell.py
