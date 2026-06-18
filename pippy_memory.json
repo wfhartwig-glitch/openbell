@@ -1,18 +1,26 @@
 {
   "interests": [],
   "mentioned_stocks": {
-    "GOING": 2,
+    "GOING": 3,
     "STOCK": 1,
     "RIGHT": 1,
     "NOW": 1,
-    "GO": 1
+    "GO": 1,
+    "WHATS": 1,
+    "MAN": 1,
+    "B": 1,
+    "AWHY": 1,
+    "WELL": 1,
+    "TODAY": 1
   },
   "expressed_preferences": [],
   "frequent_questions": [],
-  "flagged_tickers": [],
+  "flagged_tickers": [
+    "GOING"
+  ],
   "recurring_themes": {},
-  "session_count": 6,
-  "last_session": "2026-06-18T12:25:18.111147",
+  "session_count": 7,
+  "last_session": "2026-06-18T14:34:40.761846",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
