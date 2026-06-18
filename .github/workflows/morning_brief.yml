@@ -3,7 +3,8 @@
 #   GMAIL_ADDRESS
 #   GMAIL_APP_PASSWORD
 #   TO_EMAIL
-#   NEWS_API_KEY
+#   FMP_API_KEY        ← primary market data (free at financialmodelingprep.com)
+#   NEWS_API_KEY       ← optional headline fallback (free at newsapi.org)
 
 name: OpenBell Morning Briefing
 
@@ -36,11 +37,12 @@ jobs:
 
       - name: Run morning briefing
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          GMAIL_ADDRESS:     ${{ secrets.GMAIL_ADDRESS }}
+          ANTHROPIC_API_KEY:  ${{ secrets.ANTHROPIC_API_KEY }}
+          GMAIL_ADDRESS:      ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-          TO_EMAIL:          ${{ secrets.TO_EMAIL }}
-          NEWS_API_KEY:      ${{ secrets.NEWS_API_KEY }}
+          TO_EMAIL:           ${{ secrets.TO_EMAIL }}
+          FMP_API_KEY:        ${{ secrets.FMP_API_KEY }}
+          NEWS_API_KEY:       ${{ secrets.NEWS_API_KEY }}
         run: python openbell.py morning
 
       - name: Commit updated Pippy memory

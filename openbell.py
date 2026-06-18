@@ -19,8 +19,10 @@ import anthropic
 from dotenv import load_dotenv
 
 from pippy_mcp import (
+    fetch_earnings_calendar,
     fetch_economic_calendar,
     fetch_market_snapshot,
+    fetch_premarket_data,
     fetch_sector_performance,
     fetch_stock_data,
     fetch_top_headlines,
@@ -125,6 +127,22 @@ TOOLS = [
         "description": "Return a summary of the last email Pippy wrote including type, date, and key themes. Call this to maintain narrative continuity across emails.",
         "input_schema": {"type": "object", "properties": {}, "required": []},
     },
+    {
+        "name": "fetch_premarket_data",
+        "description": "Fetch pre-market price and movement for a specific ticker via FMP. Call this for every flagged ticker during morning briefing.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "ticker": {"type": "string", "description": "Stock ticker symbol, e.g. NVDA"}
+            },
+            "required": ["ticker"],
+        },
+    },
+    {
+        "name": "fetch_earnings_calendar",
+        "description": "Fetch earnings announcements scheduled for the current week via FMP. Call this for every morning briefing to include in the weekly calendar section.",
+        "input_schema": {"type": "object", "properties": {}, "required": []},
+    },
 ]
 
 # ── Tool dispatch ─────────────────────────────────────────────────────────────
@@ -143,6 +161,8 @@ def execute_tool(name: str, inputs: dict) -> str:
         "generate_monthly_picks": lambda _: generate_monthly_picks(),
         "send_email":             lambda i: send_email(i["subject"], i["html_body"]),
         "get_last_email_summary": lambda _: get_last_email_summary(),
+        "fetch_premarket_data":   lambda i: fetch_premarket_data(i["ticker"]),
+        "fetch_earnings_calendar": lambda _: fetch_earnings_calendar(),
     }
     fn = dispatch.get(name)
     if fn is None:
@@ -197,13 +217,14 @@ def run_pippy_agent(email_type: str) -> bool:
             f"2. Call get_last_email_summary — maintain narrative continuity\n"
             f"3. Call fetch_market_snapshot — pre-market futures\n"
             f"4. Call fetch_top_headlines — today's news (write one sentence of commentary per headline explaining why it matters)\n"
-            f"5. Call fetch_economic_calendar — earnings and events this week\n"
-            f"6. Call get_monthly_picks — if no picks for this month, call generate_monthly_picks instead\n"
-            f"7. If memory has flagged_tickers, call fetch_stock_data for each one\n"
-            f"8. Write the full HTML email — sections: Pre-Market Snapshot, What to Watch Today, Top Headlines, This Week's Calendar, Your Watchlist (if flagged_tickers exist), Monthly Picks\n"
+            f"5. Call fetch_economic_calendar — macro events this week\n"
+            f"6. Call fetch_earnings_calendar — earnings scheduled this week\n"
+            f"7. Call get_monthly_picks — if no picks for this month, call generate_monthly_picks instead\n"
+            f"8. If memory has flagged_tickers, call fetch_premarket_data for each one (pre-market prices)\n"
+            f"9. Write the full HTML email — sections: Pre-Market Snapshot, What to Watch Today, Top Headlines, This Week's Calendar (macro events + earnings), Your Watchlist (if flagged_tickers exist with pre-market data), Monthly Picks\n"
             f"   Subject: OpenBell ☀️ — {date.today().strftime('%A, %B %d')} Morning Briefing\n"
-            f"9. Call send_email\n"
-            f"10. Call save_memory — update last_morning_brief, last_email_sent, last_email_summary, email_count"
+            f"10. Call send_email\n"
+            f"11. Call save_memory — update last_morning_brief, last_email_sent, last_email_summary, email_count"
         ),
         "close": (
             f"Write and send the Market Close Summary email for {today_str}.\n\n"

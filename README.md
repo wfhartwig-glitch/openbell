@@ -2,7 +2,7 @@
 
 Three automated emails, every day. Morning briefing before the open, closing
 summary after the bell, and deep dives on weekends and holidays. Powered by
-Claude + yfinance.
+Claude + FMP (Financial Modeling Prep).
 
 ---
 
@@ -83,6 +83,19 @@ Sonnet.
 
 ---
 
+## API Keys Required
+
+| Key | Where to get it | Required |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | [console.anthropic.com](https://console.anthropic.com) | Yes |
+| `GMAIL_ADDRESS` | Your Gmail address | Yes |
+| `GMAIL_APP_PASSWORD` | [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) | Yes |
+| `TO_EMAIL` | Your recipient email | Yes |
+| `FMP_API_KEY` | [financialmodelingprep.com](https://financialmodelingprep.com) — free tier | Yes |
+| `NEWS_API_KEY` | [newsapi.org](https://newsapi.org/register) — free tier | Optional fallback |
+
+---
+
 ## GitHub Actions Setup
 
 Everything runs automatically in the cloud — no local machine needed.
@@ -96,7 +109,8 @@ Everything runs automatically in the cloud — no local machine needed.
 | `GMAIL_ADDRESS` | Gmail address you're sending from |
 | `GMAIL_APP_PASSWORD` | 16-character Gmail App Password |
 | `TO_EMAIL` | Where to deliver the emails |
-| `NEWS_API_KEY` | Your NewsAPI key (optional but recommended) |
+| `FMP_API_KEY` | Your FMP API key (free at financialmodelingprep.com) |
+| `NEWS_API_KEY` | Your NewsAPI key (optional — FMP headlines used first) |
 
 3. Go to the **Actions** tab and manually trigger `OpenBell Morning Briefing` once to confirm it works end to end.
 
@@ -131,14 +145,20 @@ GitHub Actions (cron scheduler)
 
 ## How it works
 
-| Section | Source |
-|---|---|
-| Futures / closing prices | `yfinance` — live index or futures tickers |
-| Top headlines | NewsAPI (preferred) or yfinance fallback |
-| Sector performance | `yfinance` — XLK, XLF, XLE, XLV, XLI, XLY, XLP, XLB, XLRE, XLU, XLC |
-| All narrative writing | Claude `claude-sonnet-4-6` via tool-use agentic loop |
-| Monthly picks | `yfinance` fundamentals scan, cached in `picks_cache.json` |
-| Deep dive topics | Claude chooses from 7 categories, rotated via `deep_dive_history` |
+| Section | Primary Source | Fallback |
+|---|---|---|
+| Market snapshot / indices | FMP `/quotes/index` | yfinance |
+| Stock data | FMP `/quote/{ticker}` | yfinance |
+| Top headlines | FMP `/stock_news` | NewsAPI → yfinance |
+| Sector performance | FMP `/sectors-performance` | yfinance sector ETFs |
+| Top movers | FMP `/stock_market/gainers` + `/losers` | yfinance scan |
+| Economic calendar | FMP `/economic_calendar` | yfinance earnings |
+| Earnings calendar | FMP `/earning_calendar` | — |
+| Pre-market data | FMP `/pre-post-market/{ticker}` | yfinance |
+| Market open status | FMP `/is-the-market-open` | hardcoded holiday list |
+| All narrative writing | Claude `claude-sonnet-4-6` via tool-use agentic loop | — |
+| Monthly picks | `yfinance` fundamentals scan, cached in `picks_cache.json` | — |
+| Deep dive topics | Claude chooses from 7 categories, rotated via `deep_dive_history` | — |
 
 ---
 
