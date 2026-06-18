@@ -1,0 +1,6 @@
+.env
+pippy_memory.json
+pippy_history.json
+picks_cache.json
+__pycache__/
+*.pyc
