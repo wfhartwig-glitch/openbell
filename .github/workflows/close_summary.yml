@@ -1,5 +1,4 @@
-# Required GitHub Secrets (add at github.com/wfhartwig-glitch/openbell/settings/secrets/actions):
-#   ANTHROPIC_API_KEY
+# Required GitHub Secrets:
 #   GMAIL_ADDRESS
 #   GMAIL_APP_PASSWORD
 #   TO_EMAIL
@@ -10,7 +9,7 @@ name: OpenBell Close Summary
 
 on:
   schedule:
-    # 3:00 PM CT = 21:00 UTC (CDT)
+    # 3:00 PM CT = 21:00 UTC
     - cron: '0 21 * * 1-5'
   workflow_dispatch:
 
@@ -37,7 +36,6 @@ jobs:
 
       - name: Run close summary
         env:
-          ANTHROPIC_API_KEY:  ${{ secrets.ANTHROPIC_API_KEY }}
           GMAIL_ADDRESS:      ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           TO_EMAIL:           ${{ secrets.TO_EMAIL }}
@@ -45,10 +43,10 @@ jobs:
           NEWS_API_KEY:       ${{ secrets.NEWS_API_KEY }}
         run: python openbell.py close
 
-      - name: Commit updated Pippy memory
+      - name: Commit updated memory
         run: |
           git config user.name "Pippy"
           git config user.email "pippy@openbell.ai"
           git add pippy_memory.json
-          git diff --staged --quiet || git commit -m "Pippy memory update — close summary $(date +'%Y-%m-%d')"
+          git diff --staged --quiet || git commit -m "Pippy memory — close summary $(date +'%Y-%m-%d')"
           git push

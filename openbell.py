@@ -1,336 +1,403 @@
 #!/usr/bin/env python3
 """
-OpenBell — autonomous email agent.
-Pippy fetches live data and writes every email via the Anthropic tool-use API.
+OpenBell — autonomous email agent. Zero Anthropic API cost.
+Runs as an MCP client, calls pippy_mcp.py tools for data, builds HTML, sends email.
 
 Usage:
-  python openbell.py morning    → Morning Briefing (weekdays)
-  python openbell.py close      → Market Close Summary (weekdays)
-  python openbell.py deepdive   → Deep Dive (only runs if market is closed)
+  python openbell.py morning    → Morning Briefing (weekdays only)
+  python openbell.py close      → Market Close Summary (weekdays only)
+  python openbell.py deepdive   → Weekend/Holiday Summary (skips if market open)
 """
 
 import argparse
+import asyncio
 import json
 import os
 import sys
 from datetime import date, datetime
 
-import anthropic
 from dotenv import load_dotenv
-
-from pippy_mcp import (
-    fetch_earnings_calendar,
-    fetch_economic_calendar,
-    fetch_market_snapshot,
-    fetch_premarket_data,
-    fetch_sector_performance,
-    fetch_stock_data,
-    fetch_top_headlines,
-    fetch_top_movers,
-    generate_monthly_picks,
-    get_last_email_summary,
-    get_monthly_picks,
-    is_market_open_today,
-    load_memory,
-    save_memory,
-    send_email,
-)
+from mcp import ClientSession
+from mcp.client.stdio import StdioServerParameters, stdio_client
 
 load_dotenv()
 
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
-CLAUDE_MODEL      = "claude-sonnet-4-6"
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# ── Tool schema (Anthropic tool_use API format) ───────────────────────────────
-TOOLS = [
-    {
-        "name": "is_market_open_today",
-        "description": "Check if the US stock market is open today. Returns true for weekdays that are not NYSE holidays. Call this at the start of every scheduled run to determine which email to send.",
-        "input_schema": {"type": "object", "properties": {}, "required": []},
-    },
-    {
-        "name": "fetch_market_snapshot",
-        "description": "Fetch live S&P 500, Nasdaq, and Dow futures data with % change. Call this at the start of every morning briefing or when the user asks what the market is doing.",
-        "input_schema": {"type": "object", "properties": {}, "required": []},
-    },
-    {
-        "name": "fetch_stock_data",
-        "description": "Fetch live price, 52-week high/low, P/E ratio, analyst target, and latest news headline for a specific stock ticker. Call this any time a specific stock is mentioned.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "ticker": {"type": "string", "description": "Stock ticker symbol, e.g. NVDA"}
-            },
-            "required": ["ticker"],
-        },
-    },
-    {
-        "name": "fetch_top_headlines",
-        "description": "Fetch today's top 5 market-moving financial headlines via NewsAPI. Call this for morning briefings and any time the user asks about news.",
-        "input_schema": {"type": "object", "properties": {}, "required": []},
-    },
-    {
-        "name": "fetch_sector_performance",
-        "description": "Fetch end-of-day % change for all 11 S&P 500 sectors via sector ETFs. Call this for every close summary.",
-        "input_schema": {"type": "object", "properties": {}, "required": []},
-    },
-    {
-        "name": "fetch_top_movers",
-        "description": "Fetch the top 3 gaining and top 3 declining stocks on the day. Call this for close summaries.",
-        "input_schema": {"type": "object", "properties": {}, "required": []},
-    },
-    {
-        "name": "fetch_economic_calendar",
-        "description": "Fetch key economic events scheduled for the current week including Fed speakers, CPI, PPI, jobs data, and major earnings. Call this for morning briefings.",
-        "input_schema": {"type": "object", "properties": {}, "required": []},
-    },
-    {
-        "name": "load_memory",
-        "description": "Load the full pippy_memory.json file. Always call this at the start of every email write so Pippy has complete context about this user.",
-        "input_schema": {"type": "object", "properties": {}, "required": []},
-    },
-    {
-        "name": "save_memory",
-        "description": "Save the full updated memory object back to pippy_memory.json. Always call this after every email is written with everything learned.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "data": {"type": "object", "description": "The complete updated pippy_memory object"}
-            },
-            "required": ["data"],
-        },
-    },
-    {
-        "name": "get_monthly_picks",
-        "description": "Read and return the current month's stock picks from picks_cache.json. Call this for morning briefings and when the user asks about picks.",
-        "input_schema": {"type": "object", "properties": {}, "required": []},
-    },
-    {
-        "name": "generate_monthly_picks",
-        "description": "Generate a new set of monthly stock picks using fundamentals data. Only call this on the 1st of the month or when picks_cache.json is empty or stale.",
-        "input_schema": {"type": "object", "properties": {}, "required": []},
-    },
-    {
-        "name": "send_email",
-        "description": "Send the final composed HTML email via Gmail SMTP. Call this only after the full email body has been written and reviewed.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "subject":   {"type": "string", "description": "Email subject line"},
-                "html_body": {"type": "string", "description": "Complete HTML email body"},
-            },
-            "required": ["subject", "html_body"],
-        },
-    },
-    {
-        "name": "get_last_email_summary",
-        "description": "Return a summary of the last email Pippy wrote including type, date, and key themes. Call this to maintain narrative continuity across emails.",
-        "input_schema": {"type": "object", "properties": {}, "required": []},
-    },
-    {
-        "name": "fetch_premarket_data",
-        "description": "Fetch pre-market price and movement for a specific ticker via FMP. Call this for every flagged ticker during morning briefing.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "ticker": {"type": "string", "description": "Stock ticker symbol, e.g. NVDA"}
-            },
-            "required": ["ticker"],
-        },
-    },
-    {
-        "name": "fetch_earnings_calendar",
-        "description": "Fetch earnings announcements scheduled for the current week via FMP. Call this for every morning briefing to include in the weekly calendar section.",
-        "input_schema": {"type": "object", "properties": {}, "required": []},
-    },
-]
+STYLE = """
+body{font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#e0e0e0}
+.header{background:#1a1a2e;padding:20px;border-bottom:2px solid #00d4aa}
+.header h1{color:#00d4aa;margin:0;font-size:22px;letter-spacing:.5px}
+.header p{color:#888;margin:4px 0 0;font-size:13px}
+.section{padding:16px 20px;border-bottom:1px solid #1e1e1e}
+.section h2{color:#00d4aa;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px}
+table{border-collapse:collapse;width:100%}
+td{padding:5px 14px 5px 0;font-size:14px;vertical-align:top}
+.green{color:#00d4aa;font-weight:700}
+.red{color:#ff4757;font-weight:700}
+.neutral{color:#888}
+.ticker{background:#1a1a2e;padding:3px 7px;border-radius:4px;font-family:monospace;font-size:13px}
+.tag-high{color:#ff4757;font-size:11px;font-weight:700;text-transform:uppercase}
+.tag-med{color:#ffa502;font-size:11px;font-weight:700;text-transform:uppercase}
+.tag-earn{color:#7c3aed;font-size:11px;font-weight:700;text-transform:uppercase}
+.tag-risk-low{color:#00d4aa;font-size:11px;font-weight:700}
+.tag-risk-med{color:#ffa502;font-size:11px;font-weight:700}
+.tag-risk-high{color:#ff4757;font-size:11px;font-weight:700}
+.tag-risk-spec{color:#7c3aed;font-size:11px;font-weight:700}
+.hl-item{padding:7px 0;border-bottom:1px solid #1e1e1e;font-size:14px}
+.hl-item:last-child{border-bottom:none}
+.hl-snippet{color:#888;font-size:12px;margin-top:2px}
+.hl-meta{color:#555;font-size:11px;margin-top:1px}
+.footer{padding:14px 20px;color:#444;font-size:11px}
+"""
 
-# ── Tool dispatch ─────────────────────────────────────────────────────────────
-def execute_tool(name: str, inputs: dict) -> str:
-    dispatch = {
-        "is_market_open_today":   lambda _: is_market_open_today(),
-        "fetch_market_snapshot":  lambda _: fetch_market_snapshot(),
-        "fetch_stock_data":       lambda i: fetch_stock_data(i["ticker"]),
-        "fetch_top_headlines":    lambda _: fetch_top_headlines(),
-        "fetch_sector_performance": lambda _: fetch_sector_performance(),
-        "fetch_top_movers":       lambda _: fetch_top_movers(),
-        "fetch_economic_calendar": lambda _: fetch_economic_calendar(),
-        "load_memory":            lambda _: load_memory(),
-        "save_memory":            lambda i: save_memory(i["data"]),
-        "get_monthly_picks":      lambda _: get_monthly_picks(),
-        "generate_monthly_picks": lambda _: generate_monthly_picks(),
-        "send_email":             lambda i: send_email(i["subject"], i["html_body"]),
-        "get_last_email_summary": lambda _: get_last_email_summary(),
-        "fetch_premarket_data":   lambda i: fetch_premarket_data(i["ticker"]),
-        "fetch_earnings_calendar": lambda _: fetch_earnings_calendar(),
-    }
-    fn = dispatch.get(name)
-    if fn is None:
-        return json.dumps({"error": f"Unknown tool: {name}"})
+
+# ── MCP helpers ───────────────────────────────────────────────────────────────
+
+async def call(session: ClientSession, name: str, args: dict = None) -> dict | list | str:
+    result = await session.call_tool(name, args or {})
+    text   = result.content[0].text if result.content else "{}"
     try:
-        return fn(inputs)
-    except Exception as e:
-        return json.dumps({"error": str(e)})
+        return json.loads(text)
+    except Exception:
+        return text
 
 
-# ── System prompt ─────────────────────────────────────────────────────────────
-SYSTEM_PROMPT = """You are Pippy, the autonomous AI brain behind OpenBell. You write every word of every email OpenBell sends. You are one unified intelligence — the same Pippy that runs in the user's terminal and sends their daily emails.
+# ── HTML helpers ──────────────────────────────────────────────────────────────
 
-You have access to tools. Use them aggressively and autonomously. Do not wait to be told when to fetch data — reason about what you need and call the right tools. For every email:
-- Always call load_memory first to understand this specific user
-- Always call get_last_email_summary for narrative continuity
-- Always fetch fresh live data before writing anything
-- Always call save_memory last with everything you learned
-
-You have deep persistent memory. You know this user's interests, their flagged stocks, their preferences, and every email you have written them. Use all of it. Write emails that feel authored specifically for this person — not generic market emails.
-
-Writing rules:
-- Reason about cause and effect — never just report numbers
-- Connect today to yesterday — build a continuous narrative across emails
-- If a flagged ticker appears in fetched data, give it extra attention
-- When a theme recurs 5+ times in memory, weave it in proactively
-- Write clean, simple HTML — scannable on mobile, clear section headers
-- Every email must feel smarter than the one before it
-- Use inline CSS only — no <style> tags (Gmail strips them)
-
-HTML style guide:
-- Font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif
-- Max width: 600px, margin 0 auto, padding 20px
-- Section headers: small caps, gray, border-bottom
-- Numbers: bold, green (#16a34a) for positive, red (#dc2626) for negative
-- Background: white (#ffffff), text: near-black (#111111)"""
+def _cls(pct) -> str:
+    try:
+        return "green" if float(pct) >= 0 else "red"
+    except Exception:
+        return "neutral"
 
 
-# ── Agentic loop ──────────────────────────────────────────────────────────────
-def run_pippy_agent(email_type: str) -> bool:
-    """
-    Run Pippy as a fully autonomous agent. Returns True if email was sent.
-    """
-    today_str = date.today().strftime("%A, %B %d, %Y")
-    client    = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+def _arrow(pct) -> str:
+    try:
+        return "▲" if float(pct) >= 0 else "▼"
+    except Exception:
+        return "—"
 
-    prompts = {
-        "morning": (
-            f"Write and send the Morning Briefing email for {today_str}.\n\n"
-            f"Steps:\n"
-            f"1. Call load_memory — understand this user's context\n"
-            f"2. Call get_last_email_summary — maintain narrative continuity\n"
-            f"3. Call fetch_market_snapshot — pre-market futures\n"
-            f"4. Call fetch_top_headlines — today's news (write one sentence of commentary per headline explaining why it matters)\n"
-            f"5. Call fetch_economic_calendar — macro events this week\n"
-            f"6. Call fetch_earnings_calendar — earnings scheduled this week\n"
-            f"7. Call get_monthly_picks — if no picks for this month, call generate_monthly_picks instead\n"
-            f"8. If memory has flagged_tickers, call fetch_premarket_data for each one (pre-market prices)\n"
-            f"9. Write the full HTML email — sections: Pre-Market Snapshot, What to Watch Today, Top Headlines, This Week's Calendar (macro events + earnings), Your Watchlist (if flagged_tickers exist with pre-market data), Monthly Picks\n"
-            f"   Subject: OpenBell ☀️ — {date.today().strftime('%A, %B %d')} Morning Briefing\n"
-            f"10. Call send_email\n"
-            f"11. Call save_memory — update last_morning_brief, last_email_sent, last_email_summary, email_count"
-        ),
-        "close": (
-            f"Write and send the Market Close Summary email for {today_str}.\n\n"
-            f"Steps:\n"
-            f"1. Call load_memory\n"
-            f"2. Call get_last_email_summary — reference this morning's briefing if it exists\n"
-            f"3. Call fetch_market_snapshot — closing prices\n"
-            f"4. Call fetch_top_headlines — today's news to explain market moves\n"
-            f"5. Call fetch_top_movers — top gainers and losers\n"
-            f"6. Call fetch_sector_performance — all 11 sectors\n"
-            f"7. If memory has flagged_tickers, call fetch_stock_data for each one\n"
-            f"8. Write the full HTML email — sections: Closing Snapshot, Today's Story (3-4 sentences on what drove the market — cause and effect, reference actual data), Top Movers, Sector Performance, Your Watchlist EOD (if flagged_tickers), What to Watch Tomorrow\n"
-            f"   Subject: OpenBell 📊 — {date.today().strftime('%A, %B %d')} Market Close\n"
-            f"9. Call send_email\n"
-            f"10. Call save_memory — update last_close_summary, last_email_sent, last_email_summary, email_count"
-        ),
-        "deepdive": (
-            f"Write and send the Deep Dive email for {today_str}.\n\n"
-            f"Steps:\n"
-            f"1. Call is_market_open_today — if market IS open, do NOT send a deep dive. Print 'Market is open — skipping deep dive' and stop.\n"
-            f"2. Call load_memory — check deep_dive_history to avoid repeating recent categories\n"
-            f"3. Choose ONE topic category that hasn't been covered recently. Categories: 'up and coming publicly traded company', 'privately held company worth knowing about', 'sector deep dive', 'housing market analysis', 'macro theme', 'historical market event', 'venture-backed startup in fintech/AI/infrastructure'\n"
-            f"4. If memory has flagged_tickers or interests, skew the topic toward what this user cares about when relevant\n"
-            f"5. Write the full HTML email with these sections:\n"
-            f"   - Today's Topic: one line\n"
-            f"   - The Setup: 2-3 sentences on why this is relevant right now\n"
-            f"   - The Deep Dive: 4-6 sentences of actual substance — numbers, context, what is happening and why it matters\n"
-            f"   - What to Watch: 2 sentences on what to track going forward\n"
-            f"   - Pippy's Take: one bold, direct opinion or prediction — no hedging\n"
-            f"   Subject: OpenBell 📚 — {date.today().strftime('%A, %B %d')} Deep Dive\n"
-            f"6. Call send_email\n"
-            f"7. Call save_memory — update deep_dive_history (append date + category), last_deep_dive, last_email_sent, last_email_summary, email_count"
-        ),
-    }
 
-    user_message = prompts.get(email_type)
-    if not user_message:
-        print(f"Unknown email type: {email_type}", file=sys.stderr)
-        return False
+def _fmt(pct) -> str:
+    try:
+        v = float(pct)
+        return f'{_arrow(v)} {abs(v):.2f}%'
+    except Exception:
+        return str(pct) if pct else "N/A"
 
-    messages   = [{"role": "user", "content": user_message}]
-    email_sent = False
-    max_turns  = 25
 
-    for turn in range(max_turns):
-        print(f"  [turn {turn+1}] calling Claude…")
-        response = client.messages.create(
-            model=CLAUDE_MODEL,
-            max_tokens=4096,
-            system=SYSTEM_PROMPT,
-            tools=TOOLS,
-            messages=messages,
+def _base(title: str, subtitle: str, body: str) -> str:
+    return (
+        f'<!DOCTYPE html><html><head><meta charset="UTF-8">'
+        f'<meta name="viewport" content="width=device-width,initial-scale=1">'
+        f'<style>{STYLE}</style></head>'
+        f'<body>'
+        f'<div class="header"><h1>{title}</h1><p>{subtitle}</p></div>'
+        f'{body}'
+        f'<div class="footer">OpenBell &mdash; automated market briefing &nbsp;&nbsp;Not financial advice.</div>'
+        f'</body></html>'
+    )
+
+
+def _sec(title: str, inner: str) -> str:
+    return f'<div class="section"><h2>{title}</h2>{inner}</div>'
+
+
+# ── Section builders ──────────────────────────────────────────────────────────
+
+def _indices(data: list) -> str:
+    rows = ""
+    for item in data:
+        name  = item.get("name", "")
+        price = item.get("price")
+        pct   = item.get("pct") or item.get("changesPercentage")
+        p_str = f"${float(price):,.2f}" if price else "—"
+        rows += (
+            f'<tr>'
+            f'<td style="font-weight:600;width:90px">{name}</td>'
+            f'<td>{p_str}</td>'
+            f'<td class="{_cls(pct)}">{_fmt(pct)}</td>'
+            f'</tr>'
         )
+    return _sec("Market Snapshot", f'<table>{rows}</table>')
 
-        messages.append({"role": "assistant", "content": response.content})
 
-        if response.stop_reason == "end_turn":
-            print("  [done] Pippy finished.")
-            break
+def _headlines(headlines: list) -> str:
+    items = ""
+    for h in headlines:
+        title   = h.get("title", h) if isinstance(h, dict) else str(h)
+        snippet = h.get("snippet", "") if isinstance(h, dict) else ""
+        site    = h.get("site", "") if isinstance(h, dict) else ""
+        items += (
+            f'<div class="hl-item"><div>{title}</div>'
+            + (f'<div class="hl-snippet">{snippet}</div>' if snippet else "")
+            + (f'<div class="hl-meta">{site}</div>'       if site    else "")
+            + '</div>'
+        )
+    return _sec("Top Headlines", items)
 
-        if response.stop_reason == "tool_use":
-            tool_results = []
-            for block in response.content:
-                if block.type == "tool_use":
-                    print(f"  → {block.name}({', '.join(f'{k}={repr(v)[:40]}' for k,v in block.input.items()) if block.input else ''})")
-                    result = execute_tool(block.name, block.input or {})
-                    if block.name == "send_email" and "sent successfully" in result:
-                        email_sent = True
-                        print(f"  ✓ Email sent.")
-                    tool_results.append({
-                        "type":        "tool_result",
-                        "tool_use_id": block.id,
-                        "content":     result,
-                    })
-            messages.append({"role": "user", "content": tool_results})
-        else:
-            print(f"  [stop_reason={response.stop_reason}] Exiting loop.")
-            break
 
-    return email_sent
+def _calendar(events: list, earnings: list) -> str:
+    rows = ""
+    for e in events[:8]:
+        evt    = e.get("event", "")
+        dt     = (e.get("date", "") or "")[-5:]
+        impact = e.get("impact", "")
+        tag    = (f'<span class="tag-high">{impact}</span>' if impact == "High"
+                  else f'<span class="tag-med">{impact}</span>' if impact else "")
+        rows += f'<tr><td class="neutral" style="width:55px">{dt}</td><td>{evt}</td><td style="width:70px">{tag}</td></tr>'
+    for e in earnings[:6]:
+        sym  = e.get("symbol", "")
+        dt   = (e.get("date", "") or "")[-5:]
+        eps  = e.get("eps_estimated")
+        note = f"EPS est. ${eps:.2f}" if eps else "earnings"
+        rows += (
+            f'<tr><td class="neutral" style="width:55px">{dt}</td>'
+            f'<td><span class="ticker">{sym}</span> {note}</td>'
+            f'<td style="width:70px"><span class="tag-earn">EARN</span></td></tr>'
+        )
+    if not rows:
+        return _sec("This Week's Calendar",
+                    '<p class="neutral" style="font-size:13px">No major events found.</p>')
+    return _sec("This Week's Calendar", f'<table>{rows}</table>')
+
+
+def _sectors(sectors: list) -> str:
+    rows = ""
+    for s in sectors:
+        name = s.get("sector", "")
+        pct  = s.get("pct") or s.get("changesPercentage")
+        rows += f'<tr><td style="font-size:13px">{name}</td><td class="{_cls(pct)}">{_fmt(pct)}</td></tr>'
+    return _sec("Sector Performance", f'<table>{rows}</table>')
+
+
+def _movers(gainers: list, losers: list) -> str:
+    def _block(items, label, css_cls):
+        rows = ""
+        for m in items:
+            sym   = m.get("symbol", "")
+            name  = (m.get("name") or "")[:22]
+            price = m.get("price")
+            pct   = m.get("pct") or m.get("changesPercentage")
+            p_str = f"${float(price):,.2f}" if price else ""
+            rows += (
+                f'<tr>'
+                f'<td><span class="ticker">{sym}</span></td>'
+                f'<td class="neutral" style="font-size:12px">{name}</td>'
+                f'<td>{p_str}</td>'
+                f'<td class="{css_cls}">{_fmt(pct)}</td>'
+                f'</tr>'
+            )
+        return (
+            f'<div style="margin-bottom:12px">'
+            f'<div class="{css_cls}" style="font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:6px">{label}</div>'
+            f'<table>{rows}</table></div>'
+        )
+    return _sec("Top Movers", _block(gainers, "Gainers", "green") + _block(losers, "Losers", "red"))
+
+
+def _watchlist(tickers_data: list, label: str) -> str:
+    if not tickers_data:
+        return ""
+    rows = ""
+    for w in tickers_data:
+        sym   = w.get("ticker", "")
+        price = w.get("price")
+        pct   = w.get("pct") or w.get("changesPercentage")
+        head  = w.get("headline", "")
+        p_str = f"${float(price):,.2f}" if price else "—"
+        rows += (
+            f'<tr>'
+            f'<td style="width:70px"><span class="ticker">{sym}</span></td>'
+            f'<td>{p_str}</td>'
+            f'<td class="{_cls(pct)}" style="width:80px">{_fmt(pct)}</td>'
+            + (f'<td class="neutral" style="font-size:12px">{head[:55]}…</td>' if head else '<td></td>')
+            + '</tr>'
+        )
+    return _sec(label, f'<table>{rows}</table>')
+
+
+def _picks(picks: list) -> str:
+    if not picks:
+        return ""
+    risk_cls = {"Low": "tag-risk-low", "Medium": "tag-risk-med",
+                "High": "tag-risk-high", "Speculative": "tag-risk-spec"}
+    rows = (
+        '<tr style="border-bottom:1px solid #222;font-size:11px;color:#555">'
+        '<td>TICKER</td><td>COMPANY</td><td>SECTOR</td><td>RISK</td><td>RATIONALE</td></tr>'
+    )
+    for p in picks:
+        risk = p.get("risk", "—")
+        cls  = risk_cls.get(risk, "neutral")
+        rows += (
+            f'<tr style="border-bottom:1px solid #1a1a1a">'
+            f'<td><span class="ticker">{p["ticker"]}</span></td>'
+            f'<td style="font-size:13px">{p.get("company","")}</td>'
+            f'<td class="neutral" style="font-size:12px">{p.get("sector","")}</td>'
+            f'<td><span class="{cls}">{risk}</span></td>'
+            f'<td style="font-size:12px;color:#aaa">{p.get("rationale","")}</td>'
+            f'</tr>'
+        )
+    return _sec("Monthly Picks",
+        f'<table>{rows}</table>'
+        f'<div style="font-size:11px;color:#444;margin-top:8px">Refreshed monthly. Informational only.</div>')
+
+
+# ── Email assemblers ──────────────────────────────────────────────────────────
+
+async def morning(session: ClientSession) -> tuple[str, str]:
+    today = date.today().strftime("%A, %B %d")
+    print("    fetching snapshot…")
+    snapshot  = await call(session, "fetch_market_snapshot")
+    print("    fetching headlines…")
+    headlines = await call(session, "fetch_top_headlines")
+    print("    fetching calendar…")
+    econ      = await call(session, "fetch_economic_calendar")
+    earnings  = await call(session, "fetch_earnings_calendar")
+    print("    loading memory…")
+    mem       = await call(session, "load_memory")
+    print("    loading picks…")
+    picks     = await call(session, "get_monthly_picks")
+    if not picks.get("picks"):
+        print("    generating picks…")
+        picks = await call(session, "generate_monthly_picks")
+
+    flagged   = mem.get("flagged_tickers", []) if isinstance(mem, dict) else []
+    watchlist = []
+    for t in flagged[:5]:
+        print(f"    pre-market {t}…")
+        watchlist.append(await call(session, "fetch_premarket_data", {"ticker": t}))
+
+    body = (
+        _indices(snapshot.get("data", []))
+        + _headlines(headlines.get("headlines", []))
+        + _calendar(econ.get("events", []), earnings.get("earnings", []))
+        + _watchlist(watchlist, "Your Watchlist — Pre-Market")
+        + _picks(picks.get("picks", []))
+    )
+    return (f"OpenBell ☀️ — {today} Morning Briefing",
+            _base(f"OpenBell ☀️  {today}", "Morning Briefing", body))
+
+
+async def close(session: ClientSession) -> tuple[str, str]:
+    today = date.today().strftime("%A, %B %d")
+    print("    fetching snapshot…")
+    snapshot  = await call(session, "fetch_market_snapshot")
+    print("    fetching sectors…")
+    sectors   = await call(session, "fetch_sector_performance")
+    print("    fetching movers…")
+    movers    = await call(session, "fetch_top_movers")
+    print("    fetching headlines…")
+    headlines = await call(session, "fetch_top_headlines")
+    print("    loading memory…")
+    mem       = await call(session, "load_memory")
+
+    flagged   = mem.get("flagged_tickers", []) if isinstance(mem, dict) else []
+    watchlist = []
+    for t in flagged[:5]:
+        print(f"    EOD {t}…")
+        watchlist.append(await call(session, "fetch_stock_data", {"ticker": t}))
+
+    body = (
+        _indices(snapshot.get("data", []))
+        + _movers(movers.get("gainers", []), movers.get("losers", []))
+        + _sectors(sectors.get("sectors", []))
+        + _watchlist(watchlist, "Your Watchlist — EOD")
+        + _headlines(headlines.get("headlines", []))
+    )
+    return (f"OpenBell 📊 — {today} Market Close",
+            _base(f"OpenBell 📊  {today}", "Market Close Summary", body))
+
+
+async def deepdive(session: ClientSession) -> tuple[str, str]:
+    today = date.today().strftime("%A, %B %d")
+    print("    fetching data…")
+    snapshot  = await call(session, "fetch_market_snapshot")
+    headlines = await call(session, "fetch_top_headlines")
+    movers    = await call(session, "fetch_top_movers")
+    sectors   = await call(session, "fetch_sector_performance")
+    earnings  = await call(session, "fetch_earnings_calendar")
+
+    upcoming = earnings.get("earnings", [])
+    earn_html = ""
+    if upcoming:
+        rows = "".join(
+            f'<tr>'
+            f'<td><span class="ticker">{e.get("symbol","")}</span></td>'
+            f'<td class="neutral" style="font-size:13px">{e.get("date","")}</td>'
+            f'<td class="neutral" style="font-size:12px">'
+            + (f'EPS est. ${e["eps_estimated"]:.2f}' if e.get("eps_estimated") else "")
+            + '</td></tr>'
+            for e in upcoming[:8]
+        )
+        earn_html = _sec("Earnings This Week", f'<table>{rows}</table>')
+
+    body = (
+        _indices(snapshot.get("data", []))
+        + _headlines(headlines.get("headlines", []))
+        + _movers(movers.get("gainers", []), movers.get("losers", []))
+        + _sectors(sectors.get("sectors", []))
+        + earn_html
+    )
+    return (f"OpenBell 📚 — {today} Weekend Summary",
+            _base(f"OpenBell 📚  {today}", "Weekend Market Summary", body))
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
-def main():
-    parser = argparse.ArgumentParser(description="OpenBell autonomous email agent")
-    parser.add_argument(
-        "mode",
-        choices=["morning", "close", "deepdive"],
-        help="Which email to send",
-    )
-    args = parser.parse_args()
 
+async def run(mode: str):
     today_str = date.today().strftime("%A, %B %d, %Y")
-    print(f"[OpenBell] {args.mode.upper()} — {today_str}")
-    print(f"[OpenBell] Starting Pippy agentic loop…")
+    print(f"[OpenBell] {mode.upper()} — {today_str}")
 
-    sent = run_pippy_agent(args.mode)
+    server_params = StdioServerParameters(
+        command=sys.executable,
+        args=[os.path.join(PROJECT_DIR, "pippy_mcp.py")],
+        env=dict(os.environ),
+    )
 
-    if sent:
-        print(f"[OpenBell] Done.")
-    else:
-        if args.mode == "deepdive":
-            print("[OpenBell] Deep dive skipped (market is open today).")
-        else:
-            print("[OpenBell] Warning: email may not have been sent — check logs above.")
-        sys.exit(0)
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+
+            market = await call(session, "is_market_open_today")
+
+            if mode == "deepdive":
+                if market.get("open"):
+                    print("[OpenBell] Market is open — skipping deep dive.")
+                    return
+                subject, html = await deepdive(session)
+
+            elif mode == "morning":
+                subject, html = await morning(session)
+
+            elif mode == "close":
+                subject, html = await close(session)
+
+            else:
+                print(f"[OpenBell] Unknown mode: {mode}")
+                return
+
+            print("  → Sending…")
+            result = await call(session, "send_email",
+                                {"subject": subject, "html_body": html})
+            print(f"  {result}")
+
+            mem = await call(session, "load_memory")
+            if isinstance(mem, dict):
+                mem["last_email_sent"]    = datetime.now().isoformat()
+                mem["last_email_summary"] = f"{mode} sent {today_str}"
+                mem["email_count"]        = mem.get("email_count", 0) + 1
+                await call(session, "save_memory", {"data": mem})
+
+            print("[OpenBell] Done.")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("mode", choices=["morning", "close", "deepdive"])
+    args = parser.parse_args()
+    asyncio.run(run(args.mode))
 
 
 if __name__ == "__main__":
