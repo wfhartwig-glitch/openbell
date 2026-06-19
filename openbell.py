@@ -13,7 +13,6 @@ import argparse
 import asyncio
 import json
 import os
-import subprocess
 import sys
 from datetime import date, datetime
 
@@ -415,58 +414,260 @@ async def close(session: ClientSession) -> tuple[str, str]:
     return subject, html
 
 
-DEEPDIVE_CATEGORIES = [
-    "private company", "sector rotation", "macro / Fed policy",
-    "housing market", "emerging technology", "IPO / public markets",
-    "consumer trends", "global markets",
+# Priority keywords for headline-based topic selection
+_HEADLINE_KEYWORDS = [
+    ("Fed", "macro / Fed policy"),
+    ("Federal Reserve", "macro / Fed policy"),
+    ("rate cut", "macro / Fed policy"),
+    ("rate hike", "macro / Fed policy"),
+    ("interest rate", "macro / Fed policy"),
+    ("inflation", "macro / Fed policy"),
+    ("CPI", "macro / Fed policy"),
+    ("Powell", "macro / Fed policy"),
+    ("IPO", "IPO / public markets"),
+    ("goes public", "IPO / public markets"),
+    ("merger", "private company"),
+    ("acquisition", "private company"),
+    ("acquired", "private company"),
+    ("takeover", "private company"),
+    ("earnings", "earnings"),
+    ("beats", "earnings"),
+    ("misses", "earnings"),
+    ("guidance", "earnings"),
+    ("recession", "macro / Fed policy"),
+    ("GDP", "macro / Fed policy"),
+    ("jobs", "macro / Fed policy"),
+    ("unemployment", "macro / Fed policy"),
+    ("housing", "housing market"),
+    ("mortgage", "housing market"),
+    ("AI", "emerging technology"),
+    ("artificial intelligence", "emerging technology"),
+    ("chip", "emerging technology"),
+    ("semiconductor", "emerging technology"),
 ]
 
-DEEPDIVE_PROMPT_TEMPLATE = """You are Pippy, an autonomous investment assistant writing the weekend edition of a daily market briefing email called Pippy's Brief.
 
-Today's date: {today}
-Today's headlines:
-{headlines}
+def _build_deep_dive(
+    snapshot_data: list,
+    headline_list: list,
+    movers: dict,
+    sectors: list,
+) -> dict:
+    """
+    Deterministic deep dive builder. Picks the most notable event/signal
+    from real data and writes hook/story/take using template strings.
+    No AI, no external text generation — just conditional logic on real numbers.
+    """
 
-Market context (last close):
-{market_ctx}
+    # ── index numbers ─────────────────────────────────────────────────────────
+    idx = {i.get("name"): i for i in snapshot_data}
+    sp  = idx.get("S&P 500", {})
+    ndx = idx.get("Nasdaq",  {})
+    dow = idx.get("Dow",     {})
 
-Your job: write a short deep dive that connects to something REAL happening this week — a specific story from the headlines above, not a generic topic. Pick the most interesting financial thread and go deep on that specific thing.
+    def pct(item): return float(item.get("pct") or 0)
+    def price(item): return float(item.get("price") or 0)
 
-Respond in EXACTLY this format (no extra text, no markdown, no asterisks):
+    sp_pct  = pct(sp)
+    ndx_pct = pct(ndx)
+    dow_pct = pct(dow)
 
-TOPIC: [one specific line — the actual subject, tied to a real event this week]
-CATEGORY: [one of: {categories}]
-TRIGGERED_BY: [the specific headline or event that made you pick this topic, in one phrase]
-HOOK: [1-2 sentences — why this matters RIGHT NOW, tied directly to the real event]
-STORY: [3-4 sentences — the actual substance, real numbers if available, what's happening and why it matters to investors]
-TAKE: [1 sentence — your direct opinion or call. No hedging.]
+    sp_dir  = "up" if sp_pct  >= 0 else "down"
+    ndx_dir = "up" if ndx_pct >= 0 else "down"
+    dow_dir = "up" if dow_pct >= 0 else "down"
 
-Rules:
-- Total word count for HOOK + STORY + TAKE must be under 150 words
-- Use specific names, numbers, and companies from the news — no vague generalities
-- If headlines are thin or unrelated to markets, pick the best available thread and note why in TRIGGERED_BY
-- Write like a sharp analyst, not a newsletter bot"""
+    spread = abs(ndx_pct - dow_pct)
 
+    # ── top sector divergence ─────────────────────────────────────────────────
+    sector_vals = [(s.get("sector",""), float(s.get("pct") or 0)) for s in sectors if s.get("pct") is not None]
+    sector_vals.sort(key=lambda x: x[1], reverse=True)
+    top_sector    = sector_vals[0]  if sector_vals else ("—", 0)
+    bottom_sector = sector_vals[-1] if sector_vals else ("—", 0)
+    sector_spread = top_sector[1] - bottom_sector[1]
 
-def _ask_claude_sync(prompt: str) -> str:
-    try:
-        result = subprocess.run(
-            ["claude", "-p", prompt],
-            capture_output=True, text=True, cwd=PROJECT_DIR, timeout=120,
+    # ── top movers ────────────────────────────────────────────────────────────
+    gainers = movers.get("gainers", [])
+    losers  = movers.get("losers",  [])
+    top_gainer = gainers[0] if gainers else {}
+    top_loser  = losers[0]  if losers  else {}
+
+    # ── priority: real headline with keyword match ────────────────────────────
+    matched_headline = None
+    matched_category = "market overview"
+    for h in headline_list[:8]:
+        title = h.get("title", "")
+        for kw, cat in _HEADLINE_KEYWORDS:
+            if kw.lower() in title.lower():
+                matched_headline = h
+                matched_category = cat
+                break
+        if matched_headline:
+            break
+
+    # If no keyword match, use first headline anyway if we have one
+    if not matched_headline and headline_list:
+        matched_headline = headline_list[0]
+        matched_category = "market overview"
+
+    # ── build the piece ───────────────────────────────────────────────────────
+
+    if matched_headline:
+        # Headline-led piece
+        title = matched_headline.get("title", "")
+        site  = matched_headline.get("site", "")
+        snippet = matched_headline.get("snippet", "")
+
+        topic        = title
+        triggered_by = f'"{title}"' + (f" via {site}" if site else "")
+        category     = matched_category
+
+        hook = (
+            f'This week\'s standout story: "{title}." '
+            f'With the S&P {sp_dir} {abs(sp_pct):.2f}% on the week, the timing matters.'
         )
-        return result.stdout.strip() or ""
-    except Exception as e:
-        return f"ERROR: {e}"
+        story_parts = []
+        if snippet:
+            story_parts.append(snippet[:180].rstrip(".") + ".")
+        story_parts.append(
+            f"Meanwhile the broader market closed with S&P {sp_dir} {abs(sp_pct):.2f}%, "
+            f"Nasdaq {ndx_dir} {abs(ndx_pct):.2f}%, and Dow {dow_dir} {abs(dow_pct):.2f}%."
+        )
+        if sector_spread > 1.5:
+            story_parts.append(
+                f"{top_sector[0]} led sectors ({'+' if top_sector[1]>=0 else ''}{top_sector[1]:.2f}%) "
+                f"while {bottom_sector[0]} lagged ({'+' if bottom_sector[1]>=0 else ''}{bottom_sector[1]:.2f}%)."
+            )
+        story = " ".join(story_parts[:3])
 
+        if matched_category in ("macro / Fed policy", "earnings"):
+            take = (
+                f"Watch how the market digests this heading into Monday — "
+                f"{'rate-sensitive names could see volatility' if 'rate' in title.lower() or 'Fed' in title else 'positioning shifts often follow weekend headlines like this'}."
+            )
+        else:
+            take = (
+                f"This is the story to track next week — "
+                f"whether the initial reaction holds or fades will signal how serious the market considers it."
+            )
 
-def _parse_deepdive_response(text: str) -> dict:
-    """Parse Claude's structured deep dive response into a dict."""
-    fields = {}
-    for line in text.splitlines():
-        for key in ("TOPIC", "CATEGORY", "TRIGGERED_BY", "HOOK", "STORY", "TAKE"):
-            if line.startswith(f"{key}:"):
-                fields[key] = line[len(key)+1:].strip()
-    return fields
+    elif spread >= 1.0:
+        # Rotation story — meaningful Nasdaq/Dow divergence, no headline
+        if ndx_pct > dow_pct:
+            leader, laggard, leader_pct, laggard_pct = "Nasdaq", "Dow", ndx_pct, dow_pct
+            rotation_type = "growth over value"
+        else:
+            leader, laggard, leader_pct, laggard_pct = "Dow", "Nasdaq", dow_pct, ndx_pct
+            rotation_type = "value over growth"
+
+        topic        = f"{leader} vs. {laggard} — {spread:.2f}% spread points to {rotation_type} rotation"
+        triggered_by = f"Index divergence at Thursday's close: {leader} {leader_pct:+.2f}%, {laggard} {laggard_pct:+.2f}%"
+        category     = "sector rotation"
+
+        hook = (
+            f"A {spread:.2f}% gap between the {leader} and {laggard} at the weekly close "
+            f"isn't noise — that kind of spread usually signals active rotation, not a broad move."
+        )
+        story = (
+            f"Thursday closed with S&P {sp_dir} {abs(sp_pct):.2f}%, {leader} {'+' if leader_pct>=0 else ''}{leader_pct:.2f}%, "
+            f"and {laggard} {'+' if laggard_pct>=0 else ''}{laggard_pct:.2f}%. "
+            f"Nearly {spread:.0f}% of divergence between {rotation_type.split(' over ')[0]} and "
+            f"{rotation_type.split(' over ')[1]} names in a single session typically reflects institutional repositioning. "
+        )
+        if sector_spread > 1.5:
+            story += (
+                f"Sector data backs it up: {top_sector[0]} led ({'+' if top_sector[1]>=0 else ''}{top_sector[1]:.2f}%) "
+                f"while {bottom_sector[0]} lagged ({'+' if bottom_sector[1]>=0 else ''}{bottom_sector[1]:.2f}%)."
+            )
+        take = (
+            f"Watch equal-weight S&P vs. cap-weight spread Monday morning — "
+            f"if the gap holds, the {rotation_type} trade has legs."
+        )
+
+    elif sector_spread >= 2.0:
+        # Sector divergence story
+        topic        = f"{top_sector[0]} leads, {bottom_sector[0]} lags — {sector_spread:.1f}% sector spread this week"
+        triggered_by = f"Sector divergence: {top_sector[0]} {top_sector[1]:+.2f}% vs {bottom_sector[0]} {bottom_sector[1]:+.2f}%"
+        category     = "sector rotation"
+
+        hook = (
+            f"This week's sector spread hit {sector_spread:.1f}% between {top_sector[0]} and {bottom_sector[0]}. "
+            f"That's wide enough to matter for anyone positioned across sectors."
+        )
+        story = (
+            f"{top_sector[0]} finished the week {'+' if top_sector[1]>=0 else ''}{top_sector[1]:.2f}%, "
+            f"while {bottom_sector[0]} ended at {'+' if bottom_sector[1]>=0 else ''}{bottom_sector[1]:.2f}%. "
+            f"The S&P overall went {sp_dir} {abs(sp_pct):.2f}%, "
+            f"but a {sector_spread:.1f}% range between sectors means the index number hides more than it reveals. "
+            f"Narrow-sector ETF positioning would have made a significant difference in performance this week."
+        )
+        take = (
+            f"If you hold a broad index fund, you got the average — "
+            f"the {top_sector[0]} overweight was this week's real trade."
+        )
+
+    elif top_gainer.get("symbol") and abs(float(top_gainer.get("pct") or 0)) >= 5:
+        # Big single mover story
+        sym      = top_gainer.get("symbol", "")
+        gainer_pct = float(top_gainer.get("pct") or 0)
+        name     = (top_gainer.get("name") or sym)[:40]
+
+        topic        = f"{sym}'s {gainer_pct:.1f}% move — what's behind it"
+        triggered_by = f"Top mover: {sym} up {gainer_pct:.2f}% on Friday's close"
+        category     = "private company"
+
+        hook = (
+            f"{sym} was Friday's standout mover, closing up {gainer_pct:.1f}%. "
+            f"A move that size on a {date.today().strftime('%A')} is worth understanding."
+        )
+        story = (
+            f"{name} posted a {gainer_pct:.1f}% gain in the session. "
+            f"The broader market was less dramatic — S&P {sp_dir} {abs(sp_pct):.2f}%, "
+            f"Nasdaq {ndx_dir} {abs(ndx_pct):.2f}%. "
+            f"Single-stock moves this sharp relative to the index typically trace back to "
+            f"earnings surprise, analyst action, M&A speculation, or a macro read specific to the sector. "
+            f"The move is worth tracking into Monday for follow-through or fade."
+        )
+        take = (
+            f"A {gainer_pct:.0f}% pop with no obvious catalyst is the kind of setup "
+            f"that can cut both ways Monday — confirm the reason before chasing."
+        )
+
+    else:
+        # Quiet week — plain summary
+        direction = "positive" if sp_pct >= 0 else "negative"
+        topic        = f"A {direction} but quiet week — S&P {sp_pct:+.2f}%, Nasdaq {ndx_pct:+.2f}%"
+        triggered_by = "No notable divergence or headlines — plain market summary"
+        category     = "market overview"
+
+        hook = (
+            f"No dramatic divergences this week — the S&P finished {sp_dir} {abs(sp_pct):.2f}%, "
+            f"and the other major indices moved in the same direction."
+        )
+        story = (
+            f"S&P closed {sp_dir} {abs(sp_pct):.2f}%, Nasdaq {ndx_dir} {abs(ndx_pct):.2f}%, "
+            f"Dow {dow_dir} {abs(dow_pct):.2f}%. "
+        )
+        if sector_spread > 0:
+            story += (
+                f"Sector dispersion stayed contained — {top_sector[0]} led at {top_sector[1]:+.2f}% "
+                f"with {bottom_sector[0]} at the bottom at {bottom_sector[1]:+.2f}%. "
+            )
+        story += "Quiet weeks like this are often consolidation before the next directional move."
+        take = "Nothing to chase here — wait for Monday's open to see if the trend resumes or reverses."
+
+    word_count = len(f"{hook} {story} {take}".split())
+    print(f"    topic: {topic[:80]}")
+    print(f"    category: {category}  |  triggered by: {triggered_by[:60]}")
+    print(f"    word count: {word_count}")
+
+    return {
+        "TOPIC":        topic,
+        "CATEGORY":     category,
+        "TRIGGERED_BY": triggered_by,
+        "HOOK":         hook,
+        "STORY":        story,
+        "TAKE":         take,
+    }
 
 
 def _deepdive_html(fields: dict, today: str, snapshot_data: list) -> tuple[str, str]:
@@ -528,57 +729,24 @@ async def deepdive(session: ClientSession) -> tuple[str, str]:
     today     = date.today().strftime("%A, %B %d")
     today_iso = date.today().isoformat()
 
-    print("    fetching headlines and snapshot…")
-    snapshot, headlines, mem = await asyncio.gather(
+    print("    fetching snapshot, headlines, movers, sectors…")
+    snapshot, headlines, movers, sectors, mem = await asyncio.gather(
         call(session, "fetch_market_snapshot"),
         call(session, "fetch_top_headlines"),
+        call(session, "fetch_top_movers"),
+        call(session, "fetch_sector_performance"),
         call(session, "load_memory"),
     )
 
-    # Build headline list for the prompt
-    head_list = headlines.get("headlines", [])
-    headlines_str = "\n".join(
-        f"- {h.get('title','')}" + (f" ({h.get('site','')})" if h.get("site") else "")
-        for h in head_list[:8]
-    ) or "No headlines available — use recent market knowledge."
+    head_list  = headlines.get("headlines", [])
+    index_data = snapshot.get("data", [])
 
     if not head_list:
-        print("    WARNING: no headlines returned — using fallback rotation")
+        print("    no headlines returned — will use market data for topic selection")
 
-    # Build market context string
-    index_data = snapshot.get("data", [])
-    market_ctx = "\n".join(
-        f"  {i.get('name')}: last close {_fmt(i.get('pct'))}"
-        for i in index_data
-    ) or "Market data unavailable."
-
-    # Ask Claude to pick a topic and write the piece
-    print("    asking Claude for deep dive topic and write-up…")
-    prompt = DEEPDIVE_PROMPT_TEMPLATE.format(
-        today=today,
-        headlines=headlines_str,
-        market_ctx=market_ctx,
-        categories=", ".join(DEEPDIVE_CATEGORIES),
-    )
-    raw_response = _ask_claude_sync(prompt)
-    print(f"    Claude response preview: {raw_response[:120]}…")
-
-    fields = _parse_deepdive_response(raw_response)
-
-    # Fallback if parsing failed
-    if not fields.get("TOPIC"):
-        print("    WARNING: Claude response parsing failed — using data-only fallback")
-        fields = {
-            "TOPIC": "Market Snapshot — This Week",
-            "CATEGORY": "macro / Fed policy",
-            "TRIGGERED_BY": "fallback — no parseable Claude response",
-            "HOOK": "Markets were closed today. Here's where things stood at the end of the week.",
-            "STORY": " ".join(
-                f"{i.get('name')} closed {_fmt(i.get('pct'))}."
-                for i in index_data
-            ) or "Market data unavailable.",
-            "TAKE": "Watch next week's open for follow-through.",
-        }
+    # Build the deep dive deterministically from real data — zero AI calls
+    print("    building deep dive from real data…")
+    fields = _build_deep_dive(index_data, head_list, movers, sectors.get("sectors", []))
 
     # Log to memory
     if isinstance(mem, dict):
