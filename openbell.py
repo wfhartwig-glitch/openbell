@@ -348,7 +348,9 @@ async def deepdive(session: ClientSession) -> tuple[str, str]:
 
 async def run(mode: str):
     today_str = date.today().strftime("%A, %B %d, %Y")
+    start_ts  = datetime.now().strftime("%H:%M:%S UTC+0")
     print(f"[OpenBell] {mode.upper()} — {today_str}")
+    print(f"[OpenBell] started at {start_ts}")
 
     server_params = StdioServerParameters(
         command=sys.executable,
@@ -378,7 +380,8 @@ async def run(mode: str):
                 print(f"[OpenBell] Unknown mode: {mode}")
                 return
 
-            print("  → Sending…")
+            send_ts = datetime.now().strftime("%H:%M:%S UTC+0")
+            print(f"  → Sending… (pre-send time: {send_ts})")
             result = await call(session, "send_email",
                                 {"subject": subject, "html_body": html})
             print(f"  {result}")

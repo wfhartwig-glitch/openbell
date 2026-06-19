@@ -9,8 +9,8 @@ name: OpenBell Close Summary
 
 on:
   schedule:
-    # 3:00 PM CT = 21:00 UTC
-    - cron: '0 21 * * 1-5'
+    # 3:00 PM CDT (UTC-5, Jun-Nov) = 20:00 UTC
+    - cron: '0 20 * * 1-5'
   workflow_dispatch:
 
 permissions:
