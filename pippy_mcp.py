@@ -304,16 +304,59 @@ def fetch_top_headlines() -> str:
             except Exception:
                 pass
         try:
-            skip = ["beginner", "guide", "how to", "what is", "explainer"]
-            seen, titles = set(), []
+            from datetime import timezone
+            skip       = ["beginner", "guide", "how to", "what is", "explainer"]
+            # Speculative/future-tense language — dangerous if article is old
+            speculative = ["nominee", "candidate", "leading candidate", "expected to",
+                           "could replace", "may become", "potential replacement",
+                           "confirmation hearing", "reportedly considering"]
+            now_utc    = datetime.now(timezone.utc)
+            cutoff_hrs = 72
+            seen, titles, excluded = set(), [], []
             for sym in ["SPY", "QQQ", "^VIX", "GLD"]:
                 for item in (yf.Ticker(sym).news or []):
-                    h = item.get("content", {}).get("title") or item.get("title", "")
-                    if h and h not in seen and len(h) > 20 and not any(k in h.lower() for k in skip):
-                        seen.add(h)
-                        titles.append({"title": h, "snippet": "", "site": "Yahoo Finance", "published": ""})
+                    content  = item.get("content", {})
+                    h        = content.get("title") or item.get("title", "")
+                    pub_str  = content.get("pubDate") or content.get("displayTime", "")
+                    site     = content.get("provider", {}).get("displayName", "Yahoo Finance")
+                    if not h or h in seen or len(h) < 20:
+                        continue
+                    if any(k in h.lower() for k in skip):
+                        continue
+                    # Parse publish date
+                    pub_dt   = None
+                    age_hrs  = None
+                    if pub_str:
+                        try:
+                            pub_dt  = datetime.fromisoformat(pub_str.replace("Z", "+00:00"))
+                            age_hrs = (now_utc - pub_dt).total_seconds() / 3600
+                        except Exception:
+                            pass
+                    # Recency gate: discard if older than cutoff
+                    if age_hrs is not None and age_hrs > cutoff_hrs:
+                        excluded.append({"title": h[:60], "age_hrs": round(age_hrs, 1)})
+                        continue
+                    # Speculative-language + age guard: discard if speculative AND not from today
+                    if age_hrs is not None and age_hrs > 24:
+                        if any(s in h.lower() for s in speculative):
+                            excluded.append({"title": h[:60], "age_hrs": round(age_hrs, 1),
+                                             "reason": "speculative language in old article"})
+                            continue
+                    seen.add(h)
+                    titles.append({
+                        "title":     h,
+                        "snippet":   content.get("summary", "")[:120],
+                        "site":      site,
+                        "published": pub_str[:10] if pub_str else "",
+                        "age_hrs":   round(age_hrs, 1) if age_hrs is not None else None,
+                    })
                 if len(titles) >= 7:
                     break
+            if excluded:
+                import sys
+                print(f"[fetch_top_headlines] excluded {len(excluded)} stale/speculative items: "
+                      + ", ".join(f"{e['title']} ({e.get('age_hrs','?')}h)" for e in excluded),
+                      file=sys.stderr)
             return json.dumps({"source": "yfinance", "headlines": titles[:5], "timestamp": ts})
         except Exception as e:
             return json.dumps({"source": "unavailable", "error": str(e), "timestamp": ts})

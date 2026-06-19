@@ -748,14 +748,18 @@ async def deepdive(session: ClientSession) -> tuple[str, str]:
     print("    building deep dive from real data…")
     fields = _build_deep_dive(index_data, head_list, movers, sectors.get("sectors", []))
 
-    # Log to memory
+    # Log to memory — include actual publish date of the source headline
+    source_published = ""
+    if head_list and fields.get("TRIGGERED_BY", "").startswith('"'):
+        source_published = head_list[0].get("published", "")
     if isinstance(mem, dict):
         history = mem.get("deep_dive_history", [])
         history.append({
-            "date":         today_iso,
-            "category":     fields.get("CATEGORY", "unknown"),
-            "topic":        fields.get("TOPIC", ""),
-            "triggered_by": fields.get("TRIGGERED_BY", ""),
+            "date":                     today_iso,
+            "category":                 fields.get("CATEGORY", "unknown"),
+            "topic":                    fields.get("TOPIC", ""),
+            "triggered_by":             fields.get("TRIGGERED_BY", ""),
+            "source_headline_published": source_published,
         })
         mem["deep_dive_history"] = history[-52:]  # keep ~1 year
         await call(session, "save_memory", {"data": mem})
