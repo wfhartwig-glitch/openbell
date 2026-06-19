@@ -786,10 +786,12 @@ async def run(mode: str):
         async with ClientSession(read, write) as session:
             await session.initialize()
 
-            market = await call(session, "is_market_open_today")
+            market     = await call(session, "is_market_open_today")
+            is_open    = bool(market.get("open", False))
+            mkt_reason = market.get("reason", "unknown")
 
             if mode == "deepdive":
-                if market.get("open"):
+                if is_open:
                     print("[Pippy's Brief] Market is open — skipping deep dive.")
                     return
                 subject, html = await deepdive(session)
@@ -798,6 +800,9 @@ async def run(mode: str):
                 subject, html = await morning(session)
 
             elif mode == "close":
+                if not is_open:
+                    print(f"[Pippy's Brief] Skipped close summary — market closed ({mkt_reason}), no session to summarize.")
+                    return
                 subject, html = await close(session)
 
             else:
