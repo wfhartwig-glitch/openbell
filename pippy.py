@@ -296,8 +296,8 @@ async def repl(session: ClientSession):
                 show_stock(d)
             continue
 
-        # Ticker lookup
-        tokens  = re.findall(r'\b[A-Z]{2,5}\b', user.upper())
+        # Ticker lookup — only match words the user typed in ALL-CAPS themselves
+        tokens  = re.findall(r'\b[A-Z]{2,5}\b', user)  # original case, not uppercased
         tickers = [t for t in tokens if t not in SKIP_WORDS]
         if tickers:
             for sym in tickers[:2]:
