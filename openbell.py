@@ -24,35 +24,8 @@ load_dotenv()
 
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-STYLE = """
-body{font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#e0e0e0}
-.header{background:#1a1a2e;padding:20px;border-bottom:2px solid #00d4aa}
-.header h1{color:#00d4aa;margin:0;font-size:22px;letter-spacing:.5px}
-.header p{color:#888;margin:4px 0 0;font-size:13px}
-.section{padding:16px 20px;border-bottom:1px solid #1e1e1e}
-.section h2{color:#00d4aa;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px}
-table{border-collapse:collapse;width:100%}
-td{padding:5px 14px 5px 0;font-size:14px;vertical-align:top}
-.green{color:#00d4aa;font-weight:700}
-.red{color:#ff4757;font-weight:700}
-.neutral{color:#888}
-.ticker{background:#1a1a2e;padding:3px 7px;border-radius:4px;font-family:monospace;font-size:13px}
-.tag-high{color:#ff4757;font-size:11px;font-weight:700;text-transform:uppercase}
-.tag-med{color:#ffa502;font-size:11px;font-weight:700;text-transform:uppercase}
-.tag-earn{color:#7c3aed;font-size:11px;font-weight:700;text-transform:uppercase}
-.tag-risk-low{color:#00d4aa;font-size:11px;font-weight:700}
-.tag-risk-med{color:#ffa502;font-size:11px;font-weight:700}
-.tag-risk-high{color:#ff4757;font-size:11px;font-weight:700}
-.tag-risk-spec{color:#7c3aed;font-size:11px;font-weight:700}
-.hl-item{padding:7px 0;border-bottom:1px solid #1e1e1e;font-size:14px}
-.hl-item:last-child{border-bottom:none}
-.hl-snippet{color:#888;font-size:12px;margin-top:2px}
-.hl-meta{color:#555;font-size:11px;margin-top:1px}
-.footer{padding:14px 20px;color:#444;font-size:11px}
-"""
 
-
-# ── MCP helpers ───────────────────────────────────────────────────────────────
+# ── MCP helper ────────────────────────────────────────────────────────────────
 
 async def call(session: ClientSession, name: str, args: dict = None) -> dict | list | str:
     result = await session.call_tool(name, args or {})
@@ -63,13 +36,22 @@ async def call(session: ClientSession, name: str, args: dict = None) -> dict | l
         return text
 
 
-# ── HTML helpers ──────────────────────────────────────────────────────────────
+# ── Inline-style HTML helpers (Gmail strips <style> tags) ────────────────────
 
-def _cls(pct) -> str:
+GREEN  = "#16a34a"
+RED    = "#dc2626"
+GRAY   = "#6b7280"
+BORDER = "#e5e7eb"
+BG     = "#ffffff"
+HEADER = "#111827"
+ACCENT = "#111827"
+
+
+def _pct_color(pct) -> str:
     try:
-        return "green" if float(pct) >= 0 else "red"
+        return GREEN if float(pct) >= 0 else RED
     except Exception:
-        return "neutral"
+        return GRAY
 
 
 def _arrow(pct) -> str:
@@ -82,29 +64,48 @@ def _arrow(pct) -> str:
 def _fmt(pct) -> str:
     try:
         v = float(pct)
-        return f'{_arrow(v)} {abs(v):.2f}%'
+        return f"{_arrow(v)} {abs(v):.2f}%"
     except Exception:
-        return str(pct) if pct else "N/A"
+        return str(pct) if pct else "—"
 
 
-def _base(title: str, subtitle: str, body: str) -> str:
-    return (
-        f'<!DOCTYPE html><html><head><meta charset="UTF-8">'
-        f'<meta name="viewport" content="width=device-width,initial-scale=1">'
-        f'<style>{STYLE}</style></head>'
-        f'<body>'
-        f'<div class="header"><h1>{title}</h1><p>{subtitle}</p></div>'
-        f'{body}'
-        f'<div class="footer">Pippy's Brief &mdash; automated market briefing &nbsp;&nbsp;Not financial advice.</div>'
-        f'</body></html>'
-    )
+def _wrap(body: str, title: str, subtitle: str) -> str:
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:24px 0">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1)">
+
+  <!-- HEADER -->
+  <tr><td style="background:#111827;padding:28px 32px">
+    <p style="margin:0 0 4px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#9ca3af">{subtitle}</p>
+    <h1 style="margin:0;font-size:22px;font-weight:700;color:#ffffff;line-height:1.2">{title}</h1>
+  </td></tr>
+
+  <!-- BODY -->
+  {body}
+
+  <!-- FOOTER -->
+  <tr><td style="padding:20px 32px;border-top:1px solid #e5e7eb;background:#f9fafb">
+    <p style="margin:0;font-size:11px;color:#9ca3af">Pippy's Brief &mdash; automated daily market briefing. Not financial advice.</p>
+  </td></tr>
+
+</table>
+</td></tr>
+</table>
+</body></html>"""
 
 
-def _sec(title: str, inner: str) -> str:
-    return f'<div class="section"><h2>{title}</h2>{inner}</div>'
+def _section(label: str, inner: str) -> str:
+    return f"""<tr><td style="padding:24px 32px;border-bottom:1px solid #e5e7eb">
+  <p style="margin:0 0 14px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9ca3af">{label}</p>
+  {inner}
+</td></tr>"""
 
 
-# ── Section builders ──────────────────────────────────────────────────────────
+# ── Section builders — all inline styles ──────────────────────────────────────
 
 def _indices(data: list) -> str:
     rows = ""
@@ -113,29 +114,30 @@ def _indices(data: list) -> str:
         price = item.get("price")
         pct   = item.get("pct") or item.get("changesPercentage")
         p_str = f"${float(price):,.2f}" if price else "—"
-        rows += (
-            f'<tr>'
-            f'<td style="font-weight:600;width:90px">{name}</td>'
-            f'<td>{p_str}</td>'
-            f'<td class="{_cls(pct)}">{_fmt(pct)}</td>'
-            f'</tr>'
-        )
-    return _sec("Market Snapshot", f'<table>{rows}</table>')
+        color = _pct_color(pct)
+        rows += f"""
+        <tr>
+          <td style="padding:8px 0;font-size:15px;font-weight:600;color:#111827;width:100px">{name}</td>
+          <td style="padding:8px 0;font-size:15px;color:#374151">{p_str}</td>
+          <td style="padding:8px 0;font-size:15px;font-weight:700;color:{color};text-align:right">{_fmt(pct)}</td>
+        </tr>"""
+    return _section("Market Snapshot", f'<table width="100%" cellpadding="0" cellspacing="0">{rows}</table>')
 
 
 def _headlines(headlines: list) -> str:
     items = ""
-    for h in headlines:
+    for i, h in enumerate(headlines):
         title   = h.get("title", h) if isinstance(h, dict) else str(h)
         snippet = h.get("snippet", "") if isinstance(h, dict) else ""
         site    = h.get("site", "") if isinstance(h, dict) else ""
-        items += (
-            f'<div class="hl-item"><div>{title}</div>'
-            + (f'<div class="hl-snippet">{snippet}</div>' if snippet else "")
-            + (f'<div class="hl-meta">{site}</div>'       if site    else "")
-            + '</div>'
-        )
-    return _sec("Top Headlines", items)
+        border  = "border-top:1px solid #f3f4f6;" if i > 0 else ""
+        items += f"""
+        <div style="{border}padding:10px 0">
+          <p style="margin:0 0 3px;font-size:14px;font-weight:500;color:#111827;line-height:1.4">{title}</p>
+          {"" if not snippet else f'<p style="margin:0 0 2px;font-size:12px;color:#6b7280;line-height:1.4">{snippet}</p>'}
+          {"" if not site    else f'<p style="margin:0;font-size:11px;color:#9ca3af">{site}</p>'}
+        </div>"""
+    return _section("Top Headlines", items)
 
 
 def _calendar(events: list, earnings: list) -> str:
@@ -144,23 +146,28 @@ def _calendar(events: list, earnings: list) -> str:
         evt    = e.get("event", "")
         dt     = (e.get("date", "") or "")[-5:]
         impact = e.get("impact", "")
-        tag    = (f'<span class="tag-high">{impact}</span>' if impact == "High"
-                  else f'<span class="tag-med">{impact}</span>' if impact else "")
-        rows += f'<tr><td class="neutral" style="width:55px">{dt}</td><td>{evt}</td><td style="width:70px">{tag}</td></tr>'
+        impact_color = RED if impact == "High" else "#d97706" if impact == "Medium" else GRAY
+        badge = f'<span style="font-size:10px;font-weight:700;color:{impact_color};text-transform:uppercase">{impact}</span>' if impact else ""
+        rows += f"""
+        <tr>
+          <td style="padding:7px 12px 7px 0;font-size:12px;color:#6b7280;white-space:nowrap;width:50px">{dt}</td>
+          <td style="padding:7px 12px 7px 0;font-size:13px;color:#374151">{evt}</td>
+          <td style="padding:7px 0;text-align:right">{badge}</td>
+        </tr>"""
     for e in earnings[:6]:
         sym  = e.get("symbol", "")
         dt   = (e.get("date", "") or "")[-5:]
         eps  = e.get("eps_estimated")
-        note = f"EPS est. ${eps:.2f}" if eps else "earnings"
-        rows += (
-            f'<tr><td class="neutral" style="width:55px">{dt}</td>'
-            f'<td><span class="ticker">{sym}</span> {note}</td>'
-            f'<td style="width:70px"><span class="tag-earn">EARN</span></td></tr>'
-        )
+        note = f"EPS est. ${eps:.2f}" if eps else "reports earnings"
+        rows += f"""
+        <tr>
+          <td style="padding:7px 12px 7px 0;font-size:12px;color:#6b7280;white-space:nowrap;width:50px">{dt}</td>
+          <td style="padding:7px 12px 7px 0;font-size:13px;color:#374151"><strong style="color:#111827">{sym}</strong> — {note}</td>
+          <td style="padding:7px 0;text-align:right"><span style="font-size:10px;font-weight:700;color:#7c3aed;text-transform:uppercase">Earnings</span></td>
+        </tr>"""
     if not rows:
-        return _sec("This Week's Calendar",
-                    '<p class="neutral" style="font-size:13px">No major events found.</p>')
-    return _sec("This Week's Calendar", f'<table>{rows}</table>')
+        return _section("This Week's Calendar", '<p style="margin:0;font-size:13px;color:#9ca3af">No major events found.</p>')
+    return _section("This Week's Calendar", f'<table width="100%" cellpadding="0" cellspacing="0">{rows}</table>')
 
 
 def _sectors(sectors: list) -> str:
@@ -168,33 +175,37 @@ def _sectors(sectors: list) -> str:
     for s in sectors:
         name = s.get("sector", "")
         pct  = s.get("pct") or s.get("changesPercentage")
-        rows += f'<tr><td style="font-size:13px">{name}</td><td class="{_cls(pct)}">{_fmt(pct)}</td></tr>'
-    return _sec("Sector Performance", f'<table>{rows}</table>')
+        color = _pct_color(pct)
+        rows += f"""
+        <tr>
+          <td style="padding:6px 0;font-size:13px;color:#374151">{name}</td>
+          <td style="padding:6px 0;font-size:13px;font-weight:700;color:{color};text-align:right">{_fmt(pct)}</td>
+        </tr>"""
+    return _section("Sector Performance", f'<table width="100%" cellpadding="0" cellspacing="0">{rows}</table>')
 
 
 def _movers(gainers: list, losers: list) -> str:
-    def _block(items, label, css_cls):
+    def _block(items, label, color):
         rows = ""
         for m in items:
             sym   = m.get("symbol", "")
-            name  = (m.get("name") or "")[:22]
+            name  = (m.get("name") or "")[:28]
             price = m.get("price")
             pct   = m.get("pct") or m.get("changesPercentage")
-            p_str = f"${float(price):,.2f}" if price else ""
-            rows += (
-                f'<tr>'
-                f'<td><span class="ticker">{sym}</span></td>'
-                f'<td class="neutral" style="font-size:12px">{name}</td>'
-                f'<td>{p_str}</td>'
-                f'<td class="{css_cls}">{_fmt(pct)}</td>'
-                f'</tr>'
-            )
-        return (
-            f'<div style="margin-bottom:12px">'
-            f'<div class="{css_cls}" style="font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:6px">{label}</div>'
-            f'<table>{rows}</table></div>'
-        )
-    return _sec("Top Movers", _block(gainers, "Gainers", "green") + _block(losers, "Losers", "red"))
+            p_str = f"${float(price):,.2f}" if price else "—"
+            rows += f"""
+            <tr>
+              <td style="padding:7px 12px 7px 0;font-size:13px;font-weight:700;color:#111827;width:60px">{sym}</td>
+              <td style="padding:7px 12px 7px 0;font-size:12px;color:#6b7280">{name}</td>
+              <td style="padding:7px 12px 7px 0;font-size:13px;color:#374151">{p_str}</td>
+              <td style="padding:7px 0;font-size:13px;font-weight:700;color:{color};text-align:right">{_fmt(pct)}</td>
+            </tr>"""
+        return f"""
+        <div style="margin-bottom:16px">
+          <p style="margin:0 0 8px;font-size:11px;font-weight:700;color:{color};text-transform:uppercase;letter-spacing:.06em">{label}</p>
+          <table width="100%" cellpadding="0" cellspacing="0">{rows}</table>
+        </div>"""
+    return _section("Top Movers", _block(gainers, "Gainers", GREEN) + _block(losers, "Losers", RED))
 
 
 def _watchlist(tickers_data: list, label: str) -> str:
@@ -207,41 +218,43 @@ def _watchlist(tickers_data: list, label: str) -> str:
         pct   = w.get("pct") or w.get("changesPercentage")
         head  = w.get("headline", "")
         p_str = f"${float(price):,.2f}" if price else "—"
-        rows += (
-            f'<tr>'
-            f'<td style="width:70px"><span class="ticker">{sym}</span></td>'
-            f'<td>{p_str}</td>'
-            f'<td class="{_cls(pct)}" style="width:80px">{_fmt(pct)}</td>'
-            + (f'<td class="neutral" style="font-size:12px">{head[:55]}…</td>' if head else '<td></td>')
-            + '</tr>'
-        )
-    return _sec(label, f'<table>{rows}</table>')
+        color = _pct_color(pct)
+        rows += f"""
+        <tr>
+          <td style="padding:8px 12px 8px 0;font-size:13px;font-weight:700;color:#111827;width:65px">{sym}</td>
+          <td style="padding:8px 12px 8px 0;font-size:13px;color:#374151">{p_str}</td>
+          <td style="padding:8px 12px 8px 0;font-size:13px;font-weight:700;color:{color};width:85px">{_fmt(pct)}</td>
+          <td style="padding:8px 0;font-size:12px;color:#6b7280">{"" if not head else head[:60] + "…"}</td>
+        </tr>"""
+    return _section(label, f'<table width="100%" cellpadding="0" cellspacing="0">{rows}</table>')
 
 
 def _picks(picks: list) -> str:
     if not picks:
         return ""
-    risk_cls = {"Low": "tag-risk-low", "Medium": "tag-risk-med",
-                "High": "tag-risk-high", "Speculative": "tag-risk-spec"}
-    rows = (
-        '<tr style="border-bottom:1px solid #222;font-size:11px;color:#555">'
-        '<td>TICKER</td><td>COMPANY</td><td>SECTOR</td><td>RISK</td><td>RATIONALE</td></tr>'
-    )
+    risk_colors = {"Low": GREEN, "Medium": "#d97706", "High": RED, "Speculative": "#7c3aed"}
+    rows = ""
     for p in picks:
-        risk = p.get("risk", "—")
-        cls  = risk_cls.get(risk, "neutral")
-        rows += (
-            f'<tr style="border-bottom:1px solid #1a1a1a">'
-            f'<td><span class="ticker">{p["ticker"]}</span></td>'
-            f'<td style="font-size:13px">{p.get("company","")}</td>'
-            f'<td class="neutral" style="font-size:12px">{p.get("sector","")}</td>'
-            f'<td><span class="{cls}">{risk}</span></td>'
-            f'<td style="font-size:12px;color:#aaa">{p.get("rationale","")}</td>'
-            f'</tr>'
-        )
-    return _sec("Monthly Picks",
-        f'<table>{rows}</table>'
-        f'<div style="font-size:11px;color:#444;margin-top:8px">Refreshed monthly. Informational only.</div>')
+        risk  = p.get("risk", "—")
+        rcolor = risk_colors.get(risk, GRAY)
+        rows += f"""
+        <tr style="border-top:1px solid #f3f4f6">
+          <td style="padding:10px 12px 10px 0;font-size:13px;font-weight:700;color:#111827;width:60px">{p.get("ticker","")}</td>
+          <td style="padding:10px 12px 10px 0;font-size:13px;color:#374151">{p.get("company","")}</td>
+          <td style="padding:10px 12px 10px 0;font-size:12px;color:#6b7280">{p.get("sector","")}</td>
+          <td style="padding:10px 12px 10px 0;font-size:11px;font-weight:700;color:{rcolor};text-transform:uppercase;white-space:nowrap">{risk}</td>
+          <td style="padding:10px 0;font-size:12px;color:#6b7280">{p.get("rationale","")}</td>
+        </tr>"""
+    header = """<tr>
+      <td style="padding:0 12px 8px 0;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em">Ticker</td>
+      <td style="padding:0 12px 8px 0;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em">Company</td>
+      <td style="padding:0 12px 8px 0;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em">Sector</td>
+      <td style="padding:0 12px 8px 0;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em">Risk</td>
+      <td style="padding:0 0 8px;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em">Rationale</td>
+    </tr>"""
+    return _section("Monthly Picks",
+        f'<table width="100%" cellpadding="0" cellspacing="0">{header}{rows}</table>'
+        f'<p style="margin:10px 0 0;font-size:11px;color:#9ca3af">Refreshed monthly. Informational only.</p>')
 
 
 # ── Email assemblers ──────────────────────────────────────────────────────────
@@ -276,8 +289,9 @@ async def morning(session: ClientSession) -> tuple[str, str]:
         + _watchlist(watchlist, "Your Watchlist — Pre-Market")
         + _picks(picks.get("picks", []))
     )
-    return (f"Pippy's Brief ☀️ — {today} Morning Briefing",
-            _base(f"Pippy's Brief ☀️  {today}", "Morning Briefing", body))
+    subject = f"Pippy's Brief — {today} Morning Briefing"
+    html    = _wrap(body, f"Morning Briefing &nbsp; {today}", "Pippy's Brief ☀️")
+    return subject, html
 
 
 async def close(session: ClientSession) -> tuple[str, str]:
@@ -303,11 +317,12 @@ async def close(session: ClientSession) -> tuple[str, str]:
         _indices(snapshot.get("data", []))
         + _movers(movers.get("gainers", []), movers.get("losers", []))
         + _sectors(sectors.get("sectors", []))
-        + _watchlist(watchlist, "Your Watchlist — EOD")
+        + _watchlist(watchlist, "Your Watchlist — End of Day")
         + _headlines(headlines.get("headlines", []))
     )
-    return (f"Pippy's Brief 📊 — {today} Market Close",
-            _base(f"Pippy's Brief 📊  {today}", "Market Close Summary", body))
+    subject = f"Pippy's Brief — {today} Market Close"
+    html    = _wrap(body, f"Market Close &nbsp; {today}", "Pippy's Brief 📊")
+    return subject, html
 
 
 async def deepdive(session: ClientSession) -> tuple[str, str]:
@@ -323,15 +338,15 @@ async def deepdive(session: ClientSession) -> tuple[str, str]:
     earn_html = ""
     if upcoming:
         rows = "".join(
-            f'<tr>'
-            f'<td><span class="ticker">{e.get("symbol","")}</span></td>'
-            f'<td class="neutral" style="font-size:13px">{e.get("date","")}</td>'
-            f'<td class="neutral" style="font-size:12px">'
-            + (f'EPS est. ${e["eps_estimated"]:.2f}' if e.get("eps_estimated") else "")
-            + '</td></tr>'
+            f"""<tr>
+              <td style="padding:7px 12px 7px 0;font-size:13px;font-weight:700;color:#111827;width:65px">{e.get("symbol","")}</td>
+              <td style="padding:7px 12px 7px 0;font-size:13px;color:#374151">{e.get("date","")}</td>
+              <td style="padding:7px 0;font-size:12px;color:#6b7280">{"EPS est. $" + f'{e["eps_estimated"]:.2f}' if e.get("eps_estimated") else ""}</td>
+            </tr>"""
             for e in upcoming[:8]
         )
-        earn_html = _sec("Earnings This Week", f'<table>{rows}</table>')
+        earn_html = _section("Earnings This Week",
+            f'<table width="100%" cellpadding="0" cellspacing="0">{rows}</table>')
 
     body = (
         _indices(snapshot.get("data", []))
@@ -340,15 +355,16 @@ async def deepdive(session: ClientSession) -> tuple[str, str]:
         + _sectors(sectors.get("sectors", []))
         + earn_html
     )
-    return (f"Pippy's Brief 📚 — {today} Weekend Summary",
-            _base(f"Pippy's Brief 📚  {today}", "Weekend Market Summary", body))
+    subject = f"Pippy's Brief — {today} Weekend Summary"
+    html    = _wrap(body, f"Weekend Summary &nbsp; {today}", "Pippy's Brief 📚")
+    return subject, html
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 async def run(mode: str):
     today_str = date.today().strftime("%A, %B %d, %Y")
-    start_ts  = datetime.now().strftime("%H:%M:%S UTC+0")
+    start_ts  = datetime.now().strftime("%H:%M:%S UTC")
     print(f"[Pippy's Brief] {mode.upper()} — {today_str}")
     print(f"[Pippy's Brief] started at {start_ts}")
 
@@ -380,7 +396,7 @@ async def run(mode: str):
                 print(f"[Pippy's Brief] Unknown mode: {mode}")
                 return
 
-            send_ts = datetime.now().strftime("%H:%M:%S UTC+0")
+            send_ts = datetime.now().strftime("%H:%M:%S UTC")
             print(f"  → Sending… (pre-send time: {send_ts})")
             result = await call(session, "send_email",
                                 {"subject": subject, "html_body": html})
