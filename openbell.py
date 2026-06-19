@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-OpenBell — autonomous email agent. Zero Anthropic API cost.
+Pippy's Brief — autonomous email agent. Zero Anthropic API cost.
 Runs as an MCP client, calls pippy_mcp.py tools for data, builds HTML, sends email.
 
 Usage:
@@ -95,7 +95,7 @@ def _base(title: str, subtitle: str, body: str) -> str:
         f'<body>'
         f'<div class="header"><h1>{title}</h1><p>{subtitle}</p></div>'
         f'{body}'
-        f'<div class="footer">OpenBell &mdash; automated market briefing &nbsp;&nbsp;Not financial advice.</div>'
+        f'<div class="footer">Pippy's Brief &mdash; automated market briefing &nbsp;&nbsp;Not financial advice.</div>'
         f'</body></html>'
     )
 
@@ -276,8 +276,8 @@ async def morning(session: ClientSession) -> tuple[str, str]:
         + _watchlist(watchlist, "Your Watchlist — Pre-Market")
         + _picks(picks.get("picks", []))
     )
-    return (f"OpenBell ☀️ — {today} Morning Briefing",
-            _base(f"OpenBell ☀️  {today}", "Morning Briefing", body))
+    return (f"Pippy's Brief ☀️ — {today} Morning Briefing",
+            _base(f"Pippy's Brief ☀️  {today}", "Morning Briefing", body))
 
 
 async def close(session: ClientSession) -> tuple[str, str]:
@@ -306,8 +306,8 @@ async def close(session: ClientSession) -> tuple[str, str]:
         + _watchlist(watchlist, "Your Watchlist — EOD")
         + _headlines(headlines.get("headlines", []))
     )
-    return (f"OpenBell 📊 — {today} Market Close",
-            _base(f"OpenBell 📊  {today}", "Market Close Summary", body))
+    return (f"Pippy's Brief 📊 — {today} Market Close",
+            _base(f"Pippy's Brief 📊  {today}", "Market Close Summary", body))
 
 
 async def deepdive(session: ClientSession) -> tuple[str, str]:
@@ -340,8 +340,8 @@ async def deepdive(session: ClientSession) -> tuple[str, str]:
         + _sectors(sectors.get("sectors", []))
         + earn_html
     )
-    return (f"OpenBell 📚 — {today} Weekend Summary",
-            _base(f"OpenBell 📚  {today}", "Weekend Market Summary", body))
+    return (f"Pippy's Brief 📚 — {today} Weekend Summary",
+            _base(f"Pippy's Brief 📚  {today}", "Weekend Market Summary", body))
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
@@ -349,8 +349,8 @@ async def deepdive(session: ClientSession) -> tuple[str, str]:
 async def run(mode: str):
     today_str = date.today().strftime("%A, %B %d, %Y")
     start_ts  = datetime.now().strftime("%H:%M:%S UTC+0")
-    print(f"[OpenBell] {mode.upper()} — {today_str}")
-    print(f"[OpenBell] started at {start_ts}")
+    print(f"[Pippy's Brief] {mode.upper()} — {today_str}")
+    print(f"[Pippy's Brief] started at {start_ts}")
 
     server_params = StdioServerParameters(
         command=sys.executable,
@@ -366,7 +366,7 @@ async def run(mode: str):
 
             if mode == "deepdive":
                 if market.get("open"):
-                    print("[OpenBell] Market is open — skipping deep dive.")
+                    print("[Pippy's Brief] Market is open — skipping deep dive.")
                     return
                 subject, html = await deepdive(session)
 
@@ -377,7 +377,7 @@ async def run(mode: str):
                 subject, html = await close(session)
 
             else:
-                print(f"[OpenBell] Unknown mode: {mode}")
+                print(f"[Pippy's Brief] Unknown mode: {mode}")
                 return
 
             send_ts = datetime.now().strftime("%H:%M:%S UTC+0")
@@ -393,7 +393,7 @@ async def run(mode: str):
                 mem["email_count"]        = mem.get("email_count", 0) + 1
                 await call(session, "save_memory", {"data": mem})
 
-            print("[OpenBell] Done.")
+            print("[Pippy's Brief] Done.")
 
 
 def main():

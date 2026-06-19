@@ -5,7 +5,7 @@
 #   FMP_API_KEY        ← primary market data (free at financialmodelingprep.com)
 #   NEWS_API_KEY       ← optional headline fallback (free at newsapi.org)
 
-name: OpenBell Close Summary
+name: Pippy's Brief — Close
 
 on:
   schedule:
