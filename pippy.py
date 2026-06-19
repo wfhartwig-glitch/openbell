@@ -23,10 +23,28 @@ load_dotenv()
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 SKIP_WORDS = {
-    "I", "A", "AN", "THE", "AND", "OR", "BUT", "FOR", "IN", "ON", "AT", "TO", "OF",
-    "IS", "IT", "MY", "ME", "DO", "IF", "SO", "UP", "AI", "US", "OK", "AM", "PM",
-    "ET", "PE", "YOY", "EPS", "CEO", "CFO", "IPO", "GDP", "FED", "ETF",
-    "WHAT", "HOW", "WHY", "WHEN", "WHO", "CAN", "WILL", "DOES", "HAS", "ARE",
+    # Articles / prepositions / conjunctions
+    "A", "AN", "THE", "AND", "OR", "BUT", "FOR", "IN", "ON", "AT", "TO", "OF",
+    "BY", "AS", "UP", "IF", "SO", "BE", "DO", "GO",
+    # Pronouns / common verbs
+    "I", "IT", "IS", "MY", "ME", "AM", "HE", "SHE", "WE", "HIS", "HER", "ITS",
+    "ARE", "WAS", "HAS", "HAD", "CAN", "WILL", "DOES", "DID", "GET", "GOT",
+    "BUY", "SELL", "HOLD", "USE", "SAY", "SEE", "NOW", "NEW",
+    # Question words
+    "WHAT", "HOW", "WHY", "WHEN", "WHO", "WHICH", "WHERE",
+    # Finance jargon that looks like tickers
+    "AI", "US", "OK", "ET", "PE", "YOY", "EPS", "CEO", "CFO", "IPO",
+    "GDP", "FED", "ETF", "SEC", "ESG", "DCF", "ROI", "YTD", "ATH",
+    "PM", "AM", "CT", "PT", "ET",
+    # Common English words that regex catches as uppercase
+    "BEST", "GOOD", "HIGH", "LOW", "TOP", "BIG", "BAD", "OLD", "NEW",
+    "STOCK", "STOCKS", "PICK", "PICKS", "MARKET", "RATE", "RATES",
+    "YEAR", "WEEK", "MONTH", "DAY", "TIME", "LATE", "NEXT", "LAST",
+    "MOST", "MORE", "LESS", "JUST", "VERY", "ALSO", "EVEN", "ONLY",
+    "INTO", "FROM", "WITH", "THAN", "THAT", "THIS", "THEY", "THEM",
+    "MAKE", "TAKE", "WANT", "NEED", "LIKE", "SOME", "MANY", "MUCH",
+    "LONG", "SHORT", "CALL", "PUTS", "CASH", "DEBT", "RISK", "BULL", "BEAR",
+    "RIGHT", "THINK", "KNOW", "LOOK", "FEEL", "WELL", "BACK", "DOWN",
 }
 
 
@@ -295,7 +313,8 @@ async def repl(session: ClientSession):
                         print(f"  {_dim(sym + ' added to your watchlist.')}")
             continue
 
-        print(f"  Try: briefing, picks, memory, movers, watchlist, a ticker like AAPL, or exit.\n")
+        print(f"  I'm a data terminal — I don't answer open-ended questions.")
+        print(f"  Try: briefing · picks · memory · movers · watchlist · AAPL · exit\n")
 
 
 async def main():
