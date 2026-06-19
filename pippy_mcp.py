@@ -314,7 +314,7 @@ def fetch_top_headlines() -> str:
                         titles.append({"title": h, "snippet": "", "site": "Yahoo Finance", "published": ""})
                 if len(titles) >= 7:
                     break
-            return json.dumps({"source": "fallback", "headlines": titles[:5], "timestamp": ts})
+            return json.dumps({"source": "yfinance", "headlines": titles[:5], "timestamp": ts})
         except Exception as e:
             return json.dumps({"source": "unavailable", "error": str(e), "timestamp": ts})
 
