@@ -113,9 +113,24 @@ def _ts() -> str:
 
 # ── Tools ─────────────────────────────────────────────────────────────────────
 
+def _is_market_open_now_fallback() -> bool:
+    """ET time-window check: 9:30 AM – 4:00 PM ET, weekdays, non-holidays."""
+    import pytz
+    et      = pytz.timezone("America/New_York")
+    now_et  = datetime.now(et)
+    today   = now_et.date()
+    if now_et.weekday() >= 5:
+        return False
+    if today.isoformat() in NYSE_HOLIDAYS:
+        return False
+    open_t  = now_et.replace(hour=9,  minute=30, second=0, microsecond=0)
+    close_t = now_et.replace(hour=16, minute=0,  second=0, microsecond=0)
+    return open_t <= now_et < close_t
+
+
 @mcp.tool()
 def is_market_open_today() -> str:
-    """Check if the US stock market is open today. Returns JSON with 'open' bool."""
+    """Check if the US market is open RIGHT NOW. Uses FMP live status; falls back to ET time-window check."""
     ts = _ts()
     try:
         data  = _fmp("/is-the-market-open")
@@ -123,15 +138,20 @@ def is_market_open_today() -> str:
         return json.dumps({"source": "FMP", "open": open_,
                            "reason": "FMP live market status", "timestamp": ts})
     except Exception:
-        today = date.today()
-        if today.weekday() >= 5:
-            return json.dumps({"source": "fallback", "open": False,
-                               "reason": "weekend", "timestamp": ts})
-        if today.isoformat() in NYSE_HOLIDAYS:
-            return json.dumps({"source": "fallback", "open": False,
-                               "reason": "NYSE holiday", "timestamp": ts})
-        return json.dumps({"source": "fallback", "open": True,
-                           "reason": "regular trading day", "timestamp": ts})
+        open_ = _is_market_open_now_fallback()
+        reason = "ET time-window fallback (9:30 AM – 4:00 PM ET)"
+        if not open_:
+            import pytz
+            et     = pytz.timezone("America/New_York")
+            now_et = datetime.now(et)
+            if now_et.weekday() >= 5:
+                reason = "weekend"
+            elif now_et.date().isoformat() in NYSE_HOLIDAYS:
+                reason = "NYSE holiday"
+            else:
+                reason = "outside trading hours (9:30 AM – 4:00 PM ET)"
+        return json.dumps({"source": "fallback", "open": open_,
+                           "reason": reason, "timestamp": ts})
 
 
 @mcp.tool()

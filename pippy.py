@@ -205,7 +205,8 @@ def show_memory(mem: dict):
 # ── Startup greeting ──────────────────────────────────────────────────────────
 
 async def print_greeting(session: ClientSession):
-    """Fetch a quick snapshot and print a live one-line greeting."""
+    """Fetch live market status and print a three-state greeting."""
+    import pytz
     try:
         market_status, snap = await asyncio.gather(
             call(session, "is_market_open_today"),
@@ -215,25 +216,51 @@ async def print_greeting(session: ClientSession):
         sp  = next((i for i in indices if i.get("name") == "S&P 500"), None)
         ndx = next((i for i in indices if i.get("name") == "Nasdaq"),  None)
 
-        is_open = market_status.get("open", True) if isinstance(market_status, dict) else True
+        # Safe default: closed. Never assume open without confirmation.
+        is_open = False
+        if isinstance(market_status, dict):
+            is_open = bool(market_status.get("open", False))
 
-        parts = []
-        if sp:
-            parts.append(f"S&P {_pct(sp.get('pct'))}")
-        if ndx:
-            parts.append(f"Nasdaq {_pct(ndx.get('pct'))}")
+        def index_str(item):
+            return _pct(item.get("pct")) if item else None
 
-        status_line = "  " + "  ·  ".join(parts) if parts else ""
+        sp_s  = index_str(sp)
+        ndx_s = index_str(ndx)
+        nums  = "  ·  ".join(p for p in [
+            f"S&P {sp_s}"  if sp_s  else None,
+            f"Nasdaq {ndx_s}" if ndx_s else None,
+        ] if p)
 
         print()
         print(_b("  Pippy"))
-        if is_open and status_line:
-            print(f"  Markets are open.{('  ' + status_line.strip()) if status_line else ''}")
-        elif not is_open and status_line:
-            print(f"  Markets are closed.{('  ' + status_line.strip()) if status_line else ''}")
+
+        if is_open:
+            # State 1: market actually open right now
+            line = "  Markets are open."
+            if nums:
+                line += f"  {nums}"
+            print(line)
         else:
-            open_str = "open" if is_open else "closed"
-            print(f"  Markets are {open_str}.")
+            # Determine whether it's a weekend/holiday or just after-hours
+            et     = pytz.timezone("America/New_York")
+            now_et = datetime.now(et)
+            if now_et.weekday() >= 5:
+                day = now_et.strftime("%A")
+                line = f"  Markets closed today — {day}."
+                if nums:
+                    line += f"  Last close: {nums}"
+            else:
+                # Trading day but outside hours (pre-market or after-hours)
+                now_hour = now_et.hour + now_et.minute / 60
+                if now_hour < 9.5:
+                    session_label = "Pre-market"
+                else:
+                    session_label = "After-hours"
+                line = f"  Markets closed. {session_label}."
+                if nums:
+                    line += f"  Last close: {nums}"
+            print(line)
+
         print(_d("  briefing · picks · movers · sectors · watchlist · memory · exit"))
         print()
     except Exception:
