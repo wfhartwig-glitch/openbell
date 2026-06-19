@@ -13,12 +13,22 @@ from datetime import date, datetime, timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+import logging
+
 import requests
 import yfinance as yf
 from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 
 load_dotenv()
+
+# Route all MCP/library INFO logs to a file — never to stdout/stderr
+logging.basicConfig(
+    filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), "pippy_mcp.log"),
+    level=logging.WARNING,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+logging.getLogger().setLevel(logging.WARNING)
 
 PROJECT_DIR        = os.path.dirname(os.path.abspath(__file__))
 MEMORY_FILE        = os.path.join(PROJECT_DIR, "pippy_memory.json")
