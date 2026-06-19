@@ -206,8 +206,9 @@ def show_memory(mem: dict):
 # ── Startup greeting ──────────────────────────────────────────────────────────
 
 async def print_greeting(session: ClientSession):
-    """Fetch live market status and print a three-state greeting."""
+    """Fetch live market status and print a warm, conversational greeting."""
     import pytz
+    import random
     try:
         market_status, snap = await asyncio.gather(
             call(session, "is_market_open_today"),
@@ -217,50 +218,72 @@ async def print_greeting(session: ClientSession):
         sp  = next((i for i in indices if i.get("name") == "S&P 500"), None)
         ndx = next((i for i in indices if i.get("name") == "Nasdaq"),  None)
 
-        # Safe default: closed. Never assume open without confirmation.
         is_open = False
         if isinstance(market_status, dict):
             is_open = bool(market_status.get("open", False))
 
-        def index_str(item):
-            return _pct(item.get("pct")) if item else None
+        def fmt_pct(item):
+            if not item:
+                return None
+            try:
+                v = float(item.get("pct", 0) or 0)
+                direction = "up" if v >= 0 else "down"
+                return f"{direction} {abs(v):.2f}%"
+            except Exception:
+                return None
 
-        sp_s  = index_str(sp)
-        ndx_s = index_str(ndx)
-        nums  = "  ·  ".join(p for p in [
-            f"S&P {sp_s}"  if sp_s  else None,
-            f"Nasdaq {ndx_s}" if ndx_s else None,
-        ] if p)
+        sp_s  = fmt_pct(sp)
+        ndx_s = fmt_pct(ndx)
 
         print()
         print(_b("  Pippy"))
 
         if is_open:
-            # State 1: market actually open right now
-            line = "  Markets are open."
-            if nums:
-                line += f"  {nums}"
-            print(line)
+            sp_part  = f"S&P's {sp_s}"  if sp_s  else None
+            ndx_part = f"Nasdaq {ndx_s}" if ndx_s else None
+            nums = " and ".join(p for p in [sp_part, ndx_part] if p)
+            openers = [
+                f"Hey — markets are live.{(' ' + nums + '.') if nums else ''} What's on your mind?",
+                f"Morning. We're open.{(' ' + nums + '.') if nums else ''} What are you watching?",
+                f"Markets are running.{(' ' + nums + '.') if nums else ''} What do you want to dig into?",
+            ]
+            print(f"  {random.choice(openers)}")
+
         else:
-            # Determine whether it's a weekend/holiday or just after-hours
             et     = pytz.timezone("America/New_York")
             now_et = datetime.now(et)
+
             if now_et.weekday() >= 5:
                 day = now_et.strftime("%A")
-                line = f"  Markets closed today — {day}."
-                if nums:
-                    line += f"  Last close: {nums}"
+                sp_part  = f"S&P closed {sp_s}"  if sp_s  else None
+                ndx_part = f"Nasdaq {ndx_s}" if ndx_s else None
+                nums = ", ".join(p for p in [sp_part, ndx_part] if p)
+                openers = [
+                    f"It's {day} — markets are dark.{(' ' + nums + ' on the week.' ) if nums else ''} Good time to zoom out.",
+                    f"{day}. No trading today.{(' ' + nums + '.' ) if nums else ''} Want to look at picks or talk through something?",
+                    f"Weekend. Markets closed.{(' ' + nums + '.' ) if nums else ''} Want the weekly recap or just to think out loud?",
+                ]
+                print(f"  {random.choice(openers)}")
+
             else:
-                # Trading day but outside hours (pre-market or after-hours)
                 now_hour = now_et.hour + now_et.minute / 60
+                sp_part  = f"S&P closed {sp_s}"  if sp_s  else None
+                ndx_part = f"Nasdaq {ndx_s}" if ndx_s else None
+                nums = ", ".join(p for p in [sp_part, ndx_part] if p)
+
                 if now_hour < 9.5:
-                    session_label = "Pre-market"
+                    openers = [
+                        f"Pre-market. Bell's not rung yet.{(' ' + nums + ' at the close yesterday.') if nums else ''} What are you thinking about?",
+                        f"Early. Markets open at 9:30.{(' ' + nums + ' yesterday.') if nums else ''} What's on your radar?",
+                    ]
                 else:
-                    session_label = "After-hours"
-                line = f"  Markets closed. {session_label}."
-                if nums:
-                    line += f"  Last close: {nums}"
-            print(line)
+                    tod = "Evening" if now_hour >= 17 else "Afternoon"
+                    openers = [
+                        f"{tod}. Markets wrapped up — {nums + '.' if nums else 'day is done.'} Want the full rundown or something specific?",
+                        f"Day's done.{(' ' + nums + '.') if nums else ''} What do you want to look at?",
+                        f"After-hours now.{(' ' + nums + ' today.') if nums else ''} What's on your mind?",
+                    ]
+                print(f"  {random.choice(openers)}")
 
         print(_d("  briefing · picks · movers · sectors · watchlist · memory · exit"))
         print()
