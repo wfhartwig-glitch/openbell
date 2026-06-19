@@ -548,12 +548,312 @@ def generate_monthly_picks() -> str:
 
 
 @mcp.tool()
+def get_weekly_picks() -> str:
+    """Return this week's stock picks from picks_cache.json. ISO week format e.g. 2026-W25."""
+    week_key = date.today().strftime("%Y-W%W")
+    if os.path.exists(PICKS_FILE):
+        try:
+            with open(PICKS_FILE) as f:
+                cache = json.load(f)
+            if week_key in cache:
+                return json.dumps({"week": week_key, **cache[week_key]})
+        except Exception:
+            pass
+    return json.dumps({"week": week_key, "picks": [],
+                       "note": "No picks yet for this week — call generate_weekly_picks"})
+
+
+@mcp.tool()
+def generate_weekly_picks() -> str:
+    """
+    Generate or update this week's stock picks. Evaluates last week's picks first —
+    keeps each one if the thesis still holds, replaces only what has genuinely shifted.
+    Tracks performance history and uses it to improve future selections.
+    """
+    today    = date.today()
+    week_key = today.strftime("%Y-W%W")
+
+    cache = {}
+    if os.path.exists(PICKS_FILE):
+        try:
+            with open(PICKS_FILE) as f:
+                cache = json.load(f)
+        except Exception:
+            pass
+
+    # Already generated this week — return as-is
+    if week_key in cache and cache[week_key].get("picks"):
+        return json.dumps({"week": week_key, **cache[week_key], "note": "from cache"})
+
+    # ── helpers ───────────────────────────────────────────────────────────────
+
+    def _risk(beta, mkt_cap):
+        if beta is None:
+            beta = 1.0
+        large = mkt_cap and mkt_cap > 50_000_000_000
+        if beta < 0.8 and large:  return "Low"
+        if beta < 1.3 and large:  return "Medium"
+        if beta < 2.0:            return "High"
+        return "Speculative"
+
+    def _score_candidate(info: dict) -> float:
+        price  = info.get("currentPrice", 0)
+        target = info.get("targetMeanPrice") or price
+        upside = ((target - price) / price * 100) if price else 0
+        rec    = info.get("recommendationKey", "").lower()
+        score  = upside + (20 if rec in ("buy", "strong_buy") else 0)
+        eg = info.get("earningsGrowth")
+        if eg and eg > 0.15: score += 10
+        rg = info.get("revenueGrowth")
+        if rg and rg > 0.10: score += 8
+        fpe = info.get("forwardPE")
+        if fpe and fpe < 25: score += 5
+        return score
+
+    def _rationale(info: dict) -> str:
+        price  = info.get("currentPrice", 0)
+        target = info.get("targetMeanPrice") or price
+        upside = ((target - price) / price * 100) if price else 0
+        rec    = info.get("recommendationKey", "").lower()
+        parts  = []
+        if upside > 5:  parts.append(f"analyst target implies {upside:.0f}% upside")
+        if rec in ("buy", "strong_buy"): parts.append(f"rated {rec.replace('_',' ')} by analysts")
+        eg = info.get("earningsGrowth")
+        if eg and eg > 0.1:  parts.append(f"earnings up {eg*100:.0f}% YoY")
+        rg = info.get("revenueGrowth")
+        if rg and rg > 0.05: parts.append(f"revenue growing {rg*100:.0f}% YoY")
+        fpe = info.get("forwardPE")
+        if fpe and fpe < 30: parts.append(f"forward P/E {fpe:.1f}x")
+        return ". ".join(parts[:3]) + "." if parts else f"{info.get('sector','—')} holding."
+
+    # ── load memory for performance context ───────────────────────────────────
+
+    mem = {}
+    if os.path.exists(MEMORY_FILE):
+        try:
+            with open(MEMORY_FILE) as f:
+                mem = json.load(f)
+        except Exception:
+            pass
+
+    perf_history  = mem.get("pick_performance_history", [])
+    lessons       = mem.get("lessons_learned", [])
+
+    # Compute sector/risk performance bias from recent history
+    sector_scores: dict[str, list[float]] = {}
+    risk_scores:   dict[str, list[float]] = {}
+    for ph in perf_history[-30:]:  # last 30 pick-weeks
+        pct = ph.get("pct_change_since_pick")
+        if pct is None:
+            continue
+        s = ph.get("sector", "")
+        r = ph.get("risk_level", "")
+        if s: sector_scores.setdefault(s, []).append(pct)
+        if r: risk_scores.setdefault(r, []).append(pct)
+
+    sector_bias = {s: sum(v)/len(v) for s, v in sector_scores.items() if v}
+    risk_bias   = {r: sum(v)/len(v) for r, v in risk_scores.items()   if v}
+
+    # ── find last week's picks ────────────────────────────────────────────────
+
+    last_week_key  = (today - __import__("datetime").timedelta(weeks=1)).strftime("%Y-W%W")
+    last_week_data = cache.get(last_week_key, {})
+    last_picks     = last_week_data.get("picks", [])
+
+    # If no last week, check the most recent week in cache
+    if not last_picks:
+        week_keys = sorted([k for k in cache if k.startswith("20") and "W" in k], reverse=True)
+        if week_keys:
+            last_picks = cache[week_keys[0]].get("picks", [])
+
+    # ── evaluate existing picks ───────────────────────────────────────────────
+
+    kept_picks  = []
+    dropped     = []
+    changes_log = []
+
+    for pick in last_picks:
+        ticker = pick.get("ticker", "")
+        try:
+            info  = yf.Ticker(ticker).info
+            price = info.get("currentPrice") or info.get("regularMarketPrice")
+            if not price:
+                dropped.append(pick)
+                changes_log.append(f"Dropped {ticker} — could not fetch current price")
+                continue
+
+            prev_price = pick.get("price_when_picked") or price
+            pct_change = ((price - prev_price) / prev_price * 100) if prev_price else 0
+
+            # Drop signals: sharp breakdown, broken 52w low, very bad fundamentals
+            low_52w    = info.get("fiftyTwoWeekLow", 0)
+            drop_reason = None
+
+            if pct_change < -12:
+                drop_reason = f"dropped {abs(pct_change):.1f}% since picked — momentum breakdown"
+            elif low_52w and price < low_52w * 1.02:
+                drop_reason = "trading at/below 52-week low — technical breakdown"
+            elif info.get("recommendationKey", "").lower() in ("sell", "strong_sell", "underperform"):
+                drop_reason = "analysts downgraded to sell/underperform"
+
+            if drop_reason:
+                dropped.append(pick)
+                changes_log.append(f"Replaced {ticker} — {drop_reason}")
+            else:
+                held = dict(pick)
+                held["price_now"]           = round(price, 2)
+                held["pct_change_this_week"] = round(pct_change, 2)
+                held["weeks_held"]          = pick.get("weeks_held", 1) + 1
+                held["status"]              = "holding"
+                held["note"]                = f"Holding — thesis intact, {_rationale(info)}"
+                held.pop("price_when_picked", None)
+                held["price_when_picked"]   = round(prev_price, 2)
+                kept_picks.append(held)
+            time.sleep(0.1)
+        except Exception:
+            # Can't evaluate — keep it by default
+            held = dict(pick)
+            held["weeks_held"] = pick.get("weeks_held", 1) + 1
+            held["status"]     = "holding"
+            held["note"]       = "Holding — data unavailable, keeping position"
+            kept_picks.append(held)
+
+    # ── fill empty slots from candidate pool ──────────────────────────────────
+
+    slots_needed = 5 - len(kept_picks)
+    existing_tickers = {p["ticker"] for p in kept_picks}
+
+    if slots_needed > 0:
+        candidates = []
+        for ticker in WATCHLIST:
+            if ticker in existing_tickers:
+                continue
+            try:
+                info = yf.Ticker(ticker).info
+                if not info or not info.get("currentPrice"):
+                    continue
+                price = info.get("currentPrice", 0)
+                score = _score_candidate(info)
+
+                # Apply sector/risk bias from performance history
+                sector = info.get("sector", "")
+                risk   = _risk(info.get("beta"), info.get("marketCap"))
+                score += sector_bias.get(sector, 0) * 0.5
+                score += risk_bias.get(risk, 0) * 0.3
+
+                candidates.append({
+                    "ticker":            ticker,
+                    "company":           info.get("longName", ticker),
+                    "sector":            sector,
+                    "risk_level":        risk,
+                    "rationale":         _rationale(info),
+                    "status":            "new",
+                    "note":              f"New pick — {_rationale(info)}",
+                    "weeks_held":        1,
+                    "price_when_picked": round(price, 2),
+                    "score":             score,
+                    "is_known":          ticker in WELL_KNOWN,
+                })
+                time.sleep(0.1)
+            except Exception:
+                continue
+
+        # Balance: at least 2 well-known, up to 3 hidden gems
+        known  = sorted([c for c in candidates if c["is_known"]],    key=lambda x: x["score"], reverse=True)
+        hidden = sorted([c for c in candidates if not c["is_known"]], key=lambda x: x["score"], reverse=True)
+
+        new_picks = []
+        k_need = min(max(slots_needed - min(slots_needed // 2, len(hidden)), 0), len(known))
+        h_need = slots_needed - k_need
+        new_picks = known[:k_need] + hidden[:h_need]
+
+        # Note what replaced what
+        for i, np_ in enumerate(new_picks):
+            if i < len(dropped):
+                old = dropped[i].get("ticker", "?")
+                np_["note"] = f"New pick (replaced {old}) — {np_['rationale']}"
+
+        kept_picks.extend([{k: v for k, v in p.items() if k != "score"} for p in new_picks])
+
+    # ── update performance history in memory ──────────────────────────────────
+
+    perf_map = {ph["ticker"]: ph for ph in perf_history}
+    for pick in kept_picks:
+        ticker     = pick["ticker"]
+        price_now  = pick.get("price_now") or pick.get("price_when_picked")
+        price_pick = pick.get("price_when_picked") or price_now
+        pct        = round(((price_now - price_pick) / price_pick * 100), 2) if price_now and price_pick else None
+
+        if ticker in perf_map:
+            perf_map[ticker]["price_now"]           = price_now
+            perf_map[ticker]["pct_change_since_pick"] = pct
+            perf_map[ticker]["still_held"]          = True
+        else:
+            perf_map[ticker] = {
+                "ticker":               ticker,
+                "sector":               pick.get("sector", ""),
+                "risk_level":           pick.get("risk_level", ""),
+                "week_picked":          week_key,
+                "week_dropped":         None,
+                "price_when_picked":    price_pick,
+                "price_now":            price_now,
+                "pct_change_since_pick": pct,
+                "still_held":           True,
+            }
+
+    # Mark dropped picks as no longer held
+    for pick in dropped:
+        t = pick.get("ticker", "")
+        if t in perf_map:
+            perf_map[t]["still_held"]  = False
+            perf_map[t]["week_dropped"] = week_key
+
+    mem["pick_performance_history"] = list(perf_map.values())
+
+    # ── generate lessons_learned note ─────────────────────────────────────────
+
+    recent_held = [ph for ph in perf_history if ph.get("still_held") and ph.get("pct_change_since_pick") is not None]
+    lesson_note = ""
+    if recent_held:
+        avg_pct = sum(ph["pct_change_since_pick"] for ph in recent_held) / len(recent_held)
+        best_sector = max(sector_bias, key=sector_bias.get) if sector_bias else None
+        worst_sector = min(sector_bias, key=sector_bias.get) if sector_bias else None
+        parts = [f"Active picks avg {avg_pct:+.1f}% since entry"]
+        if best_sector and sector_bias[best_sector] > 2:
+            parts.append(f"{best_sector} picks outperforming — leaning toward more")
+        if worst_sector and sector_bias[worst_sector] < -2:
+            parts.append(f"{worst_sector} picks underperforming — weighting away")
+        lesson_note = "; ".join(parts) + "."
+
+    if lesson_note:
+        lessons.append({"week": week_key, "note": lesson_note})
+        mem["lessons_learned"] = lessons[-20:]  # keep last 20 weeks
+
+    # Save memory
+    with open(MEMORY_FILE, "w") as f:
+        json.dump(mem, f, indent=2)
+
+    # ── save picks ────────────────────────────────────────────────────────────
+
+    week_data = {
+        "generated":             datetime.now().isoformat(),
+        "picks":                 kept_picks,
+        "changes_from_last_week": changes_log,
+    }
+    cache[week_key] = week_data
+    with open(PICKS_FILE, "w") as f:
+        json.dump(cache, f, indent=2)
+
+    return json.dumps({"week": week_key, **week_data})
+
+
+@mcp.tool()
 def send_email(subject: str, html_body: str) -> str:
     """Send an HTML email via Gmail SMTP."""
     try:
         msg            = MIMEMultipart("alternative")
         msg["Subject"] = subject
-        msg["From"]    = f"OpenBell <{GMAIL_ADDRESS}>"
+        msg["From"]    = f"Pippy's Brief <{GMAIL_ADDRESS}>"
         msg["To"]      = TO_EMAIL
         msg.attach(MIMEText(html_body, "html"))
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:

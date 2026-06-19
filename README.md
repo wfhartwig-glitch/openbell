@@ -1,8 +1,8 @@
-# OpenBell
+# Pippy's Brief
 
 Three automated emails, every day. Morning briefing before the open, closing
-summary after the bell, and deep dives on weekends and holidays. Powered by
-Claude + FMP (Financial Modeling Prep).
+summary after the bell, and weekend summaries on Saturdays and Sundays.
+Powered by FMP (Financial Modeling Prep). Zero AI API cost.
 
 ---
 
@@ -10,12 +10,11 @@ Claude + FMP (Financial Modeling Prep).
 
 | Time (Central) | Day | Email |
 |---|---|---|
-| 8:30 AM CT | Weekdays | ☀️ Morning Briefing — futures, headlines, What to Watch, calendar, watchlist, monthly picks |
-| 3:00 PM CT | Weekdays | 📊 Market Close Summary — closing prices, Today's Story, top movers, sectors, watchlist EOD |
-| 8:30 AM CT | Weekends & holidays | 📚 Deep Dive — Claude-written deep dive on a company, sector, macro theme, or market topic |
+| 8:30 AM CT | Weekdays | ☀️ Morning Briefing — snapshot, headlines, calendar, watchlist, weekly picks (+ performance report on Mondays) |
+| 3:00 PM CT | Weekdays | 📊 Market Close Summary — closing prices, top movers, sectors, watchlist EOD, headlines |
+| 8:30 AM CT | Weekends | 📚 Weekend Summary — market snapshot, headlines, movers, sectors, earnings calendar |
 
-Market holidays (NYSE) are hardcoded for 2025 and 2026. On a holiday weekday
-the close job is skipped and the morning job sends a Deep Dive instead.
+On Mondays the morning briefing also includes a picks performance report — how each pick has done since entry, what changed, and what Pippy is leaning toward this week.
 
 ---
 
@@ -159,6 +158,19 @@ GitHub Actions (cron scheduler)
 | All narrative writing | Claude `claude-sonnet-4-6` via tool-use agentic loop | — |
 | Monthly picks | `yfinance` fundamentals scan, cached in `picks_cache.json` | — |
 | Deep dive topics | Claude chooses from 7 categories, rotated via `deep_dive_history` | — |
+
+---
+
+## Weekly Stock Picks
+
+Pippy reviews and updates his 5 stock picks every Monday morning. Picks are not changed for novelty — they're kept if the thesis still holds and replaced only when something has genuinely shifted (sharp price breakdown, analyst downgrade, broken technical level). Pippy tracks the performance of every pick over time and uses that track record to improve future selections — leaning toward sectors and risk profiles that have been working, away from those that haven't.
+
+Each pick carries:
+- `weeks_held` — how many weeks it has survived review
+- `pct_change_since_pick` — total return since first picked
+- `note` — "Holding — thesis intact" or "New pick — reason" or "Replaced X — reason it was dropped"
+
+This builds a real track record over time instead of resetting fresh every week.
 
 ---
 
