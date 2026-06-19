@@ -96,9 +96,10 @@ async def call(session: ClientSession, name: str, args: dict = None):
 
 # ── Display helpers ───────────────────────────────────────────────────────────
 
-def show_snapshot(data: list):
+def show_snapshot(data: list, source: str = ""):
     print()
-    print(_b("  Market Snapshot"))
+    src_label = _d(f"  [{source}]") if source else ""
+    print(_b("  Market Snapshot") + (f"  {_d(source)}" if source else ""))
     print("  " + "─" * 42)
     for item in data:
         name  = item.get("name", "").ljust(10)
@@ -464,7 +465,7 @@ async def repl(session: ClientSession):
                 call(session, "fetch_market_snapshot"),
                 call(session, "fetch_top_headlines"),
             )
-            show_snapshot(snap.get("data", []))
+            show_snapshot(snap.get("data", []), source=snap.get("source", ""))
             show_headlines(heads.get("headlines", []))
             continue
 

@@ -180,13 +180,10 @@ def fetch_market_snapshot() -> str:
             return json.dumps({"source": "FMP", "data": results, "timestamp": ts})
         raise ValueError("no index data")
     except Exception:
+        # Always use real index tickers — never switch to futures (ES=F etc.).
+        # Futures have a different previous_close baseline and produce wrong pct change.
         try:
-            now    = datetime.now()
-            mins   = now.hour * 60 + now.minute
-            live   = now.weekday() < 5 and (8*60+30) <= mins <= (15*60)
-            pairs  = [("S&P 500", "^GSPC" if live else "ES=F"),
-                      ("Nasdaq",  "^IXIC" if live else "NQ=F"),
-                      ("Dow",     "^DJI"  if live else "YM=F")]
+            pairs = [("S&P 500", "^GSPC"), ("Nasdaq", "^IXIC"), ("Dow", "^DJI")]
             results = []
             for name, sym in pairs:
                 fi    = yf.Ticker(sym).fast_info
@@ -194,8 +191,14 @@ def fetch_market_snapshot() -> str:
                 prev  = fi.previous_close
                 if price and prev:
                     pct = (price - prev) / prev * 100
-                    results.append({"name": name, "price": round(price, 2), "pct": round(pct, 2)})
-            return json.dumps({"source": "fallback", "data": results, "timestamp": ts})
+                    results.append({
+                        "name":   name,
+                        "symbol": sym,
+                        "price":  round(price, 2),
+                        "pct":    round(pct, 2),
+                        "source": "yfinance",
+                    })
+            return json.dumps({"source": "yfinance", "data": results, "timestamp": ts})
         except Exception as e:
             return json.dumps({"source": "unavailable", "error": str(e), "timestamp": ts})
 
