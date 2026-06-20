@@ -19,13 +19,21 @@
     "GOING"
   ],
   "recurring_themes": {},
-  "session_count": 14,
-  "last_session": "2026-06-19T20:59:21.925957",
+  "session_count": 16,
+  "last_session": "2026-06-20T15:20:53.965859",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
-  "deep_dive_history": [],
-  "email_count": 5,
-  "last_email_sent": "2026-06-19T20:59:21.925210",
-  "last_email_summary": "close sent Friday, June 19, 2026"
+  "deep_dive_history": [
+    {
+      "date": "2026-06-20",
+      "category": "emerging technology",
+      "topic": "Why JEPI Investors Gave Up $3,379 in Five-Year Gains",
+      "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via 24/7 Wall St.",
+      "source_headline_published": "2026-06-19"
+    }
+  ],
+  "email_count": 6,
+  "last_email_sent": "2026-06-20T15:20:53.965169",
+  "last_email_summary": "deepdive sent Saturday, June 20, 2026"
 }
