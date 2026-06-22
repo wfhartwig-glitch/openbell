@@ -27,13 +27,14 @@ PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ── MCP helper ────────────────────────────────────────────────────────────────
 
-async def call(session: ClientSession, name: str, args: dict = None) -> dict | list | str:
+async def call(session: ClientSession, name: str, args: dict = None) -> dict | list:
     result = await session.call_tool(name, args or {})
     text   = result.content[0].text if result.content else "{}"
     try:
         return json.loads(text)
     except Exception:
-        return text
+        print(f"  [warn] tool '{name}' returned non-JSON: {text[:120]}", flush=True)
+        return {}
 
 
 # ── Inline-style HTML helpers (Gmail strips <style> tags) ────────────────────
@@ -355,6 +356,9 @@ async def morning(session: ClientSession) -> tuple[str, str]:
         if not picks_data.get("picks"):
             print("    no picks cached — generating…")
             picks_data = await call(session, "generate_weekly_picks")
+
+    if not isinstance(picks_data, dict):
+        picks_data = {}
 
     flagged   = mem.get("flagged_tickers", []) if isinstance(mem, dict) else []
     watchlist = []

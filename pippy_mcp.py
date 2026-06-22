@@ -631,8 +631,11 @@ def get_weekly_picks() -> str:
         try:
             with open(PICKS_FILE) as f:
                 cache = json.load(f)
-            if week_key in cache:
-                return json.dumps({"week": week_key, **cache[week_key]})
+            entry = cache.get(week_key)
+            if isinstance(entry, list):
+                entry = {"picks": entry, "generated": "", "changes_from_last_week": []}
+            if entry:
+                return json.dumps({"week": week_key, **entry})
         except Exception:
             pass
     return json.dumps({"week": week_key, "picks": [],
@@ -654,6 +657,10 @@ def generate_weekly_picks() -> str:
         try:
             with open(PICKS_FILE) as f:
                 cache = json.load(f)
+            # Normalize any legacy list-format entries (old schema stored raw list, new schema stores dict)
+            for k in list(cache.keys()):
+                if isinstance(cache[k], list):
+                    cache[k] = {"picks": cache[k], "generated": "", "changes_from_last_week": []}
         except Exception:
             pass
 
