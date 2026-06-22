@@ -774,9 +774,11 @@ async def deepdive(session: ClientSession) -> tuple[str, str]:
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 
-async def run(mode: str):
+async def run(mode: str, dry_run: bool = False):
     today_str = date.today().strftime("%A, %B %d, %Y")
     start_ts  = datetime.now().strftime("%H:%M:%S UTC")
+    if dry_run:
+        print("=== DRY RUN — no email will be sent, no memory will be saved ===")
     print(f"[Pippy's Brief] {mode.upper()} — {today_str}")
     print(f"[Pippy's Brief] started at {start_ts}")
 
@@ -818,18 +820,26 @@ async def run(mode: str):
                 print(f"[Pippy's Brief] Unknown mode: {mode}")
                 return
 
-            send_ts = datetime.now().strftime("%H:%M:%S UTC")
-            print(f"  → Sending… (pre-send time: {send_ts})")
-            result = await call(session, "send_email",
-                                {"subject": subject, "html_body": html})
-            print(f"  {result}")
+            if dry_run:
+                print(f"\n--- SUBJECT ---\n{subject}\n")
+                print(f"--- HTML BODY ({len(html)} chars) ---")
+                print(html[:3000])
+                if len(html) > 3000:
+                    print(f"  … (truncated, {len(html) - 3000} more chars)")
+                print("\n=== DRY RUN COMPLETE — no email sent, no memory saved ===")
+            else:
+                send_ts = datetime.now().strftime("%H:%M:%S UTC")
+                print(f"  → Sending… (pre-send time: {send_ts})")
+                result = await call(session, "send_email",
+                                    {"subject": subject, "html_body": html})
+                print(f"  {result}")
 
-            mem = await call(session, "load_memory")
-            if isinstance(mem, dict):
-                mem["last_email_sent"]    = datetime.now().isoformat()
-                mem["last_email_summary"] = f"{mode} sent {today_str}"
-                mem["email_count"]        = mem.get("email_count", 0) + 1
-                await call(session, "save_memory", {"data": mem})
+                mem = await call(session, "load_memory")
+                if isinstance(mem, dict):
+                    mem["last_email_sent"]    = datetime.now().isoformat()
+                    mem["last_email_summary"] = f"{mode} sent {today_str}"
+                    mem["email_count"]        = mem.get("email_count", 0) + 1
+                    await call(session, "save_memory", {"data": mem})
 
             print("[Pippy's Brief] Done.")
 
@@ -837,8 +847,10 @@ async def run(mode: str):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("mode", choices=["morning", "close", "deepdive"])
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Run full pipeline but skip send_email and save_memory")
     args = parser.parse_args()
-    asyncio.run(run(args.mode))
+    asyncio.run(run(args.mode, dry_run=args.dry_run))
 
 
 if __name__ == "__main__":
