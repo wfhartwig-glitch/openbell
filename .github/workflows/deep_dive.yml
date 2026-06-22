@@ -49,4 +49,5 @@ jobs:
           git config user.email "pippy@openbell.ai"
           git add pippy_memory.json
           git diff --staged --quiet || git commit -m "Pippy memory — deep dive $(date +'%Y-%m-%d')"
+          git pull --rebase origin main
           git push
