@@ -8,8 +8,10 @@
 name: Pippy's Brief — Morning
 
 on:
-  # Triggered externally by cron-job.org at 8:30 AM CT (13:30 UTC CDT / 14:30 UTC CST)
-  # weekdays only. Uses workflow_dispatch for reliable exact-time delivery —
+  # Triggered externally by cron-job.org at 9:30 AM ET (= 8:30 AM CT).
+  # Market hours are Eastern Time (NYSE). 9:30 AM ET = 13:30 UTC summer (EDT, UTC-4) / 14:30 UTC winter (EST, UTC-5).
+  # cron-job.org job is set to 8:30 AM CT, which equals 9:30 AM ET — market open.
+  # Weekdays only. Uses workflow_dispatch for reliable exact-time delivery —
   # GitHub's native schedule trigger has confirmed ~2hr lag on weekends.
   workflow_dispatch:
 

@@ -8,8 +8,10 @@
 name: Pippy's Brief — Close
 
 on:
-  # Triggered externally by cron-job.org at 3:00 PM CT (20:00 UTC CDT / 21:00 UTC CST)
-  # weekdays only. Workflow internally skips on holidays.
+  # Triggered externally by cron-job.org at 4:00 PM ET (= 3:00 PM CT) — market close.
+  # Market hours are Eastern Time (NYSE). 4:00 PM ET = 20:00 UTC summer (EDT, UTC-4) / 21:00 UTC winter (EST, UTC-5).
+  # cron-job.org job is set to 3:00 PM CT, which equals 4:00 PM ET — market close.
+  # Weekdays only. Workflow internally skips on holidays and if market still open.
   # Uses workflow_dispatch for reliable exact-time delivery.
   workflow_dispatch:
 
