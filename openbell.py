@@ -329,6 +329,156 @@ def _picks_performance(perf_history: list, lessons: list) -> str:
         + lesson_html)
 
 
+# ── Pippy narrative summaries ────────────────────────────────────────────────
+
+def _build_morning_summary(snapshot_data: list, headlines: list, picks_data: dict) -> str:
+    """2-3 sentence plain-English read on the morning, built from real numbers."""
+    idx = {}
+    for item in snapshot_data:
+        name = item.get("name", "")
+        try:
+            idx[name] = float(item.get("pct") or item.get("changesPercentage") or 0)
+        except Exception:
+            idx[name] = 0.0
+
+    sp  = idx.get("S&P 500", 0.0)
+    ndx = idx.get("Nasdaq",  0.0)
+    dow = idx.get("Dow",     0.0)
+
+    # Sentence 1: characterize market direction
+    all_vals = [v for v in [sp, ndx, dow] if v != 0.0]
+    if not all_vals:
+        s1 = "Markets are opening this morning."
+    else:
+        greens = sum(1 for v in all_vals if v >= 0)
+        reds   = sum(1 for v in all_vals if v < 0)
+        max_move = max(abs(v) for v in all_vals)
+
+        if greens == len(all_vals):
+            tone = "broadly higher" if max_move > 0.5 else "modestly higher"
+        elif reds == len(all_vals):
+            tone = "under pressure" if max_move > 0.5 else "slightly lower"
+        else:
+            tone = "mixed"
+
+        # Most notable individual index
+        named = {"S&P 500": sp, "Nasdaq": ndx, "Dow": dow}
+        leader_name = max(named, key=lambda k: abs(named[k]))
+        leader_val  = named[leader_name]
+        dir_word    = "leading" if leader_val > 0 else "lagging"
+        s1 = f"Markets are opening {tone} — {leader_name} is {dir_word} at {_fmt(leader_val)}."
+
+    # Sentence 2: top headline hook (most recent with a real title)
+    s2 = ""
+    for h in (headlines if isinstance(headlines, list) else []):
+        title = h.get("title", "") if isinstance(h, dict) else str(h)
+        if title and len(title) > 15:
+            age = h.get("age_hrs")
+            recency = f" ({int(age):.0f}h ago)" if age and float(age) < 12 else ""
+            s2 = f"Top story{recency}: {title.rstrip('.')}"
+            if not s2.endswith("."):
+                s2 += "."
+            break
+
+    # Sentence 3: picks status
+    picks = picks_data.get("picks", []) if isinstance(picks_data, dict) else []
+    s3 = ""
+    if picks:
+        n = len(picks)
+        changes = picks_data.get("changes_from_last_week", [])
+        if changes:
+            s3 = f"{len(changes)} of your {n} picks changed this week — see below for what shifted."
+        else:
+            s3 = f"All {n} of your weekly picks are holding steady — no changes this week."
+
+    parts = [s for s in [s1, s2, s3] if s]
+    return " ".join(parts)
+
+
+def _morning_summary_html(snapshot_data: list, headlines: list, picks_data: dict) -> str:
+    text = _build_morning_summary(snapshot_data, headlines, picks_data)
+    return _section("What's Going On",
+        f'<p style="margin:0;font-size:14px;color:#374151;line-height:1.6">{text}</p>')
+
+
+def _build_close_summary(snapshot_data: list, movers: dict, sectors: list) -> str:
+    """2-3 sentence plain-English close-of-day read, built from real numbers."""
+    idx = {}
+    for item in snapshot_data:
+        name = item.get("name", "")
+        try:
+            idx[name] = float(item.get("pct") or item.get("changesPercentage") or 0)
+        except Exception:
+            idx[name] = 0.0
+
+    sp  = idx.get("S&P 500", 0.0)
+    ndx = idx.get("Nasdaq",  0.0)
+    dow = idx.get("Dow",     0.0)
+
+    all_vals = [v for v in [sp, ndx, dow] if v != 0.0]
+    if not all_vals:
+        s1 = "Markets closed today."
+    else:
+        greens  = sum(1 for v in all_vals if v >= 0)
+        reds    = sum(1 for v in all_vals if v < 0)
+        max_abs = max(abs(v) for v in all_vals)
+        if greens == len(all_vals):
+            tone = "broadly higher" if max_abs > 0.5 else "slightly higher"
+        elif reds == len(all_vals):
+            tone = "lower across the board" if max_abs > 0.5 else "slightly lower"
+        else:
+            tone = "mixed"
+        sp_str = f", with S&P {_fmt(sp)}" if sp != 0.0 else ""
+        s1 = f"Markets closed {tone} today{sp_str}."
+
+    # Sentence 2: sector leadership
+    s2 = ""
+    if sectors:
+        try:
+            best  = max(sectors, key=lambda x: float(x.get("pct") or x.get("changesPercentage") or 0))
+            worst = min(sectors, key=lambda x: float(x.get("pct") or x.get("changesPercentage") or 0))
+            best_name  = best.get("sector", "")
+            worst_name = worst.get("sector", "")
+            best_pct   = float(best.get("pct") or best.get("changesPercentage") or 0)
+            worst_pct  = float(worst.get("pct") or worst.get("changesPercentage") or 0)
+            if best_name and abs(best_pct) > 0.1:
+                s2 = f"{best_name} led with {_fmt(best_pct)}"
+                if worst_name and worst_name != best_name and worst_pct < -0.1:
+                    s2 += f"; {worst_name} lagged at {_fmt(worst_pct)}."
+                else:
+                    s2 += "."
+        except Exception:
+            pass
+
+    # Sentence 3: biggest mover
+    s3 = ""
+    gainers = movers.get("gainers", [])
+    losers  = movers.get("losers", [])
+    biggest = None
+    best_pct_m = 0.0
+    for m in gainers + losers:
+        try:
+            p = abs(float(m.get("pct") or m.get("changesPercentage") or 0))
+            if p > best_pct_m:
+                best_pct_m = p
+                biggest = m
+        except Exception:
+            pass
+    if biggest and best_pct_m >= 2.0:
+        sym  = biggest.get("symbol", "")
+        pct  = float(biggest.get("pct") or biggest.get("changesPercentage") or 0)
+        s3 = f"Biggest mover: {sym} {_fmt(pct)}."
+
+    parts = [s for s in [s1, s2, s3] if s]
+    return " ".join(parts)
+
+
+def _close_summary_html(snapshot_data: list, movers: dict, sectors: list) -> str:
+    text = _build_close_summary(snapshot_data, movers, sectors)
+    return _section("What Happened Today",
+        f'<p style="margin:0;font-size:14px;color:#374151;line-height:1.6">{text}</p>')
+
+
 # ── Email assemblers ──────────────────────────────────────────────────────────
 
 async def morning(session: ClientSession) -> tuple[str, str]:
@@ -372,9 +522,12 @@ async def morning(session: ClientSession) -> tuple[str, str]:
         lessons      = mem.get("lessons_learned", [])          if isinstance(mem, dict) else []
         perf_section = _picks_performance(perf_history, lessons)
 
+    snap_list = snapshot.get("data", [])
+    hl_list   = headlines.get("headlines", [])
     body = (
-        _indices(snapshot.get("data", []))
-        + _headlines(headlines.get("headlines", []))
+        _morning_summary_html(snap_list, hl_list, picks_data)
+        + _indices(snap_list)
+        + _headlines(hl_list)
         + _calendar(econ.get("events", []), earnings.get("earnings", []))
         + _watchlist(watchlist, "Your Watchlist — Pre-Market")
         + perf_section
@@ -406,10 +559,13 @@ async def close(session: ClientSession) -> tuple[str, str]:
         print(f"    EOD {t}…")
         watchlist.append(await call(session, "fetch_stock_data", {"ticker": t}))
 
+    snap_list    = snapshot.get("data", [])
+    sectors_list = sectors.get("sectors", [])
     body = (
-        _indices(snapshot.get("data", []))
+        _close_summary_html(snap_list, movers, sectors_list)
+        + _indices(snap_list)
         + _movers(movers.get("gainers", []), movers.get("losers", []))
-        + _sectors(sectors.get("sectors", []))
+        + _sectors(sectors_list)
         + _watchlist(watchlist, "Your Watchlist — End of Day")
         + _headlines(headlines.get("headlines", []))
     )
