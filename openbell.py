@@ -1005,6 +1005,35 @@ _HEADLINE_KEYWORDS = [
 ]
 
 
+def _extract_facts(title: str, snippet: str) -> list:
+    """
+    Extract concrete numeric facts (dollar amounts, percentages) from article title + snippet.
+    Numbers are factual data, not protected expression — safe to state directly.
+    Returns a list of dicts: {type, value, source} capped at 4 items.
+    """
+    import re
+    facts = []
+    combined = f"{title} |SPLIT| {snippet}"
+    split_pos = len(title) + 8
+
+    # Dollar amounts: $3,379 / $1.2 billion / $500K
+    for m in re.finditer(r'\$[\d,]+(?:\.\d+)?(?:\s*(?:million|billion|trillion|[Kk]))?', combined):
+        src = "title" if m.start() < split_pos else "snippet"
+        facts.append({"type": "dollar", "value": m.group().strip(), "source": src})
+
+    # Percentages: 3.4% / 12%
+    for m in re.finditer(r'\b\d+\.?\d*\s*%', combined):
+        src = "title" if m.start() < split_pos else "snippet"
+        facts.append({"type": "pct", "value": m.group().strip(), "source": src})
+
+    # Year references with context ("five-year", "10-year") — skip bare years like 2024
+    for m in re.finditer(r'\b(?:one|two|three|five|ten|20|30)-year\b', combined, re.IGNORECASE):
+        src = "title" if m.start() < split_pos else "snippet"
+        facts.append({"type": "timeframe", "value": m.group().strip(), "source": src})
+
+    return facts[:4]
+
+
 def _build_deep_dive(
     snapshot_data: list,
     headline_list: list,
@@ -1050,63 +1079,127 @@ def _build_deep_dive(
     top_loser  = losers[0]  if losers  else {}
 
     # ── priority: real headline with keyword match ────────────────────────────
-    matched_headline = None
-    matched_category = "market overview"
+    matched_headline   = None
+    matched_category   = "market overview"
+    matched_via_kw     = False
+    import re as _re
     for h in headline_list[:8]:
         title = h.get("title", "")
         for kw, cat in _HEADLINE_KEYWORDS:
-            if kw.lower() in title.lower():
+            # Use word-boundary match for short/uppercase keywords to avoid false substrings
+            if len(kw) <= 4 and kw == kw.upper():
+                hit = bool(_re.search(r'\b' + _re.escape(kw) + r'\b', title, _re.IGNORECASE))
+            else:
+                hit = kw.lower() in title.lower()
+            if hit:
                 matched_headline = h
                 matched_category = cat
+                matched_via_kw   = True
                 break
         if matched_headline:
             break
 
-    # If no keyword match, use first headline anyway if we have one
+    # If no keyword match, try first headline if it has extractable facts
     if not matched_headline and headline_list:
-        matched_headline = headline_list[0]
-        matched_category = "market overview"
+        candidate = headline_list[0]
+        if _extract_facts(candidate.get("title", ""), candidate.get("snippet", "")):
+            matched_headline = candidate
+            matched_category = "market overview"
+            matched_via_kw   = False
 
     # ── build the piece ───────────────────────────────────────────────────────
 
     if matched_headline:
-        # Headline-led piece
-        title = matched_headline.get("title", "")
-        site  = matched_headline.get("site", "")
+        title   = matched_headline.get("title", "")
+        site    = matched_headline.get("site", "")
         snippet = matched_headline.get("snippet", "")
+        facts   = _extract_facts(title, snippet)
 
+        # If no keyword relevance AND no concrete facts, skip this headline —
+        # the market-data paths below are more honest than a vague paraphrase.
+        if not matched_via_kw and not facts:
+            matched_headline = None
+
+    if matched_headline:
         topic        = title
         triggered_by = f'"{title}"' + (f" via {site}" if site else "")
         category     = matched_category
 
-        hook = (
-            f'This week\'s standout story: "{title}." '
-            f'With the S&P {sp_dir} {abs(sp_pct):.2f}% on the week, the timing matters.'
-        )
+        # Hook: just the headline, no bogus market-timing commentary
+        hook = f'This week\'s notable story: "{title}."'
+
         story_parts = []
-        if snippet:
-            story_parts.append(snippet[:180].rstrip(".") + ".")
-        story_parts.append(
-            f"Meanwhile the broader market closed with S&P {sp_dir} {abs(sp_pct):.2f}%, "
-            f"Nasdaq {ndx_dir} {abs(ndx_pct):.2f}%, and Dow {dow_dir} {abs(dow_pct):.2f}%."
-        )
-        if sector_spread > 1.5:
+        main_val    = ""
+
+        if facts:
+            # Surface the first concrete number/fact directly — it's a data point, not quoted prose
+            main_fact = facts[0]
+            main_val  = main_fact["value"]
+
+            if main_fact["source"] == "title":
+                # Number lives in the headline — reference it directly, no quoting needed
+                story_parts.append(
+                    f"The headline centers on a concrete figure: {main_val}. "
+                    f"That's the specific number at the heart of this story, not a vague proxy."
+                )
+            else:
+                # Number from the article body — state it as fact
+                story_parts.append(f"The piece puts a number on it: {main_val}.")
+
+            # Add a timeframe or percentage qualifier from snippet if one exists and adds meaning
+            qualifiers = [
+                f for f in facts[1:]
+                if f["source"] == "snippet" and f["type"] in ("timeframe", "pct") and f["value"] != main_val
+            ]
+            if qualifiers:
+                story_parts.append(f"The {qualifiers[0]['value']} timeframe is the window referenced.")
+
             story_parts.append(
-                f"{top_sector[0]} led sectors ({'+' if top_sector[1]>=0 else ''}{top_sector[1]:.2f}%) "
-                f"while {bottom_sector[0]} lagged ({'+' if bottom_sector[1]>=0 else ''}{bottom_sector[1]:.2f}%)."
+                f"Market context this week: S&P {sp_dir} {abs(sp_pct):.2f}%, "
+                f"Nasdaq {ndx_dir} {abs(ndx_pct):.2f}%."
             )
+
+        elif snippet and matched_via_kw:
+            # Keyword-relevant headline but no extractable numbers — use snippet honestly
+            # One short quoted phrase only if ≤15 words; otherwise paraphrase the fact
+            words = snippet.split()
+            if len(words) <= 15:
+                story_parts.append(f'"{snippet.rstrip(".")}.\"')
+            else:
+                story_parts.append(snippet[:200].rstrip(".") + ".")
+            story_parts.append(
+                f"Broader market: S&P {sp_dir} {abs(sp_pct):.2f}%, "
+                f"Nasdaq {ndx_dir} {abs(ndx_pct):.2f}%, Dow {dow_dir} {abs(dow_pct):.2f}%."
+            )
+
+        else:
+            # Keyword match but no snippet and no facts — market data only
+            story_parts.append(
+                f"S&P {sp_dir} {abs(sp_pct):.2f}%, Nasdaq {ndx_dir} {abs(ndx_pct):.2f}%, "
+                f"Dow {dow_dir} {abs(dow_pct):.2f}% on the week."
+            )
+            if sector_spread > 1.5:
+                story_parts.append(
+                    f"{top_sector[0]} led sectors ({top_sector[1]:+.2f}%) while "
+                    f"{bottom_sector[0]} lagged ({bottom_sector[1]:+.2f}%)."
+                )
+
         story = " ".join(story_parts[:3])
 
-        if matched_category in ("macro / Fed policy", "earnings"):
+        # Take: reference the specific number if we have one; honest fallback otherwise
+        if main_val:
+            cat_phrase = f"this kind of story" if matched_category == "market overview" else f"{matched_category}"
             take = (
-                f"Watch how the market digests this heading into Monday — "
-                f"{'rate-sensitive names could see volatility' if 'rate' in title.lower() or 'Fed' in title else 'positioning shifts often follow weekend headlines like this'}."
+                f"That {main_val} figure is the one to remember — "
+                f"worth filing away next time {cat_phrase} comes up in the tape."
+            )
+        elif matched_category in ("macro / Fed policy", "earnings"):
+            take = (
+                f"Watch how the market digests this heading into next week — "
+                f"{'rate-sensitive names could see volatility' if 'rate' in title.lower() or 'Fed' in title.lower() else 'positioning often shifts after a weekend headline in this category'}."
             )
         else:
-            take = (
-                f"This is the story to track next week — "
-                f"whether the initial reaction holds or fades will signal how serious the market considers it."
-            )
+            take = f"Worth keeping in mind next time {matched_category} resurfaces in the tape."
 
     elif spread >= 1.0:
         # Rotation story — meaningful Nasdaq/Dow divergence, no headline

@@ -341,7 +341,7 @@ def fetch_top_headlines() -> str:
                     seen.add(h)
                     titles.append({
                         "title":     h,
-                        "snippet":   content.get("summary", "")[:120],
+                        "snippet":   content.get("summary", "")[:350],
                         "site":      site,
                         "published": pub_str[:10] if pub_str else "",
                         "age_hrs":   round(age_hrs, 1) if age_hrs is not None else None,
