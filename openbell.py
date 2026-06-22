@@ -459,20 +459,49 @@ def _build_morning_summary(
     open_tmpl = _OPEN_PHRASES[day_hash % len(_OPEN_PHRASES)]
     s1_base   = open_tmpl.format(tone=tone_word)
 
-    # Check top headline for a macro keyword to weave in as context
+    # Market-relevance check: only cite a headline if it touches a market-moving topic.
+    # Scan top 3 headlines; use the first that passes. Skip cleanly if none qualify.
+    _MARKET_RELEVANT = {
+        "fed", "federal reserve", "rate cut", "rate hike", "interest rate",
+        "inflation", "cpi", "ppi", "jobs", "payroll", "unemployment",
+        "iran", "war", "tariff", "trade", "oil", "opec",
+        "rally", "selloff", "sell-off", "stocks", "market", "dow", "nasdaq",
+        "s&p", "treasury", "yield", "recession", "gdp", "earnings",
+        "gdp", "growth", "debt", "deficit", "sanctions", "bank",
+    }
+
     top_title  = ""
     macro_ctx  = ""
     hl_age_hrs = None
-    for h in (headlines if isinstance(headlines, list) else []):
+    hl_list    = headlines if isinstance(headlines, list) else []
+
+    # Pass 1: find first headline that has a macro keyword (for s1 context weaving)
+    for h in hl_list[:3]:
         title = h.get("title", "") if isinstance(h, dict) else str(h)
-        if title and len(title) > 15:
-            top_title  = title
-            hl_age_hrs = h.get("age_hrs")
-            for kw, ctx in _MACRO_KEYWORDS.items():
-                if kw.lower() in title.lower():
-                    macro_ctx = ctx
-                    break
+        if not title or len(title) <= 15:
+            continue
+        for kw, ctx in _MACRO_KEYWORDS.items():
+            if kw.lower() in title.lower():
+                top_title  = title
+                hl_age_hrs = h.get("age_hrs")
+                macro_ctx  = ctx
+                break
+        if macro_ctx:
             break
+
+    # Pass 2: if no macro keyword, find first headline that's market-relevant (for s2 quote)
+    relevant_title    = ""
+    relevant_age_hrs  = None
+    if not macro_ctx:
+        for h in hl_list[:3]:
+            title = h.get("title", "") if isinstance(h, dict) else str(h)
+            if not title or len(title) <= 15:
+                continue
+            tl = title.lower()
+            if any(kw in tl for kw in _MARKET_RELEVANT):
+                relevant_title   = title
+                relevant_age_hrs = h.get("age_hrs")
+                break
 
     if macro_ctx:
         s1 = f"{s1_base} as investors weigh {macro_ctx}."
@@ -483,15 +512,15 @@ def _build_morning_summary(
         dir_word  = "leading" if ldr_val > 0 else "lagging" if ldr_val < 0 else "flat"
         s1 = f"{s1_base}, with {ldr_name} {dir_word} at {_fmt(ldr_val)}."
 
-    # Sentence 2: headline or index spread detail
+    # Sentence 2: cite a market-relevant headline only — omit cleanly if none qualifies
     s2 = ""
-    if top_title and not macro_ctx:
+    if macro_ctx and top_title:
         age_note = f" ({int(float(hl_age_hrs)):.0f}h ago)" if hl_age_hrs and float(hl_age_hrs) < 12 else ""
-        s2 = f"On the tape{age_note}: {top_title.rstrip('.')}."
-    elif top_title and macro_ctx:
-        age_note = f" ({int(float(hl_age_hrs)):.0f}h ago)" if hl_age_hrs and float(hl_age_hrs) < 12 else ""
-        # Show the headline that triggered the context reference
         s2 = f"Headline driving that narrative{age_note}: \"{top_title.rstrip('.')}.\""
+    elif relevant_title:
+        age_note = f" ({int(float(relevant_age_hrs)):.0f}h ago)" if relevant_age_hrs and float(relevant_age_hrs) < 12 else ""
+        s2 = f"On the tape{age_note}: {relevant_title.rstrip('.')}."
+    # else: no relevant headline — s2 stays empty, paragraph reads cleanly without it
 
     # Sentence 3: notable commodity or yield move
     s3 = ""
