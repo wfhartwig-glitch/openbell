@@ -329,6 +329,102 @@ def _picks_performance(perf_history: list, lessons: list) -> str:
         + lesson_html)
 
 
+# ── Learning loop helpers ─────────────────────────────────────────────────────
+
+def _classify_direction(snapshot_data: list) -> str:
+    """Classify market direction from snapshot into 'higher' / 'lower' / 'mixed'."""
+    vals = []
+    for item in snapshot_data:
+        try:
+            vals.append(float(item.get("pct") or item.get("changesPercentage") or 0))
+        except Exception:
+            pass
+    if not vals:
+        return "unknown"
+    greens = sum(1 for v in vals if v >= 0)
+    reds   = sum(1 for v in vals if v < 0)
+    if greens == len(vals):
+        return "higher"
+    if reds == len(vals):
+        return "lower"
+    return "mixed"
+
+
+def _update_learning_memory(mem: dict, log_entry: dict) -> dict:
+    """
+    Append a briefing log entry, update theme_frequency, check prediction accuracy.
+    Returns the modified mem dict. Caller is responsible for saving it.
+    """
+    today_str = date.today().isoformat()
+
+    # ── briefing_history (cap 60) ─────────────────────────────────────────────
+    history = mem.setdefault("briefing_history", [])
+    log_entry["date"] = today_str
+    history.append(log_entry)
+    if len(history) > 60:
+        mem["briefing_history"] = history[-60:]
+
+    # ── theme_frequency ───────────────────────────────────────────────────────
+    theme = log_entry.get("headline_theme") or log_entry.get("theme")
+    if theme:
+        freq = mem.setdefault("theme_frequency", {})
+        freq[theme] = freq.get(theme, 0) + 1
+
+    # ── prediction_accuracy (close only) ─────────────────────────────────────
+    if log_entry.get("type") == "close":
+        actual     = log_entry.get("actual_direction", "unknown")
+        # Find today's morning entry to compare against
+        morning_entry = next(
+            (e for e in reversed(mem.get("briefing_history", []))
+             if e.get("date") == today_str and e.get("type") == "morning"),
+            None,
+        )
+        if morning_entry:
+            called   = morning_entry.get("direction_called", "unknown")
+            accurate = called == actual
+            acc_list = mem.setdefault("prediction_accuracy", [])
+            acc_list.append({
+                "date":     today_str,
+                "called":   called,
+                "actual":   actual,
+                "accurate": accurate,
+            })
+            if len(acc_list) > 60:
+                mem["prediction_accuracy"] = acc_list[-60:]
+
+            # Calibration flag: if last 10 accuracy entries are <50% accurate, note it
+            recent = mem["prediction_accuracy"][-10:]
+            if len(recent) >= 10:
+                acc_rate = sum(1 for r in recent if r.get("accurate")) / len(recent)
+                if acc_rate < 0.5:
+                    mem["calibration_note"] = (
+                        f"Direction-calling accuracy has been {acc_rate:.0%} over the last "
+                        f"{len(recent)} sessions — consider reviewing classification thresholds."
+                    )
+                else:
+                    mem.pop("calibration_note", None)
+
+    return mem
+
+
+def _get_recurring_theme(mem: dict, window: int = 5, threshold: int = 3) -> str:
+    """
+    Return the theme name if any theme appears threshold+ times in the last window briefings,
+    else return empty string.
+    """
+    recent = [
+        e.get("headline_theme") or e.get("theme")
+        for e in mem.get("briefing_history", [])[-window:]
+        if e.get("headline_theme") or e.get("theme")
+    ]
+    from collections import Counter
+    counts = Counter(recent)
+    for theme, n in counts.most_common(1):
+        if n >= threshold and theme:
+            return theme
+    return ""
+
+
 # ── New data section builders ─────────────────────────────────────────────────
 
 def _global_indices(indices: list) -> str:
@@ -425,8 +521,10 @@ def _build_morning_summary(
     picks_data: dict,
     commodities: list = None,
     treasury: dict = None,
-) -> str:
-    """3-4 sentence plain-English pre-market read, 100% deterministic, zero AI."""
+    mem: dict = None,
+) -> tuple:
+    """3-4 sentence plain-English pre-market read, 100% deterministic, zero AI.
+    Returns (text: str, log_data: dict) for the learning loop."""
     import hashlib
 
     idx = {}
@@ -556,8 +654,47 @@ def _build_morning_summary(
         else:
             s4 = f"All {n} of your weekly picks are holding — no changes this week."
 
-    parts = [s for s in [s1, s2, s3, s4] if s]
-    return " ".join(parts)
+    # Recurring-theme check: if a macro theme has dominated the last 5 briefings,
+    # append a trailing clause acknowledging the streak — even if today's headline
+    # didn't trigger it independently.
+    recurring = _get_recurring_theme(mem or {}, window=5, threshold=3)
+    if recurring and recurring != macro_ctx:
+        parts_base = [s for s in [s1, s2, s3, s4] if s]
+        text = " ".join(parts_base)
+        text += f" (Note: {recurring} has been a persistent theme over the past week.)"
+    else:
+        text = " ".join(s for s in [s1, s2, s3, s4] if s)
+
+    # Determine leading/lagging for the log
+    named    = {"S&P 500": sp, "Nasdaq": ndx, "Dow": dow}
+    ldr_name = max(named, key=lambda k: abs(named[k]))
+    ldr_val  = named[ldr_name]
+    lag_name = min(named, key=lambda k: named[k])
+
+    # Commodity note shorthand for log
+    comm_note = ""
+    if commodities:
+        for c in commodities:
+            try:
+                cpct = float(c.get("pct", 0))
+                if abs(cpct) >= 1.0:
+                    comm_note = f"{c.get('name','')} {'up' if cpct > 0 else 'down'} {abs(cpct):.1f}%"
+                    break
+            except Exception:
+                pass
+
+    picks_list = picks_data.get("picks", []) if isinstance(picks_data, dict) else []
+    log_data = {
+        "type":             "morning",
+        "direction_called": _classify_direction(snapshot_data),
+        "leading_index":    ldr_name if ldr_val >= 0 else "",
+        "lagging_index":    lag_name if named.get(lag_name, 0) < 0 else "",
+        "headline_theme":   macro_ctx,
+        "commodity_note":   comm_note,
+        "picks_status":     "rotated" if picks_data and picks_data.get("changes_from_last_week") else "holding",
+    }
+
+    return text, log_data
 
 
 def _morning_summary_html(
@@ -566,10 +703,15 @@ def _morning_summary_html(
     picks_data: dict,
     commodities: list = None,
     treasury: dict = None,
-) -> str:
-    text = _build_morning_summary(snapshot_data, headlines, picks_data, commodities, treasury)
-    return _section("What's Going On",
+    mem: dict = None,
+) -> tuple:
+    """Returns (html_str, log_data)."""
+    text, log_data = _build_morning_summary(
+        snapshot_data, headlines, picks_data, commodities, treasury, mem
+    )
+    html = _section("What's Going On",
         f'<p style="margin:0;font-size:14px;color:#374151;line-height:1.6">{text}</p>')
+    return html, log_data
 
 
 def _build_close_summary(
@@ -733,8 +875,11 @@ async def morning(session: ClientSession) -> tuple[str, str]:
     comm_list   = commodities_raw.get("commodities", [])
     tsy         = treasury_raw if treasury_raw.get("yield") else {}
 
+    morning_section, log_data = _morning_summary_html(
+        snap_list, hl_list, picks_data, comm_list, tsy, mem if isinstance(mem, dict) else {}
+    )
     body = (
-        _morning_summary_html(snap_list, hl_list, picks_data, comm_list, tsy)
+        morning_section
         + _indices(snap_list)
         + _global_indices(global_list)
         + _commodities_and_yields(comm_list, tsy)
@@ -748,12 +893,11 @@ async def morning(session: ClientSession) -> tuple[str, str]:
     )
     subject = f"Pippy's Brief — {today_str} Morning Briefing"
     html    = _wrap(body, f"Morning Briefing &nbsp; {today_str}", "Pippy's Brief ☀️")
-    return subject, html
+    return subject, html, log_data
 
 
-async def close(session: ClientSession) -> tuple[str, str]:
+async def close(session: ClientSession) -> tuple[str, str, dict]:
     today = date.today().strftime("%A, %B %d")
-    print("    fetching snapshot…")
     print("    fetching snapshot + sectors + movers + commodities…")
     snapshot, sectors, movers, commodities_raw, headlines, mem = \
         await asyncio.gather(
@@ -786,7 +930,46 @@ async def close(session: ClientSession) -> tuple[str, str]:
     )
     subject = f"Pippy's Brief — {today} Market Close"
     html    = _wrap(body, f"Market Close &nbsp; {today}", "Pippy's Brief 📊")
-    return subject, html
+
+    # Build close log entry for the learning loop
+    actual_dir = _classify_direction(snap_list)
+    sp_val = 0.0
+    for item in snap_list:
+        if item.get("name") == "S&P 500":
+            try:
+                sp_val = float(item.get("pct") or item.get("changesPercentage") or 0)
+            except Exception:
+                pass
+
+    best_s, worst_s = "", ""
+    if sectors_list:
+        try:
+            best_s  = max(sectors_list, key=lambda x: float(x.get("pct") or x.get("changesPercentage") or 0)).get("sector", "")
+            worst_s = min(sectors_list, key=lambda x: float(x.get("pct") or x.get("changesPercentage") or 0)).get("sector", "")
+        except Exception:
+            pass
+
+    biggest_m = ""
+    for m in movers.get("gainers", []) + movers.get("losers", []):
+        try:
+            p = abs(float(m.get("pct") or m.get("changesPercentage") or 0))
+            if p >= 2.0:
+                sym  = m.get("symbol", "")
+                pct  = float(m.get("pct") or m.get("changesPercentage") or 0)
+                biggest_m = f"{sym} {'+' if pct > 0 else ''}{pct:.1f}%"
+                break
+        except Exception:
+            pass
+
+    log_data = {
+        "type":             "close",
+        "actual_direction": actual_dir,
+        "actual_sp_pct":    round(sp_val, 2),
+        "best_sector":      best_s,
+        "worst_sector":     worst_s,
+        "biggest_mover":    biggest_m,
+    }
+    return subject, html, log_data
 
 
 # Priority keywords for headline-based topic selection
@@ -1100,7 +1283,7 @@ def _deepdive_html(fields: dict, today: str, snapshot_data: list) -> tuple[str, 
     return subject, html
 
 
-async def deepdive(session: ClientSession) -> tuple[str, str]:
+async def deepdive(session: ClientSession) -> tuple[str, str, dict]:
     today     = date.today().strftime("%A, %B %d")
     today_iso = date.today().isoformat()
 
@@ -1140,7 +1323,12 @@ async def deepdive(session: ClientSession) -> tuple[str, str]:
         await call(session, "save_memory", {"data": mem})
 
     subject, html = _deepdive_html(fields, today, index_data)
-    return subject, html
+    log_data = {
+        "type":  "deepdive",
+        "theme": fields.get("CATEGORY", ""),
+        "topic": fields.get("TOPIC", ""),
+    }
+    return subject, html, log_data
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
@@ -1171,10 +1359,10 @@ async def run(mode: str, dry_run: bool = False):
                 if is_open:
                     print("[Pippy's Brief] Market is open — skipping deep dive.")
                     return
-                subject, html = await deepdive(session)
+                subject, html, log_data = await deepdive(session)
 
             elif mode == "morning":
-                subject, html = await morning(session)
+                subject, html, log_data = await morning(session)
 
             elif mode == "close":
                 if is_open:
@@ -1185,7 +1373,7 @@ async def run(mode: str, dry_run: bool = False):
                 if non_trading:
                     print(f"[Pippy's Brief] Skipped close summary — {mkt_reason}, no session today.")
                     return
-                subject, html = await close(session)
+                subject, html, log_data = await close(session)
 
             else:
                 print(f"[Pippy's Brief] Unknown mode: {mode}")
@@ -1210,6 +1398,7 @@ async def run(mode: str, dry_run: bool = False):
                     mem["last_email_sent"]    = datetime.now().isoformat()
                     mem["last_email_summary"] = f"{mode} sent {today_str}"
                     mem["email_count"]        = mem.get("email_count", 0) + 1
+                    _update_learning_memory(mem, log_data)
                     await call(session, "save_memory", {"data": mem})
 
             print("[Pippy's Brief] Done.")

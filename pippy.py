@@ -516,6 +516,51 @@ async def repl(session: ClientSession):
                 show_memory(mem)
             continue
 
+        if cmd == "learning":
+            mem = await call(session, "load_memory")
+            if not isinstance(mem, dict):
+                print("  No memory found.\n")
+                continue
+            history  = mem.get("briefing_history", [])
+            accuracy = mem.get("prediction_accuracy", [])
+            freq     = mem.get("theme_frequency", {})
+            cal_note = mem.get("calibration_note", "")
+
+            if history:
+                dates = [e["date"] for e in history if "date" in e]
+                first, last = (dates[0], dates[-1]) if dates else ("n/a", "n/a")
+                print(f"\n  Tracked {len(history)} briefings ({first} → {last}).")
+            else:
+                print("\n  No briefings tracked yet.")
+
+            if accuracy:
+                correct = sum(1 for r in accuracy if r.get("accurate"))
+                total   = len(accuracy)
+                pct     = int(100 * correct / total)
+                mixed_total   = sum(1 for r in accuracy if r.get("called") == "mixed")
+                mixed_correct = sum(1 for r in accuracy if r.get("called") == "mixed" and r.get("accurate"))
+                mixed_note = ""
+                if mixed_total > 0 and int(100 * mixed_correct / mixed_total) < 50:
+                    mixed_note = f" — mixed-direction calls have been least reliable ({int(100 * mixed_correct / mixed_total)}%)"
+                print(f"  Prediction accuracy: {correct}/{total} ({pct}%){mixed_note}.")
+            else:
+                print("  No prediction accuracy data yet.")
+
+            if freq:
+                top = max(freq, key=lambda k: freq[k])
+                window = history[-10:] if len(history) >= 10 else history
+                recent_count = sum(
+                    1 for e in window
+                    if (e.get("headline_theme") or e.get("theme")) == top
+                )
+                print(f"  Top recurring theme: {top} (mentioned {freq[top]}x total, {recent_count}x in last {len(window)} briefings).")
+            else:
+                print("  No theme data yet.")
+
+            print(f"  Calibration note: {cal_note if cal_note else 'none flagged.'}")
+            print()
+            continue
+
         if cmd in ("watchlist", "watch"):
             mem     = await call(session, "load_memory")
             flagged = mem.get("flagged_tickers", []) if isinstance(mem, dict) else []
