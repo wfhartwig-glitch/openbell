@@ -620,6 +620,85 @@ def generate_monthly_picks() -> str:
 
 
 @mcp.tool()
+def fetch_commodities() -> str:
+    """Fetch WTI crude oil and gold spot prices via yfinance. Returns price, change, pct for each."""
+    ts = _ts()
+    items = [("WTI Crude Oil", "CL=F"), ("Gold", "GC=F")]
+    results = []
+    for name, sym in items:
+        try:
+            fi    = yf.Ticker(sym).fast_info
+            price = fi.last_price
+            prev  = fi.previous_close
+            if price and prev:
+                change = price - prev
+                pct    = change / prev * 100
+                results.append({
+                    "name":   name,
+                    "symbol": sym,
+                    "price":  round(price, 2),
+                    "change": round(change, 2),
+                    "pct":    round(pct, 2),
+                })
+        except Exception:
+            continue
+    return json.dumps({"source": "yfinance", "commodities": results, "timestamp": ts})
+
+
+@mcp.tool()
+def fetch_treasury_yield() -> str:
+    """Fetch the 10-year US Treasury yield (^TNX) via yfinance."""
+    ts = _ts()
+    try:
+        fi    = yf.Ticker("^TNX").fast_info
+        price = fi.last_price   # ^TNX quotes in percent (e.g. 4.32 = 4.32%)
+        prev  = fi.previous_close
+        if price and prev:
+            change = round(price - prev, 3)
+            return json.dumps({
+                "source":  "yfinance",
+                "yield":   round(price, 3),
+                "change":  change,
+                "label":   "10-Year Treasury",
+                "timestamp": ts,
+            })
+        raise ValueError("no yield data")
+    except Exception as e:
+        return json.dumps({"source": "unavailable", "error": str(e), "timestamp": ts})
+
+
+@mcp.tool()
+def fetch_global_indices() -> str:
+    """Fetch major global indices via yfinance. Labeled by session (Asia overnight / Europe)."""
+    ts = _ts()
+    index_map = [
+        ("Nikkei 225",   "^N225",    "Asia (overnight)"),
+        ("Shanghai",     "000001.SS", "Asia (overnight)"),
+        ("Hang Seng",    "^HSI",     "Asia (overnight)"),
+        ("FTSE 100",     "^FTSE",    "Europe"),
+        ("DAX",          "^GDAXI",   "Europe"),
+    ]
+    results = []
+    for name, sym, session in index_map:
+        try:
+            fi    = yf.Ticker(sym).fast_info
+            price = fi.last_price
+            prev  = fi.previous_close
+            if price and prev:
+                pct = (price - prev) / prev * 100
+                results.append({
+                    "name":    name,
+                    "symbol":  sym,
+                    "session": session,
+                    "price":   round(price, 2),
+                    "pct":     round(pct, 2),
+                })
+        except Exception:
+            continue
+    return json.dumps({"source": "yfinance", "indices": results, "timestamp": ts})
+
+
+@mcp.tool()
 def get_weekly_picks() -> str:
     """Return this week's stock picks from picks_cache.json. ISO week format e.g. 2026-W25."""
     week_key = date.today().strftime("%Y-W%W")
