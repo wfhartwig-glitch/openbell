@@ -804,8 +804,13 @@ async def run(mode: str):
                 subject, html = await morning(session)
 
             elif mode == "close":
-                if not is_open:
-                    print(f"[Pippy's Brief] Skipped close summary — market closed ({mkt_reason}), no session to summarize.")
+                if is_open:
+                    # Triggered while market is still open — too early for close summary
+                    print("[Pippy's Brief] Skipped close summary — market still open, run again after 4 PM ET.")
+                    return
+                non_trading = "weekend" in mkt_reason or "holiday" in mkt_reason
+                if non_trading:
+                    print(f"[Pippy's Brief] Skipped close summary — {mkt_reason}, no session today.")
                     return
                 subject, html = await close(session)
 

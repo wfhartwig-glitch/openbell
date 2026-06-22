@@ -130,28 +130,24 @@ def _is_market_open_now_fallback() -> bool:
 
 @mcp.tool()
 def is_market_open_today() -> str:
-    """Check if the US market is open RIGHT NOW. Uses FMP live status; falls back to ET time-window check."""
-    ts = _ts()
-    try:
-        data  = _fmp("/is-the-market-open")
-        open_ = bool(data.get("isTheStockMarketOpen", False))
-        return json.dumps({"source": "FMP", "open": open_,
-                           "reason": "FMP live market status", "timestamp": ts})
-    except Exception:
-        open_ = _is_market_open_now_fallback()
-        reason = "ET time-window fallback (9:30 AM – 4:00 PM ET)"
-        if not open_:
-            import pytz
-            et     = pytz.timezone("America/New_York")
-            now_et = datetime.now(et)
-            if now_et.weekday() >= 5:
-                reason = "weekend"
-            elif now_et.date().isoformat() in NYSE_HOLIDAYS:
-                reason = "NYSE holiday"
-            else:
-                reason = "outside trading hours (9:30 AM – 4:00 PM ET)"
-        return json.dumps({"source": "fallback", "open": open_,
-                           "reason": reason, "timestamp": ts})
+    """Check if US regular trading session is active RIGHT NOW (9:30 AM – 4:00 PM ET, weekdays, non-holidays).
+    Uses ET time-window check directly — FMP's isTheStockMarketOpen covers pre-market and is unreliable."""
+    import pytz
+    ts     = _ts()
+    et     = pytz.timezone("America/New_York")
+    now_et = datetime.now(et)
+    open_  = _is_market_open_now_fallback()
+    if not open_:
+        if now_et.weekday() >= 5:
+            reason = "weekend"
+        elif now_et.date().isoformat() in NYSE_HOLIDAYS:
+            reason = "NYSE holiday"
+        else:
+            reason = "outside trading hours (9:30 AM – 4:00 PM ET)"
+    else:
+        reason = "regular session active (9:30 AM – 4:00 PM ET)"
+    return json.dumps({"source": "ET-time-window", "open": open_,
+                       "reason": reason, "timestamp": ts})
 
 
 @mcp.tool()
