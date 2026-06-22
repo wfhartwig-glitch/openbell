@@ -8,12 +8,9 @@
 name: Pippy's Brief — Weekend
 
 on:
-  schedule:
-    # 8:30 AM CDT (UTC-5, Mar-Nov) = 13:30 UTC — every day; skips automatically if market is open
-    # NOTE: This cron is set for CDT (UTC-5), active March-November.
-    # When CST (UTC-6) begins in November, this will fire 1 hour late again
-    # unless adjusted to '30 14 * * *' for winter months.
-    - cron: '30 13 * * *'
+  # Triggered externally by cron-job.org at 8:30 AM CT (13:30 UTC CDT / 14:30 UTC CST)
+  # every day. Workflow internally skips if market is open (weekday non-holiday).
+  # Uses workflow_dispatch for reliable exact-time delivery.
   workflow_dispatch:
 
 permissions:

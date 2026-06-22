@@ -8,12 +8,9 @@
 name: Pippy's Brief — Close
 
 on:
-  schedule:
-    # 3:00 PM CDT (UTC-5, Mar-Nov) = 20:00 UTC
-    # NOTE: This cron is set for CDT (UTC-5), active March-November.
-    # When CST (UTC-6) begins in November, this will fire 1 hour late again
-    # unless adjusted to '0 21 * * 1-5' for winter months.
-    - cron: '0 20 * * 1-5'
+  # Triggered externally by cron-job.org at 3:00 PM CT (20:00 UTC CDT / 21:00 UTC CST)
+  # weekdays only. Workflow internally skips on holidays.
+  # Uses workflow_dispatch for reliable exact-time delivery.
   workflow_dispatch:
 
 permissions:

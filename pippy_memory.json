@@ -19,28 +19,26 @@
     "GOING"
   ],
   "recurring_themes": {},
-  "session_count": 18,
-  "last_session": "2026-06-21T15:21:24.223694",
+  "session_count": 16,
+  "last_session": "2026-06-19T09:24:16.789526",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
   "deep_dive_history": [
     {
-      "date": "2026-06-20",
-      "category": "emerging technology",
-      "topic": "Why JEPI Investors Gave Up $3,379 in Five-Year Gains",
-      "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via 24/7 Wall St.",
-      "source_headline_published": "2026-06-19"
+      "date": "2026-06-19",
+      "category": "macro / Fed policy",
+      "topic": "Kevin Warsh as potential Fed chair \u2014 and what a hawkish replacement means for this rally",
+      "triggered_by": "Warsh comments spooking investors, headline warning he'd \"murder this bull market\""
     },
     {
-      "date": "2026-06-21",
-      "category": "market overview",
-      "topic": "Better S&P 500 ETF: VOO vs. SPY",
-      "triggered_by": "\"Better S&P 500 ETF: VOO vs. SPY\" via Motley Fool",
-      "source_headline_published": "2026-06-21"
+      "date": "2026-06-19",
+      "category": "emerging technology",
+      "topic": "Why JEPI Investors Gave Up $3,379 in Five-Year Gains",
+      "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 7,
-  "last_email_sent": "2026-06-21T15:21:24.223092",
-  "last_email_summary": "deepdive sent Sunday, June 21, 2026"
+  "email_count": 5,
+  "last_email_sent": "2026-06-19T09:18:17.527594",
+  "last_email_summary": "deepdive sent Friday, June 19, 2026"
 }
