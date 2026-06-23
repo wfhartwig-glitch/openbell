@@ -1,90 +1,182 @@
 {
-  "2026-W24": [
-    {
-      "ticker": "MSFT",
-      "company": "Microsoft Corporation",
-      "sector": "Technology",
-      "risk": "Medium",
-      "rationale": "analyst target implies 48% upside ($379 \u2192 $561). rated strong buy by analysts. earnings up 23% YoY."
-    },
-    {
-      "ticker": "META",
-      "company": "Meta Platforms, Inc.",
-      "sector": "Communication Services",
-      "risk": "Medium",
-      "rationale": "analyst target implies 43% upside ($577 \u2192 $827). rated strong buy by analysts. earnings up 62% YoY."
-    },
-    {
-      "ticker": "NVDA",
-      "company": "NVIDIA Corporation",
-      "sector": "Technology",
-      "risk": "Speculative",
-      "rationale": "analyst target implies 42% upside ($211 \u2192 $299). rated strong buy by analysts. earnings up 214% YoY."
-    },
-    {
-      "ticker": "SOUN",
-      "company": "SoundHound AI, Inc.",
-      "sector": "Technology",
-      "risk": "Speculative",
-      "rationale": "analyst target implies 103% upside ($7 \u2192 $14). rated strong buy by analysts. revenue growing 52% YoY."
-    },
-    {
-      "ticker": "CELH",
-      "company": "Celsius Holdings, Inc.",
-      "sector": "Consumer Defensive",
-      "risk": "High",
-      "rationale": "analyst target implies 100% upside ($30 \u2192 $61). rated buy by analysts. earnings up 126% YoY."
-    },
-    {
-      "ticker": "AXON",
-      "company": "Axon Enterprise, Inc.",
-      "sector": "Industrials",
-      "risk": "High",
-      "rationale": "analyst target implies 58% upside ($419 \u2192 $662). rated buy by analysts. earnings up 90% YoY."
-    }
-  ],
-  "2026-06": [
-    {
-      "ticker": "MSFT",
-      "company": "Microsoft Corporation",
-      "sector": "Technology",
-      "risk": "Medium",
-      "rationale": "analyst target implies 48% upside. rated strong buy by analysts. earnings up 23% YoY."
-    },
-    {
-      "ticker": "META",
-      "company": "Meta Platforms, Inc.",
-      "sector": "Communication Services",
-      "risk": "Medium",
-      "rationale": "analyst target implies 43% upside. rated strong buy by analysts. earnings up 62% YoY."
-    },
-    {
-      "ticker": "NVDA",
-      "company": "NVIDIA Corporation",
-      "sector": "Technology",
-      "risk": "Speculative",
-      "rationale": "analyst target implies 42% upside. rated strong buy by analysts. earnings up 214% YoY."
-    },
-    {
-      "ticker": "CELH",
-      "company": "Celsius Holdings, Inc.",
-      "sector": "Consumer Defensive",
-      "risk": "High",
-      "rationale": "analyst target implies 97% upside. rated buy by analysts. earnings up 126% YoY."
-    },
-    {
-      "ticker": "SOUN",
-      "company": "SoundHound AI, Inc.",
-      "sector": "Technology",
-      "risk": "Speculative",
-      "rationale": "analyst target implies 97% upside. rated strong buy by analysts. revenue growing 52% YoY."
-    },
-    {
-      "ticker": "AXON",
-      "company": "Axon Enterprise, Inc.",
-      "sector": "Industrials",
-      "risk": "High",
-      "rationale": "analyst target implies 56% upside. rated buy by analysts. earnings up 90% YoY."
-    }
-  ]
+  "2026-W24": {
+    "picks": [
+      {
+        "ticker": "MSFT",
+        "company": "Microsoft Corporation",
+        "sector": "Technology",
+        "risk": "Medium",
+        "rationale": "analyst target implies 48% upside ($379 \u2192 $561). rated strong buy by analysts. earnings up 23% YoY."
+      },
+      {
+        "ticker": "META",
+        "company": "Meta Platforms, Inc.",
+        "sector": "Communication Services",
+        "risk": "Medium",
+        "rationale": "analyst target implies 43% upside ($577 \u2192 $827). rated strong buy by analysts. earnings up 62% YoY."
+      },
+      {
+        "ticker": "NVDA",
+        "company": "NVIDIA Corporation",
+        "sector": "Technology",
+        "risk": "Speculative",
+        "rationale": "analyst target implies 42% upside ($211 \u2192 $299). rated strong buy by analysts. earnings up 214% YoY."
+      },
+      {
+        "ticker": "SOUN",
+        "company": "SoundHound AI, Inc.",
+        "sector": "Technology",
+        "risk": "Speculative",
+        "rationale": "analyst target implies 103% upside ($7 \u2192 $14). rated strong buy by analysts. revenue growing 52% YoY."
+      },
+      {
+        "ticker": "CELH",
+        "company": "Celsius Holdings, Inc.",
+        "sector": "Consumer Defensive",
+        "risk": "High",
+        "rationale": "analyst target implies 100% upside ($30 \u2192 $61). rated buy by analysts. earnings up 126% YoY."
+      },
+      {
+        "ticker": "AXON",
+        "company": "Axon Enterprise, Inc.",
+        "sector": "Industrials",
+        "risk": "High",
+        "rationale": "analyst target implies 58% upside ($419 \u2192 $662). rated buy by analysts. earnings up 90% YoY."
+      }
+    ],
+    "generated": "",
+    "changes_from_last_week": []
+  },
+  "2026-06": {
+    "picks": [
+      {
+        "ticker": "MSFT",
+        "company": "Microsoft Corporation",
+        "sector": "Technology",
+        "risk": "Medium",
+        "rationale": "analyst target implies 48% upside. rated strong buy by analysts. earnings up 23% YoY."
+      },
+      {
+        "ticker": "META",
+        "company": "Meta Platforms, Inc.",
+        "sector": "Communication Services",
+        "risk": "Medium",
+        "rationale": "analyst target implies 43% upside. rated strong buy by analysts. earnings up 62% YoY."
+      },
+      {
+        "ticker": "NVDA",
+        "company": "NVIDIA Corporation",
+        "sector": "Technology",
+        "risk": "Speculative",
+        "rationale": "analyst target implies 42% upside. rated strong buy by analysts. earnings up 214% YoY."
+      },
+      {
+        "ticker": "CELH",
+        "company": "Celsius Holdings, Inc.",
+        "sector": "Consumer Defensive",
+        "risk": "High",
+        "rationale": "analyst target implies 97% upside. rated buy by analysts. earnings up 126% YoY."
+      },
+      {
+        "ticker": "SOUN",
+        "company": "SoundHound AI, Inc.",
+        "sector": "Technology",
+        "risk": "Speculative",
+        "rationale": "analyst target implies 97% upside. rated strong buy by analysts. revenue growing 52% YoY."
+      },
+      {
+        "ticker": "AXON",
+        "company": "Axon Enterprise, Inc.",
+        "sector": "Industrials",
+        "risk": "High",
+        "rationale": "analyst target implies 56% upside. rated buy by analysts. earnings up 90% YoY."
+      }
+    ],
+    "generated": "",
+    "changes_from_last_week": []
+  },
+  "2026-W25": {
+    "generated": "2026-06-23T13:30:48.849074",
+    "picks": [
+      {
+        "ticker": "MSFT",
+        "company": "Microsoft Corporation",
+        "sector": "Technology",
+        "risk": "Medium",
+        "rationale": "analyst target implies 48% upside ($379 \u2192 $561). rated strong buy by analysts. earnings up 23% YoY.",
+        "price_now": 372.31,
+        "pct_change_this_week": 0.0,
+        "weeks_held": 2,
+        "status": "holding",
+        "note": "Holding \u2014 thesis intact, analyst target implies 51% upside. rated strong buy by analysts. earnings up 23% YoY.",
+        "price_when_picked": 372.31
+      },
+      {
+        "ticker": "META",
+        "company": "Meta Platforms, Inc.",
+        "sector": "Communication Services",
+        "risk": "Medium",
+        "rationale": "analyst target implies 43% upside ($577 \u2192 $827). rated strong buy by analysts. earnings up 62% YoY.",
+        "price_now": 562.74,
+        "pct_change_this_week": 0.0,
+        "weeks_held": 2,
+        "status": "holding",
+        "note": "Holding \u2014 thesis intact, analyst target implies 47% upside. rated strong buy by analysts. earnings up 62% YoY.",
+        "price_when_picked": 562.74
+      },
+      {
+        "ticker": "NVDA",
+        "company": "NVIDIA Corporation",
+        "sector": "Technology",
+        "risk": "Speculative",
+        "rationale": "analyst target implies 42% upside ($211 \u2192 $299). rated strong buy by analysts. earnings up 214% YoY.",
+        "price_now": 201.35,
+        "pct_change_this_week": 0.0,
+        "weeks_held": 2,
+        "status": "holding",
+        "note": "Holding \u2014 thesis intact, analyst target implies 48% upside. rated strong buy by analysts. earnings up 214% YoY.",
+        "price_when_picked": 201.35
+      },
+      {
+        "ticker": "SOUN",
+        "company": "SoundHound AI, Inc.",
+        "sector": "Technology",
+        "risk": "Speculative",
+        "rationale": "analyst target implies 103% upside ($7 \u2192 $14). rated strong buy by analysts. revenue growing 52% YoY.",
+        "price_now": 6.77,
+        "pct_change_this_week": 0.0,
+        "weeks_held": 2,
+        "status": "holding",
+        "note": "Holding \u2014 thesis intact, analyst target implies 107% upside. rated strong buy by analysts. revenue growing 52% YoY.",
+        "price_when_picked": 6.77
+      },
+      {
+        "ticker": "CELH",
+        "company": "Celsius Holdings, Inc.",
+        "sector": "Consumer Defensive",
+        "risk": "High",
+        "rationale": "analyst target implies 100% upside ($30 \u2192 $61). rated buy by analysts. earnings up 126% YoY.",
+        "price_now": 28.32,
+        "pct_change_this_week": 0.0,
+        "weeks_held": 2,
+        "status": "holding",
+        "note": "Holding \u2014 thesis intact, analyst target implies 114% upside. rated buy by analysts. earnings up 126% YoY.",
+        "price_when_picked": 28.32
+      },
+      {
+        "ticker": "AXON",
+        "company": "Axon Enterprise, Inc.",
+        "sector": "Industrials",
+        "risk": "High",
+        "rationale": "analyst target implies 58% upside ($419 \u2192 $662). rated buy by analysts. earnings up 90% YoY.",
+        "price_now": 417.95,
+        "pct_change_this_week": 0.0,
+        "weeks_held": 2,
+        "status": "holding",
+        "note": "Holding \u2014 thesis intact, analyst target implies 58% upside. rated buy by analysts. earnings up 90% YoY.",
+        "price_when_picked": 417.95
+      }
+    ],
+    "changes_from_last_week": []
+  }
 }
