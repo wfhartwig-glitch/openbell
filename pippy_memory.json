@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 22,
-  "last_session": "2026-06-23T13:30:51.595171",
+  "session_count": 23,
+  "last_session": "2026-06-23T20:01:02.731735",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 11,
-  "last_email_sent": "2026-06-23T13:30:51.594290",
-  "last_email_summary": "morning sent Tuesday, June 23, 2026",
+  "email_count": 12,
+  "last_email_sent": "2026-06-23T20:01:02.730939",
+  "last_email_summary": "close sent Tuesday, June 23, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -114,12 +114,29 @@
       "commodity_note": "",
       "picks_status": "holding",
       "date": "2026-06-23"
+    },
+    {
+      "type": "close",
+      "actual_direction": "lower",
+      "actual_sp_pct": -1.47,
+      "best_sector": "Consumer Staples",
+      "worst_sector": "Technology",
+      "biggest_mover": "AXON +5.6%",
+      "date": "2026-06-23"
     }
   ],
   "lessons_learned": [
     {
       "week": "2026-W25",
       "note": "Active picks avg +0.0% since entry."
+    }
+  ],
+  "prediction_accuracy": [
+    {
+      "date": "2026-06-23",
+      "called": "lower",
+      "actual": "lower",
+      "accurate": true
     }
   ]
 }
