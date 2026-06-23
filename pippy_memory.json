@@ -36,7 +36,7 @@
       "week_dropped": null,
       "price_when_picked": 376.9,
       "price_now": 372.31,
-      "pct_change_since_pick": 0.0,
+      "pct_change_since_pick": -1.22,
       "still_held": true
     },
     {
@@ -47,7 +47,7 @@
       "week_dropped": null,
       "price_when_picked": 571.4,
       "price_now": 562.74,
-      "pct_change_since_pick": 0.0,
+      "pct_change_since_pick": -1.52,
       "still_held": true
     },
     {
@@ -58,7 +58,7 @@
       "week_dropped": null,
       "price_when_picked": 212.67,
       "price_now": 201.35,
-      "pct_change_since_pick": 0.0,
+      "pct_change_since_pick": -5.32,
       "still_held": true
     },
     {
@@ -69,7 +69,7 @@
       "week_dropped": null,
       "price_when_picked": 7.0,
       "price_now": 6.77,
-      "pct_change_since_pick": 0.0,
+      "pct_change_since_pick": -3.29,
       "still_held": true
     },
     {
@@ -80,7 +80,7 @@
       "week_dropped": null,
       "price_when_picked": 29.95,
       "price_now": 28.32,
-      "pct_change_since_pick": 0.0,
+      "pct_change_since_pick": -5.44,
       "still_held": true
     },
     {
@@ -91,7 +91,7 @@
       "week_dropped": null,
       "price_when_picked": 411.22,
       "price_now": 417.95,
-      "pct_change_since_pick": 0.0,
+      "pct_change_since_pick": 1.64,
       "still_held": true
     }
   ],
@@ -128,7 +128,7 @@
   "lessons_learned": [
     {
       "week": "2026-W25",
-      "note": "Active picks avg +0.0% since entry."
+      "note": "Active picks avg -2.5% since entry."
     }
   ],
   "prediction_accuracy": [
@@ -138,5 +138,6 @@
       "actual": "lower",
       "accurate": true
     }
-  ]
+  ],
+  "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction."
 }

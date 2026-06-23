@@ -970,23 +970,28 @@ def generate_weekly_picks() -> str:
 
     perf_map = {ph["ticker"]: ph for ph in perf_history}
     for pick in kept_picks:
-        ticker     = pick["ticker"]
-        price_now  = pick.get("price_now") or pick.get("price_when_picked")
-        price_pick = pick.get("price_when_picked") or price_now
-        pct        = round(((price_now - price_pick) / price_pick * 100), 2) if price_now and price_pick else None
+        ticker    = pick["ticker"]
+        price_now = pick.get("price_now") or pick.get("price_when_picked")
 
         if ticker in perf_map:
-            perf_map[ticker]["price_now"]           = price_now
+            # Use the original week-0 price preserved in perf_map — never pick["price_when_picked"],
+            # which gets reset to the current week's price each Monday (that was the bug).
+            orig_price = perf_map[ticker]["price_when_picked"]
+            pct = round(((price_now - orig_price) / orig_price * 100), 2) if price_now and orig_price else None
+            perf_map[ticker]["price_now"]             = price_now
             perf_map[ticker]["pct_change_since_pick"] = pct
-            perf_map[ticker]["still_held"]          = True
+            perf_map[ticker]["still_held"]            = True
         else:
+            # First time this ticker enters the history — set the write-once original price
+            price_pick = pick.get("price_when_picked") or price_now
+            pct        = round(((price_now - price_pick) / price_pick * 100), 2) if price_now and price_pick else None
             perf_map[ticker] = {
                 "ticker":               ticker,
                 "sector":               pick.get("sector", ""),
                 "risk_level":           pick.get("risk_level", ""),
                 "week_picked":          week_key,
                 "week_dropped":         None,
-                "price_when_picked":    price_pick,
+                "price_when_picked":    price_pick,  # write-once — never overwritten
                 "price_now":            price_now,
                 "pct_change_since_pick": pct,
                 "still_held":           True,

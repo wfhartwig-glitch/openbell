@@ -96,7 +96,7 @@
     "changes_from_last_week": []
   },
   "2026-W25": {
-    "generated": "2026-06-23T13:30:48.849074",
+    "generated": "2026-06-22T09:16:02.369012",
     "picks": [
       {
         "ticker": "MSFT",
@@ -104,12 +104,12 @@
         "sector": "Technology",
         "risk": "Medium",
         "rationale": "analyst target implies 48% upside ($379 \u2192 $561). rated strong buy by analysts. earnings up 23% YoY.",
-        "price_now": 372.31,
+        "price_now": 376.9,
         "pct_change_this_week": 0.0,
         "weeks_held": 2,
         "status": "holding",
-        "note": "Holding \u2014 thesis intact, analyst target implies 51% upside. rated strong buy by analysts. earnings up 23% YoY.",
-        "price_when_picked": 372.31
+        "note": "Holding \u2014 thesis intact, analyst target implies 49% upside. rated strong buy by analysts. earnings up 23% YoY.",
+        "price_when_picked": 376.9
       },
       {
         "ticker": "META",
@@ -117,12 +117,12 @@
         "sector": "Communication Services",
         "risk": "Medium",
         "rationale": "analyst target implies 43% upside ($577 \u2192 $827). rated strong buy by analysts. earnings up 62% YoY.",
-        "price_now": 562.74,
+        "price_now": 571.4,
         "pct_change_this_week": 0.0,
         "weeks_held": 2,
         "status": "holding",
-        "note": "Holding \u2014 thesis intact, analyst target implies 47% upside. rated strong buy by analysts. earnings up 62% YoY.",
-        "price_when_picked": 562.74
+        "note": "Holding \u2014 thesis intact, analyst target implies 45% upside. rated strong buy by analysts. earnings up 62% YoY.",
+        "price_when_picked": 571.4
       },
       {
         "ticker": "NVDA",
@@ -130,12 +130,12 @@
         "sector": "Technology",
         "risk": "Speculative",
         "rationale": "analyst target implies 42% upside ($211 \u2192 $299). rated strong buy by analysts. earnings up 214% YoY.",
-        "price_now": 201.35,
+        "price_now": 212.67,
         "pct_change_this_week": 0.0,
         "weeks_held": 2,
         "status": "holding",
-        "note": "Holding \u2014 thesis intact, analyst target implies 48% upside. rated strong buy by analysts. earnings up 214% YoY.",
-        "price_when_picked": 201.35
+        "note": "Holding \u2014 thesis intact, analyst target implies 41% upside. rated strong buy by analysts. earnings up 214% YoY.",
+        "price_when_picked": 212.67
       },
       {
         "ticker": "SOUN",
@@ -143,12 +143,12 @@
         "sector": "Technology",
         "risk": "Speculative",
         "rationale": "analyst target implies 103% upside ($7 \u2192 $14). rated strong buy by analysts. revenue growing 52% YoY.",
-        "price_now": 6.77,
+        "price_now": 7.0,
         "pct_change_this_week": 0.0,
         "weeks_held": 2,
         "status": "holding",
-        "note": "Holding \u2014 thesis intact, analyst target implies 107% upside. rated strong buy by analysts. revenue growing 52% YoY.",
-        "price_when_picked": 6.77
+        "note": "Holding \u2014 thesis intact, analyst target implies 100% upside. rated strong buy by analysts. revenue growing 52% YoY.",
+        "price_when_picked": 7.0
       },
       {
         "ticker": "CELH",
@@ -156,12 +156,12 @@
         "sector": "Consumer Defensive",
         "risk": "High",
         "rationale": "analyst target implies 100% upside ($30 \u2192 $61). rated buy by analysts. earnings up 126% YoY.",
-        "price_now": 28.32,
+        "price_now": 29.95,
         "pct_change_this_week": 0.0,
         "weeks_held": 2,
         "status": "holding",
-        "note": "Holding \u2014 thesis intact, analyst target implies 114% upside. rated buy by analysts. earnings up 126% YoY.",
-        "price_when_picked": 28.32
+        "note": "Holding \u2014 thesis intact, analyst target implies 102% upside. rated buy by analysts. earnings up 126% YoY.",
+        "price_when_picked": 29.95
       },
       {
         "ticker": "AXON",
@@ -169,12 +169,12 @@
         "sector": "Industrials",
         "risk": "High",
         "rationale": "analyst target implies 58% upside ($419 \u2192 $662). rated buy by analysts. earnings up 90% YoY.",
-        "price_now": 417.95,
+        "price_now": 411.22,
         "pct_change_this_week": 0.0,
         "weeks_held": 2,
         "status": "holding",
-        "note": "Holding \u2014 thesis intact, analyst target implies 58% upside. rated buy by analysts. earnings up 90% YoY.",
-        "price_when_picked": 417.95
+        "note": "Holding \u2014 thesis intact, analyst target implies 61% upside. rated buy by analysts. earnings up 90% YoY.",
+        "price_when_picked": 411.22
       }
     ],
     "changes_from_last_week": []
