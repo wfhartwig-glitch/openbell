@@ -476,6 +476,39 @@ def fetch_earnings_calendar() -> str:
                          "eps_estimated": e.get("epsEstimated"), "rev_estimated": e.get("revenueEstimated")}
                         for e in data[:10]]
         return json.dumps({"source": "FMP", "earnings": earnings[:10], "timestamp": ts})
+    except Exception:
+        pass
+    # yfinance fallback: check .calendar on each tracked ticker for the current week
+    try:
+        tracked_list = list(WELL_KNOWN | set(WATCHLIST))
+        week_start   = today.isoformat()
+        week_end_dt  = (today + timedelta(days=7))
+        earnings = []
+        seen = set()
+        for sym in tracked_list:
+            try:
+                cal = yf.Ticker(sym).calendar
+                if not cal:
+                    continue
+                e_dates = cal.get("Earnings Date", [])
+                if not isinstance(e_dates, list):
+                    e_dates = [e_dates]
+                for ed in e_dates:
+                    if ed is None:
+                        continue
+                    ed_str = ed.isoformat() if hasattr(ed, "isoformat") else str(ed)[:10]
+                    if week_start <= ed_str <= week_end_dt.isoformat() and sym not in seen:
+                        seen.add(sym)
+                        earnings.append({
+                            "symbol":        sym,
+                            "date":          ed_str,
+                            "eps_estimated": cal.get("Earnings Average"),
+                            "time":          "",  # yfinance doesn't reliably provide BMO/AMC
+                        })
+            except Exception:
+                continue
+        earnings.sort(key=lambda x: x["date"])
+        return json.dumps({"source": "yfinance", "earnings": earnings[:15], "timestamp": ts})
     except Exception as e:
         return json.dumps({"source": "unavailable", "error": str(e), "timestamp": ts})
 

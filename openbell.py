@@ -14,7 +14,7 @@ import asyncio
 import json
 import os
 import sys
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from dotenv import load_dotenv
 from mcp import ClientSession
@@ -522,6 +522,8 @@ def _build_morning_summary(
     commodities: list = None,
     treasury: dict = None,
     mem: dict = None,
+    earnings: list = None,
+    watchlist_premarket: list = None,
 ) -> tuple:
     """3-4 sentence plain-English pre-market read, 100% deterministic, zero AI.
     Returns (text: str, log_data: dict) for the learning loop."""
@@ -558,15 +560,29 @@ def _build_morning_summary(
     s1_base   = open_tmpl.format(tone=tone_word)
 
     # Market-relevance check: only cite a headline if it touches a market-moving topic.
-    # Scan top 3 headlines; use the first that passes. Skip cleanly if none qualify.
-    _MARKET_RELEVANT = {
-        "fed", "federal reserve", "rate cut", "rate hike", "interest rate",
-        "inflation", "cpi", "ppi", "jobs", "payroll", "unemployment",
-        "iran", "war", "tariff", "trade", "oil", "opec",
-        "rally", "selloff", "sell-off", "stocks", "market", "dow", "nasdaq",
-        "s&p", "treasury", "yield", "recession", "gdp", "earnings",
-        "gdp", "growth", "debt", "deficit", "sanctions", "bank",
-    }
+    # Two tiers — strong (any single match qualifies) and weak (requires 2+ matches).
+    # Word-boundary matching for short/ambiguous terms to avoid false substrings.
+    import re as _re2
+    _STRONG_MARKET_KWS = [
+        "federal reserve", "rate cut", "rate hike", "interest rate",
+        "inflation", "cpi", "ppi", "payroll", "unemployment",
+        "iran", "tariff", "trade war", "opec",
+        "selloff", "sell-off", "s&p 500", "nasdaq composite",
+        "treasury yield", "10-year yield", "recession", "gdp",
+    ]
+    _WEAK_MARKET_KWS = [
+        "fed", "jobs", "war", "oil", "trade", "stocks", "market", "dow", "nasdaq",
+        "treasury", "yield", "earnings", "growth", "debt", "deficit", "sanctions", "bank",
+        "rally", "rates",
+    ]
+
+    def _headline_is_market_relevant(title: str) -> bool:
+        tl = title.lower()
+        if any(kw in tl for kw in _STRONG_MARKET_KWS):
+            return True
+        weak_hits = sum(1 for kw in _WEAK_MARKET_KWS
+                        if _re2.search(r'\b' + _re2.escape(kw) + r'\b', tl))
+        return weak_hits >= 2
 
     top_title  = ""
     macro_ctx  = ""
@@ -595,8 +611,7 @@ def _build_morning_summary(
             title = h.get("title", "") if isinstance(h, dict) else str(h)
             if not title or len(title) <= 15:
                 continue
-            tl = title.lower()
-            if any(kw in tl for kw in _MARKET_RELEVANT):
+            if _headline_is_market_relevant(title):
                 relevant_title   = title
                 relevant_age_hrs = h.get("age_hrs")
                 break
@@ -619,6 +634,46 @@ def _build_morning_summary(
         age_note = f" ({int(float(relevant_age_hrs)):.0f}h ago)" if relevant_age_hrs and float(relevant_age_hrs) < 12 else ""
         s2 = f"On the tape{age_note}: {relevant_title.rstrip('.')}."
     # else: no relevant headline — s2 stays empty, paragraph reads cleanly without it
+
+    # Sentence 2b: earnings today (filtered to today only — the weekly calendar section
+    # already covers the full week; don't duplicate it here)
+    s2b = ""
+    today_iso = date.today().isoformat()
+    earnings_list = earnings if isinstance(earnings, list) else []
+    todays_earnings = [e for e in earnings_list if e.get("date", "") == today_iso]
+
+    # Cross-reference: if a watchlist ticker reported earnings recently and is moving big pre-market
+    pm_list = watchlist_premarket if isinstance(watchlist_premarket, list) else []
+    for pm in pm_list:
+        sym  = pm.get("ticker", "") or pm.get("symbol", "")
+        pct_ = pm.get("pct")
+        try:
+            pct_ = float(pct_)
+        except Exception:
+            pct_ = None
+        if sym and pct_ is not None and abs(pct_) >= 2.0:
+            # Check if this ticker had earnings today or yesterday
+            ticker_earnings_dates = [
+                e.get("date", "") for e in earnings_list if e.get("symbol") == sym
+            ]
+            yesterday_iso = (date.today() - timedelta(days=1)).isoformat()
+            if any(d in (today_iso, yesterday_iso) for d in ticker_earnings_dates):
+                dir_pm = "up" if pct_ > 0 else "down"
+                s2b = (
+                    f"{sym} is {dir_pm} {abs(pct_):.1f}% pre-market following "
+                    f"{'this morning' if today_iso in ticker_earnings_dates else 'last night'}'s earnings report."
+                )
+                break  # one cross-ref mention is enough
+
+    # If no cross-ref, name today's reporters (forward-looking)
+    if not s2b and todays_earnings:
+        names = [e.get("symbol", "") for e in todays_earnings[:3] if e.get("symbol")]
+        if names:
+            timing = todays_earnings[0].get("time", "")
+            time_note = " before the open" if "bmo" in timing.lower() or "pre" in timing.lower() else \
+                        " after the close" if "amc" in timing.lower() or "post" in timing.lower() else ""
+            joined = ", ".join(names[:-1]) + (" and " + names[-1] if len(names) > 1 else names[0])
+            s2b = f"Earnings today{time_note}: {joined} report{'s' if len(names) == 1 else ''}."
 
     # Sentence 3: notable commodity or yield move
     s3 = ""
@@ -654,16 +709,22 @@ def _build_morning_summary(
         else:
             s4 = f"All {n} of your weekly picks are holding — no changes this week."
 
-    # Recurring-theme check: if a macro theme has dominated the last 5 briefings,
-    # append a trailing clause acknowledging the streak — even if today's headline
-    # didn't trigger it independently.
+    # Assemble: direction → headline → earnings → commodity/yield → picks (max 4 sentences)
+    # s2b (earnings) takes priority over s2 (headline) when a same-day cross-ref exists;
+    # otherwise both can appear (headline + earnings), but cap the total at 4 sentences.
     recurring = _get_recurring_theme(mem or {}, window=5, threshold=3)
+
+    # Build ordered sentence list, capped at 4
+    all_parts = [s for s in [s1, s2, s2b, s3, s4] if s]
+    if len(all_parts) > 4:
+        # Drop commodity/yield sentence (s3) if it would push us over 4
+        all_parts = [s for s in [s1, s2, s2b, s4] if s]
+    if len(all_parts) > 4:
+        all_parts = all_parts[:4]
+
+    text = " ".join(all_parts)
     if recurring and recurring != macro_ctx:
-        parts_base = [s for s in [s1, s2, s3, s4] if s]
-        text = " ".join(parts_base)
         text += f" (Note: {recurring} has been a persistent theme over the past week.)"
-    else:
-        text = " ".join(s for s in [s1, s2, s3, s4] if s)
 
     # Determine leading/lagging for the log
     named    = {"S&P 500": sp, "Nasdaq": ndx, "Dow": dow}
@@ -704,10 +765,13 @@ def _morning_summary_html(
     commodities: list = None,
     treasury: dict = None,
     mem: dict = None,
+    earnings: list = None,
+    watchlist_premarket: list = None,
 ) -> tuple:
     """Returns (html_str, log_data)."""
     text, log_data = _build_morning_summary(
-        snapshot_data, headlines, picks_data, commodities, treasury, mem
+        snapshot_data, headlines, picks_data, commodities, treasury, mem,
+        earnings, watchlist_premarket,
     )
     html = _section("What's Going On",
         f'<p style="margin:0;font-size:14px;color:#374151;line-height:1.6">{text}</p>')
@@ -720,8 +784,9 @@ def _build_close_summary(
     sectors: list,
     commodities: list = None,
     treasury: dict = None,
+    earnings: list = None,
 ) -> str:
-    """3-sentence plain-English close-of-day read, 100% deterministic, zero AI."""
+    """3-4 sentence plain-English close-of-day read, 100% deterministic, zero AI."""
     idx = {}
     for item in snapshot_data:
         name = item.get("name", "")
@@ -776,8 +841,12 @@ def _build_close_summary(
         except Exception:
             pass
 
-    # Sentence 3: biggest single mover, or commodity note if notable
+    # Sentence 3: biggest mover — with earnings cross-reference if same-day match
     s3 = ""
+    today_iso = date.today().isoformat()
+    earnings_list  = earnings if isinstance(earnings, list) else []
+    earnings_today = {e.get("symbol", "") for e in earnings_list if e.get("date", "") == today_iso}
+
     gainers = movers.get("gainers", [])
     losers  = movers.get("losers", [])
     biggest = None
@@ -790,11 +859,16 @@ def _build_close_summary(
                 biggest  = m
         except Exception:
             pass
+
     if biggest and best_abs >= 2.0:
         sym  = biggest.get("symbol", "")
         pct  = float(biggest.get("pct") or biggest.get("changesPercentage") or 0)
         dir_ = "surged" if pct > 3 else "gained" if pct > 0 else "dropped"
-        s3   = f"On the mover board, {sym} {dir_} {_fmt(abs(pct))}."
+        if sym in earnings_today:
+            # Hard factual link: same ticker, same day
+            s3 = f"{sym} {dir_} {_fmt(abs(pct))} today following this morning's earnings report."
+        else:
+            s3 = f"On the mover board, {sym} {dir_} {_fmt(abs(pct))}."
     elif commodities:
         for c in commodities:
             try:
@@ -817,8 +891,9 @@ def _close_summary_html(
     sectors: list,
     commodities: list = None,
     treasury: dict = None,
+    earnings: list = None,
 ) -> str:
-    text = _build_close_summary(snapshot_data, movers, sectors, commodities, treasury)
+    text = _build_close_summary(snapshot_data, movers, sectors, commodities, treasury, earnings)
     return _section("What Happened Today",
         f'<p style="margin:0;font-size:14px;color:#374151;line-height:1.6">{text}</p>')
 
@@ -876,7 +951,10 @@ async def morning(session: ClientSession) -> tuple[str, str]:
     tsy         = treasury_raw if treasury_raw.get("yield") else {}
 
     morning_section, log_data = _morning_summary_html(
-        snap_list, hl_list, picks_data, comm_list, tsy, mem if isinstance(mem, dict) else {}
+        snap_list, hl_list, picks_data, comm_list, tsy,
+        mem if isinstance(mem, dict) else {},
+        earnings.get("earnings", []),
+        watchlist,
     )
     body = (
         morning_section
@@ -898,14 +976,15 @@ async def morning(session: ClientSession) -> tuple[str, str]:
 
 async def close(session: ClientSession) -> tuple[str, str, dict]:
     today = date.today().strftime("%A, %B %d")
-    print("    fetching snapshot + sectors + movers + commodities…")
-    snapshot, sectors, movers, commodities_raw, headlines, mem = \
+    print("    fetching snapshot + sectors + movers + commodities + earnings…")
+    snapshot, sectors, movers, commodities_raw, headlines, earnings_raw, mem = \
         await asyncio.gather(
             call(session, "fetch_market_snapshot"),
             call(session, "fetch_sector_performance"),
             call(session, "fetch_top_movers"),
             call(session, "fetch_commodities"),
             call(session, "fetch_top_headlines"),
+            call(session, "fetch_earnings_calendar"),
             call(session, "load_memory"),
         )
 
@@ -918,9 +997,10 @@ async def close(session: ClientSession) -> tuple[str, str, dict]:
     snap_list    = snapshot.get("data", [])
     sectors_list = sectors.get("sectors", [])
     comm_list    = commodities_raw.get("commodities", [])
+    earn_list    = earnings_raw.get("earnings", [])
 
     body = (
-        _close_summary_html(snap_list, movers, sectors_list, comm_list)
+        _close_summary_html(snap_list, movers, sectors_list, comm_list, earnings=earn_list)
         + _indices(snap_list)
         + _movers(movers.get("gainers", []), movers.get("losers", []))
         + _sectors(sectors_list)
