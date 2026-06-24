@@ -607,8 +607,15 @@ def _build_morning_summary(
         title = h.get("title", "") if isinstance(h, dict) else str(h)
         if not title or len(title) <= 15:
             continue
+        import re as _re_kw
         for kw, ctx in _MACRO_KEYWORDS.items():
-            if kw.lower() in title.lower():
+            # Use word-boundary match for short keywords to prevent false
+            # substring hits (e.g. "Fed" inside "FedEx", "CPI" inside "CPIA").
+            if len(kw) <= 6:
+                hit = bool(_re_kw.search(r'\b' + _re_kw.escape(kw) + r'\b', title, _re_kw.IGNORECASE))
+            else:
+                hit = kw.lower() in title.lower()
+            if hit:
                 top_title  = title
                 hl_age_hrs = h.get("age_hrs")
                 macro_ctx  = ctx
