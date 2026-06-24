@@ -501,6 +501,9 @@ def _commodities_and_yields(commodities: list, treasury: dict) -> str:
 # ── Pippy narrative summaries ─────────────────────────────────────────────────
 
 # Keywords whose presence in a headline suggests a macro driver worth citing
+# IMPORTANT: any new keyword added here must use word-boundary matching if <=6 chars.
+# Run test_keyword_safety.py after adding new keywords to catch substring collisions
+# (e.g. "Fed"→"FedEx", "iran"→"Iranian") before they ship in a real email.
 _MACRO_KEYWORDS = {
     "Fed": "Fed policy",
     "Federal Reserve": "Fed policy",
@@ -591,7 +594,13 @@ def _build_morning_summary(
 
     def _headline_is_market_relevant(title: str) -> bool:
         tl = title.lower()
-        if any(kw in tl for kw in _STRONG_MARKET_KWS):
+        # Use word-boundary matching for short strong keywords (≤6 chars) to avoid
+        # false substring hits (e.g. "iran" matching inside "Iranian").
+        def _strong_hit(kw: str) -> bool:
+            if len(kw) <= 6:
+                return bool(_re2.search(r'\b' + _re2.escape(kw) + r'\b', tl))
+            return kw in tl
+        if any(_strong_hit(kw) for kw in _STRONG_MARKET_KWS):
             return True
         weak_hits = sum(1 for kw in _WEAK_MARKET_KWS
                         if _re2.search(r'\b' + _re2.escape(kw) + r'\b', tl))
