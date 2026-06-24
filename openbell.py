@@ -230,6 +230,19 @@ def _watchlist(tickers_data: list, label: str) -> str:
     return _section(label, f'<table width="100%" cellpadding="0" cellspacing="0">{rows}</table>')
 
 
+def _enrich_picks_with_perf(picks: list, mem: dict) -> list:
+    """Merge pct_change_since_pick from perf_history into each pick dict for display."""
+    perf_map = {ph["ticker"]: ph for ph in mem.get("pick_performance_history", [])}
+    enriched = []
+    for p in picks:
+        sym = p.get("ticker", "")
+        enriched_pick = dict(p)
+        if sym in perf_map:
+            enriched_pick["pct_change_since_pick"] = perf_map[sym].get("pct_change_since_pick")
+        enriched.append(enriched_pick)
+    return enriched
+
+
 def _picks(picks: list, week: str = "", changes: list = None) -> str:
     if not picks:
         return ""
@@ -241,7 +254,7 @@ def _picks(picks: list, week: str = "", changes: list = None) -> str:
         status = p.get("status", "")
         status_color = GREEN if status == "holding" else "#7c3aed" if status == "new" else GRAY
         weeks_held = p.get("weeks_held", 1)
-        pct_since  = p.get("pct_change_this_week")
+        pct_since  = p.get("pct_change_since_pick")
         pct_str    = ""
         if pct_since is not None:
             c = GREEN if pct_since >= 0 else RED
@@ -965,7 +978,8 @@ async def morning(session: ClientSession) -> tuple[str, str]:
         + _calendar(econ.get("events", []), earnings.get("earnings", []))
         + _watchlist(watchlist, "Your Watchlist — Pre-Market")
         + perf_section
-        + _picks(picks_data.get("picks", []),
+        + _picks(_enrich_picks_with_perf(picks_data.get("picks", []),
+                                         mem if isinstance(mem, dict) else {}),
                  week=picks_data.get("week", ""),
                  changes=picks_data.get("changes_from_last_week", []))
     )
