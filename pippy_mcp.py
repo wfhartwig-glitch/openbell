@@ -469,10 +469,10 @@ def fetch_economic_calendar() -> str:
 
 @mcp.tool()
 def fetch_earnings_calendar() -> str:
-    """Fetch earnings announcements for the current week. Returns JSON with 'earnings' list."""
+    """Fetch earnings announcements for the next two weeks. Returns JSON with 'earnings' list."""
     ts       = _ts()
     today    = date.today()
-    week_end = (today + timedelta(days=7)).isoformat()
+    week_end = (today + timedelta(days=14)).isoformat()
     try:
         data    = _fmp("/earning_calendar", {"from": today.isoformat(), "to": week_end})
         tracked = WELL_KNOWN | set(WATCHLIST)
@@ -499,7 +499,7 @@ def fetch_earnings_calendar() -> str:
     try:
         tracked_list = list(WELL_KNOWN | set(WATCHLIST))
         week_start   = today.isoformat()
-        week_end_dt  = (today + timedelta(days=7))
+        week_end_dt  = (today + timedelta(days=14))
         earnings = []
         seen = set()
         for sym in tracked_list:

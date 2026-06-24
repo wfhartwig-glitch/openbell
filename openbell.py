@@ -141,7 +141,7 @@ def _headlines(headlines: list) -> str:
     return _section("Top Headlines", items)
 
 
-def _calendar(events: list, earnings: list) -> str:
+def _calendar(events: list, earnings: list, econ_failed: bool = False) -> str:
     rows = ""
     for e in events[:8]:
         evt    = e.get("event", "")
@@ -167,7 +167,11 @@ def _calendar(events: list, earnings: list) -> str:
           <td style="padding:7px 0;text-align:right"><span style="font-size:10px;font-weight:700;color:#7c3aed;text-transform:uppercase">Earnings</span></td>
         </tr>"""
     if not rows:
-        return _section("This Week's Calendar", '<p style="margin:0;font-size:13px;color:#9ca3af">No major events found.</p>')
+        if econ_failed:
+            msg = '<p style="margin:0;font-size:13px;color:#9ca3af">Macro event data unavailable (source error). No tracked earnings in the next two weeks.</p>'
+        else:
+            msg = '<p style="margin:0;font-size:13px;color:#9ca3af">No major events or tracked earnings in the next two weeks.</p>'
+        return _section("This Week's Calendar", msg)
     return _section("This Week's Calendar", f'<table width="100%" cellpadding="0" cellspacing="0">{rows}</table>')
 
 
@@ -991,7 +995,8 @@ async def morning(session: ClientSession) -> tuple[str, str]:
         + _global_indices(global_list)
         + _commodities_and_yields(comm_list, tsy)
         + _headlines(hl_list)
-        + _calendar(econ.get("events", []), earnings.get("earnings", []))
+        + _calendar(econ.get("events", []), earnings.get("earnings", []),
+                    econ_failed=econ.get("source") == "unavailable")
         + _watchlist(watchlist, "Your Watchlist — Pre-Market")
         + perf_section
         + _picks(_enrich_picks_with_perf(picks_data.get("picks", []),
