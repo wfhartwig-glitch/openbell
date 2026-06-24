@@ -346,13 +346,30 @@ def fetch_top_headlines() -> str:
                         "published": pub_str[:10] if pub_str else "",
                         "age_hrs":   round(age_hrs, 1) if age_hrs is not None else None,
                     })
-                if len(titles) >= 7:
-                    break
             if excluded:
                 import sys
                 print(f"[fetch_top_headlines] excluded {len(excluded)} stale/speculative items: "
                       + ", ".join(f"{e['title']} ({e.get('age_hrs','?')}h)" for e in excluded),
                       file=sys.stderr)
+            # Source-diversity filter: cap any single source at 2 in the final 5,
+            # but only when the pool is large enough (≥8 candidates) to afford it.
+            # This prevents content-mill dominance (e.g. 24/7 Wall St. publishing
+            # 13 near-identical fee-trap articles in a single day).
+            if len(titles) >= 8:
+                site_counts: dict[str, int] = {}
+                diverse: list = []
+                for t in titles:
+                    s = t["site"]
+                    if site_counts.get(s, 0) < 2:
+                        diverse.append(t)
+                        site_counts[s] = site_counts.get(s, 0) + 1
+                    if len(diverse) >= 5:
+                        break
+                # Pad back to 5 from the remainder if diversity filter left gaps
+                if len(diverse) < 5:
+                    remaining = [t for t in titles if t not in diverse]
+                    diverse.extend(remaining[:5 - len(diverse)])
+                titles = diverse
             return json.dumps({"source": "yfinance", "headlines": titles[:5], "timestamp": ts})
         except Exception as e:
             return json.dumps({"source": "unavailable", "error": str(e), "timestamp": ts})
