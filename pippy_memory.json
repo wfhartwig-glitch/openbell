@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 29,
-  "last_session": "2026-06-26T20:00:52.495005",
+  "session_count": 31,
+  "last_session": "2026-06-27T13:30:41.692013",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -22,11 +22,18 @@
       "category": "emerging technology",
       "topic": "Why JEPI Investors Gave Up $3,379 in Five-Year Gains",
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
+    },
+    {
+      "date": "2026-06-27",
+      "category": "macro / Fed policy",
+      "topic": "Scott Bessent Defends Tariff Reboot, Unveils \u20183 Through 3\u2019 Plan To Beat \u2018Structural Inflation\u2019",
+      "triggered_by": "\"Scott Bessent Defends Tariff Reboot, Unveils \u20183 Through 3\u2019 Plan To Beat \u2018Structural Inflation\u2019\" via Benzinga",
+      "source_headline_published": "2026-06-27"
     }
   ],
-  "email_count": 18,
-  "last_email_sent": "2026-06-26T20:00:52.494042",
-  "last_email_summary": "close sent Friday, June 26, 2026",
+  "email_count": 19,
+  "last_email_sent": "2026-06-27T13:30:41.690873",
+  "last_email_summary": "deepdive sent Saturday, June 27, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -180,6 +187,12 @@
       "worst_sector": "Industrials",
       "biggest_mover": "NOW +9.8%",
       "date": "2026-06-26"
+    },
+    {
+      "type": "deepdive",
+      "theme": "macro / Fed policy",
+      "topic": "Scott Bessent Defends Tariff Reboot, Unveils \u20183 Through 3\u2019 Plan To Beat \u2018Structural Inflation\u2019",
+      "date": "2026-06-27"
     }
   ],
   "lessons_learned": [
@@ -217,6 +230,7 @@
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
   "theme_frequency": {
     "Fed policy": 1,
-    "inflation data": 1
+    "inflation data": 1,
+    "macro / Fed policy": 1
   }
 }
