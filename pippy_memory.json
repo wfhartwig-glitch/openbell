@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 31,
-  "last_session": "2026-06-27T13:30:41.692013",
+  "session_count": 33,
+  "last_session": "2026-06-28T13:30:52.397508",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -29,11 +29,18 @@
       "topic": "Scott Bessent Defends Tariff Reboot, Unveils \u20183 Through 3\u2019 Plan To Beat \u2018Structural Inflation\u2019",
       "triggered_by": "\"Scott Bessent Defends Tariff Reboot, Unveils \u20183 Through 3\u2019 Plan To Beat \u2018Structural Inflation\u2019\" via Benzinga",
       "source_headline_published": "2026-06-27"
+    },
+    {
+      "date": "2026-06-28",
+      "category": "emerging technology",
+      "topic": "Forget the AI Chipmakers. For 0.47% This Fund Owns the Companies Building the Data Centers",
+      "triggered_by": "\"Forget the AI Chipmakers. For 0.47% This Fund Owns the Companies Building the Data Centers\" via 24/7 Wall St.",
+      "source_headline_published": "2026-06-27"
     }
   ],
-  "email_count": 19,
-  "last_email_sent": "2026-06-27T13:30:41.690873",
-  "last_email_summary": "deepdive sent Saturday, June 27, 2026",
+  "email_count": 20,
+  "last_email_sent": "2026-06-28T13:30:52.396254",
+  "last_email_summary": "deepdive sent Sunday, June 28, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -193,6 +200,12 @@
       "theme": "macro / Fed policy",
       "topic": "Scott Bessent Defends Tariff Reboot, Unveils \u20183 Through 3\u2019 Plan To Beat \u2018Structural Inflation\u2019",
       "date": "2026-06-27"
+    },
+    {
+      "type": "deepdive",
+      "theme": "emerging technology",
+      "topic": "Forget the AI Chipmakers. For 0.47% This Fund Owns the Companies Building the Data Centers",
+      "date": "2026-06-28"
     }
   ],
   "lessons_learned": [
@@ -231,6 +244,7 @@
   "theme_frequency": {
     "Fed policy": 1,
     "inflation data": 1,
-    "macro / Fed policy": 1
+    "macro / Fed policy": 1,
+    "emerging technology": 1
   }
 }
