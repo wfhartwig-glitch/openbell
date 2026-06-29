@@ -175,6 +175,45 @@ def _calendar(events: list, earnings: list, econ_failed: bool = False) -> str:
     return _section("This Week's Calendar", f'<table width="100%" cellpadding="0" cellspacing="0">{rows}</table>')
 
 
+def _daily_scan(candidates: list, scanned: int = 0, elapsed: float = 0) -> str:
+    if not candidates:
+        return _section("Today's Top Scored Candidates",
+                        '<p style="margin:0;font-size:13px;color:#9ca3af">Scan unavailable — no data returned.</p>')
+    rows = ""
+    for i, c in enumerate(candidates[:5], 1):
+        ticker   = c.get("ticker", "")
+        company  = c.get("company", ticker)
+        score    = c.get("score", 0)
+        rationale= c.get("rationale", "")
+        sector   = c.get("sector", "")
+        risk     = c.get("risk_level", "")
+        momentum = c.get("momentum", 0)
+        mom_color = GREEN if momentum >= 0 else RED
+        mom_str   = f'{"▲" if momentum >= 0 else "▼"} {abs(momentum):.1f}% (3mo)'
+        score_color = GREEN if score >= 30 else "#d97706" if score >= 15 else GRAY
+        rows += f"""
+        <tr>
+          <td style="padding:9px 12px 9px 0;vertical-align:top;width:22px">
+            <span style="font-size:11px;font-weight:700;color:#9ca3af">{i}.</span>
+          </td>
+          <td style="padding:9px 12px 9px 0;vertical-align:top">
+            <span style="font-size:14px;font-weight:700;color:#111827">{ticker}</span>
+            <span style="font-size:12px;color:#6b7280;margin-left:6px">{company}</span><br>
+            <span style="font-size:11px;color:#6b7280">{sector}{" · " + risk if risk else ""}</span><br>
+            <span style="font-size:12px;color:#374151;margin-top:2px;display:block">{rationale}</span>
+          </td>
+          <td style="padding:9px 0;vertical-align:top;text-align:right;white-space:nowrap">
+            <span style="font-size:13px;font-weight:700;color:{score_color}">Score {score:.0f}</span><br>
+            <span style="font-size:11px;color:{mom_color}">{mom_str}</span>
+          </td>
+        </tr>"""
+    footer = ""
+    if scanned:
+        footer = f'<tr><td colspan="3" style="padding:8px 0 0;font-size:11px;color:#9ca3af">Daily mechanical scan · {scanned} tickers scored · {elapsed:.0f}s runtime · separate from your held Weekly Picks</td></tr>'
+    return _section("Today's Top Scored Candidates",
+                    f'<table width="100%" cellpadding="0" cellspacing="0">{rows}{footer}</table>')
+
+
 def _sectors(sectors: list) -> str:
     rows = ""
     for s in sectors:
@@ -939,7 +978,7 @@ async def morning(session: ClientSession) -> tuple[str, str]:
     is_monday = today.weekday() == 0
 
     print("    fetching snapshot + global + commodities…")
-    snapshot, global_idx, commodities_raw, treasury_raw, headlines, econ, earnings, mem = \
+    snapshot, global_idx, commodities_raw, treasury_raw, headlines, econ, earnings, mem, scan_raw = \
         await asyncio.gather(
             call(session, "fetch_market_snapshot"),
             call(session, "fetch_global_indices"),
@@ -949,6 +988,7 @@ async def morning(session: ClientSession) -> tuple[str, str]:
             call(session, "fetch_economic_calendar"),
             call(session, "fetch_earnings_calendar"),
             call(session, "load_memory"),
+            call(session, "run_daily_scan"),
         )
 
     # Weekly picks — regenerate every Monday
@@ -1003,6 +1043,9 @@ async def morning(session: ClientSession) -> tuple[str, str]:
                                          mem if isinstance(mem, dict) else {}),
                  week=picks_data.get("week", ""),
                  changes=picks_data.get("changes_from_last_week", []))
+        + _daily_scan(scan_raw.get("candidates", []),
+                      scanned=scan_raw.get("scanned", 0),
+                      elapsed=scan_raw.get("elapsed_s", 0))
     )
     subject = f"Pippy's Brief — {today_str} Morning Briefing"
     html    = _wrap(body, f"Morning Briefing &nbsp; {today_str}", "Pippy's Brief ☀️")
@@ -1012,7 +1055,7 @@ async def morning(session: ClientSession) -> tuple[str, str]:
 async def close(session: ClientSession) -> tuple[str, str, dict]:
     today = date.today().strftime("%A, %B %d")
     print("    fetching snapshot + sectors + movers + commodities + earnings…")
-    snapshot, sectors, movers, commodities_raw, headlines, earnings_raw, mem = \
+    snapshot, sectors, movers, commodities_raw, headlines, earnings_raw, mem, scan_raw = \
         await asyncio.gather(
             call(session, "fetch_market_snapshot"),
             call(session, "fetch_sector_performance"),
@@ -1021,6 +1064,7 @@ async def close(session: ClientSession) -> tuple[str, str, dict]:
             call(session, "fetch_top_headlines"),
             call(session, "fetch_earnings_calendar"),
             call(session, "load_memory"),
+            call(session, "run_daily_scan"),
         )
 
     flagged   = mem.get("flagged_tickers", []) if isinstance(mem, dict) else []
@@ -1042,6 +1086,9 @@ async def close(session: ClientSession) -> tuple[str, str, dict]:
         + _commodities_and_yields(comm_list, {})
         + _watchlist(watchlist, "Your Watchlist — End of Day")
         + _headlines(headlines.get("headlines", []))
+        + _daily_scan(scan_raw.get("candidates", []),
+                      scanned=scan_raw.get("scanned", 0),
+                      elapsed=scan_raw.get("elapsed_s", 0))
     )
     subject = f"Pippy's Brief — {today} Market Close"
     html    = _wrap(body, f"Market Close &nbsp; {today}", "Pippy's Brief 📊")

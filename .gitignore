@@ -3,3 +3,4 @@ pippy_history.json
 __pycache__/
 *.pyc
 # pippy_memory.json is intentionally tracked — it is Pippy's persistent brain
+daily_scan_cache.json

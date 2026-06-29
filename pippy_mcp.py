@@ -76,6 +76,45 @@ WELL_KNOWN = {
     "AVGO", "NFLX", "AMD", "INTC", "CRM", "ADBE", "ORCL", "GS", "WMT",
 }
 
+SCAN_CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "daily_scan_cache.json")
+
+# ~150-ticker scanning universe: S&P 500 mega-caps + high-volume names across sectors.
+# Superset of WATCHLIST — scored fresh daily in run_daily_scan().
+SCAN_UNIVERSE = [
+    # Mega-cap tech
+    "AAPL","MSFT","NVDA","GOOGL","AMZN","META","TSLA","AVGO","AMD","INTC",
+    "CRM","ADBE","ORCL","QCOM","TXN","MU","AMAT","LRCX","KLAC","MRVL",
+    # Software / SaaS
+    "NOW","CRWD","PLTR","DDOG","TTD","APP","HUBS","WDAY","SNOW","TEAM",
+    "ZS","PANW","OKTA","MDB","GTLB","NET","DOCN","BILL","SMAR","VEEV",
+    # Consumer tech / fintech
+    "HOOD","SQ","PYPL","COIN","MELI","SE","GRAB","AFRM","UPST","SOFI",
+    # Semiconductors / hardware
+    "ANET","VRT","SMCI","IONQ","RGTI","ARM","MPWR","ENTG","ONTO",
+    # Biotech / healthcare
+    "HIMS","TMDX","CELH","AXON","ISRG","DXCM","PODD","IDXX","VEEV",
+    "LLY","UNH","ABBV","MRK","AMGN","GILD","BIIB","VRTX","REGN","BMY",
+    # Financials
+    "JPM","GS","MS","BAC","WFC","C","BLK","AXP","V","MA","COF","SCHW",
+    # Energy
+    "XOM","CVX","COP","EOG","SLB","HAL","PSX","VLO","MPC",
+    # Industrials / defense
+    "CAT","DE","HON","GE","RTX","LMT","NOC","BA","UPS","FDX",
+    # Consumer discretionary
+    "LULU","DECK","NKE","SBUX","MCD","CMG","ABNB","BKNG","LYFT","UBER",
+    # Consumer staples
+    "WMT","COST","TGT","PG","KO","PEP","MDLZ","CL","KHC",
+    # Real estate / utilities
+    "AMT","PLD","EQIX","SPG","O","NEE","DUK","SO","D",
+    # Communications / media
+    "NFLX","DIS","CMCSA","CHTR","T","VZ","SPOT","PARA","FOXA",
+    # Small/mid-cap growth from WATCHLIST
+    "SOUN","IONQ","RGTI","HIMS","TMDX","HOOD","APP","TTD",
+]
+# Deduplicate while preserving order
+_seen = set()
+SCAN_UNIVERSE = [t for t in SCAN_UNIVERSE if not (t in _seen or _seen.add(t))]
+
 SECTOR_ETFS = {
     "Technology":        "XLK",
     "Financials":        "XLF",
@@ -1092,6 +1131,168 @@ def get_last_email_summary() -> str:
         })
     except Exception as e:
         return json.dumps({"error": str(e)})
+
+
+@mcp.tool()
+def run_daily_scan() -> str:
+    """
+    Score SCAN_UNIVERSE (~150 tickers) using the same formula as weekly picks.
+    Returns top 20 candidates with scores. Caches results per calendar day so
+    morning and close both read the same scan without re-running it.
+    """
+    ts      = _ts()
+    today_s = date.today().isoformat()
+
+    # Return cached results if already ran today
+    if os.path.exists(SCAN_CACHE_FILE):
+        try:
+            with open(SCAN_CACHE_FILE) as f:
+                cached = json.load(f)
+            if cached.get("date") == today_s:
+                return json.dumps({"source": "cache", "date": today_s,
+                                   "candidates": cached["candidates"], "timestamp": ts})
+        except Exception:
+            pass
+
+    t0 = time.time()
+
+    # ── load performance history for sector/risk bias ─────────────────────────
+    mem = {}
+    if os.path.exists(MEMORY_FILE):
+        try:
+            with open(MEMORY_FILE) as f:
+                mem = json.load(f)
+        except Exception:
+            pass
+
+    perf_history = mem.get("pick_performance_history", [])
+    sector_scores: dict[str, list] = {}
+    risk_scores:   dict[str, list] = {}
+    for ph in perf_history[-30:]:
+        pct = ph.get("pct_change_since_pick")
+        if pct is None:
+            continue
+        s = ph.get("sector", "")
+        r = ph.get("risk_level", "")
+        if s: sector_scores.setdefault(s, []).append(pct)
+        if r: risk_scores.setdefault(r, []).append(pct)
+    sector_bias = {s: sum(v)/len(v) for s, v in sector_scores.items() if v}
+    risk_bias   = {r: sum(v)/len(v) for r, v in risk_scores.items()   if v}
+
+    def _risk_level(beta, mkt_cap):
+        if beta is None:
+            return "moderate"
+        if beta > 1.5 or (mkt_cap and mkt_cap < 5_000_000_000):
+            return "aggressive"
+        if beta < 0.8:
+            return "conservative"
+        return "moderate"
+
+    def _score(info: dict, sbias: dict, rbias: dict) -> float:
+        price  = info.get("currentPrice", 0) or 0
+        target = info.get("targetMeanPrice") or price
+        upside = ((target - price) / price * 100) if price else 0
+        rec    = info.get("recommendationKey", "").lower()
+        s = upside + (20 if rec in ("buy", "strong_buy") else 0)
+        eg = info.get("earningsGrowth")
+        if eg and eg > 0.15: s += 10
+        rg = info.get("revenueGrowth")
+        if rg and rg > 0.10: s += 8
+        fpe = info.get("forwardPE")
+        if fpe and 0 < fpe < 25: s += 5
+        sector = info.get("sector", "")
+        risk   = _risk_level(info.get("beta"), info.get("marketCap"))
+        s += sbias.get(sector, 0) * 0.5
+        s += rbias.get(risk, 0) * 0.3
+        return round(s, 2)
+
+    def _rationale(info: dict) -> str:
+        price  = info.get("currentPrice", 0) or 0
+        target = info.get("targetMeanPrice") or price
+        upside = ((target - price) / price * 100) if price else 0
+        rec    = info.get("recommendationKey", "").lower()
+        parts  = []
+        if upside > 5:  parts.append(f"analyst target implies {upside:.0f}% upside")
+        if rec in ("buy", "strong_buy"): parts.append(f"rated {rec.replace('_',' ')}")
+        eg = info.get("earningsGrowth")
+        if eg and eg > 0.1:  parts.append(f"earnings up {eg*100:.0f}% YoY")
+        rg = info.get("revenueGrowth")
+        if rg and rg > 0.05: parts.append(f"revenue growing {rg*100:.0f}% YoY")
+        fpe = info.get("forwardPE")
+        if fpe and 0 < fpe < 30: parts.append(f"fwd P/E {fpe:.1f}x")
+        return "; ".join(parts[:3]) if parts else info.get("sector", "")
+
+    # ── Phase 1: batch price download to pre-filter by 3-month momentum ───────
+    universe = list(SCAN_UNIVERSE)
+    try:
+        raw = yf.download(universe, period="3mo", interval="1d",
+                          group_by="ticker", auto_adjust=True,
+                          threads=True, progress=False)
+        momentum_scores: dict[str, float] = {}
+        for sym in universe:
+            try:
+                if len(universe) == 1:
+                    closes = raw["Close"].dropna()
+                else:
+                    closes = raw[sym]["Close"].dropna() if sym in raw.columns.get_level_values(0) else None
+                if closes is None or len(closes) < 10:
+                    momentum_scores[sym] = 0.0
+                    continue
+                pct = (closes.iloc[-1] - closes.iloc[0]) / closes.iloc[0] * 100
+                momentum_scores[sym] = round(float(pct), 2)
+            except Exception:
+                momentum_scores[sym] = 0.0
+    except Exception:
+        momentum_scores = {sym: 0.0 for sym in universe}
+
+    # Take top 60 by 3-month momentum for full scoring (+ always include WATCHLIST)
+    always_include = set(WATCHLIST)
+    top_by_momentum = sorted(universe, key=lambda s: momentum_scores.get(s, 0), reverse=True)[:60]
+    to_score = list(dict.fromkeys(top_by_momentum + [s for s in WATCHLIST if s not in top_by_momentum]))
+
+    # ── Phase 2: fetch .info for top candidates and apply full formula ─────────
+    candidates = []
+    for sym in to_score:
+        try:
+            info = yf.Ticker(sym).info
+            price = info.get("currentPrice") or info.get("regularMarketPrice")
+            if not price:
+                continue
+            sc = _score(info, sector_bias, risk_bias)
+            candidates.append({
+                "ticker":    sym,
+                "company":   info.get("shortName") or info.get("longName") or sym,
+                "sector":    info.get("sector", ""),
+                "score":     sc,
+                "momentum":  momentum_scores.get(sym, 0.0),
+                "rationale": _rationale(info),
+                "price":     round(price, 2),
+                "risk_level": _risk_level(info.get("beta"), info.get("marketCap")),
+            })
+            time.sleep(0.05)
+        except Exception:
+            continue
+
+    candidates.sort(key=lambda x: x["score"], reverse=True)
+    top20 = candidates[:20]
+    elapsed = round(time.time() - t0, 1)
+
+    result = {
+        "date":       today_s,
+        "candidates": top20,
+        "scanned":    len(candidates),
+        "elapsed_s":  elapsed,
+        "timestamp":  ts,
+    }
+    try:
+        with open(SCAN_CACHE_FILE, "w") as f:
+            json.dump(result, f)
+    except Exception:
+        pass
+
+    return json.dumps({"source": "live", "date": today_s,
+                       "candidates": top20, "scanned": len(candidates),
+                       "elapsed_s": elapsed, "timestamp": ts})
 
 
 if __name__ == "__main__":
