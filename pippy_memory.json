@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 35,
-  "last_session": "2026-06-29T20:00:56.996840",
+  "session_count": 36,
+  "last_session": "2026-06-30T13:31:22.801677",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -38,9 +38,9 @@
       "source_headline_published": "2026-06-27"
     }
   ],
-  "email_count": 22,
-  "last_email_sent": "2026-06-29T20:00:56.995515",
-  "last_email_summary": "close sent Monday, June 29, 2026",
+  "email_count": 23,
+  "last_email_sent": "2026-06-30T13:31:22.800663",
+  "last_email_summary": "morning sent Tuesday, June 30, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -225,6 +225,16 @@
       "worst_sector": "Materials",
       "biggest_mover": "AXON +10.1%",
       "date": "2026-06-29"
+    },
+    {
+      "type": "morning",
+      "direction_called": "mixed",
+      "leading_index": "Dow",
+      "lagging_index": "Nasdaq",
+      "headline_theme": "earnings season",
+      "commodity_note": "WTI Crude Oil up 1.0%",
+      "picks_status": "holding",
+      "date": "2026-06-30"
     }
   ],
   "lessons_learned": [
@@ -275,6 +285,7 @@
     "inflation data": 1,
     "macro / Fed policy": 1,
     "emerging technology": 1,
-    "geopolitical tensions": 1
+    "geopolitical tensions": 1,
+    "earnings season": 1
   }
 }
