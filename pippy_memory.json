@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 36,
-  "last_session": "2026-06-30T13:31:22.801677",
+  "session_count": 37,
+  "last_session": "2026-06-30T20:01:42.798653",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -38,9 +38,9 @@
       "source_headline_published": "2026-06-27"
     }
   ],
-  "email_count": 23,
-  "last_email_sent": "2026-06-30T13:31:22.800663",
-  "last_email_summary": "morning sent Tuesday, June 30, 2026",
+  "email_count": 24,
+  "last_email_sent": "2026-06-30T20:01:42.797634",
+  "last_email_summary": "close sent Tuesday, June 30, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -235,6 +235,15 @@
       "commodity_note": "WTI Crude Oil up 1.0%",
       "picks_status": "holding",
       "date": "2026-06-30"
+    },
+    {
+      "type": "close",
+      "actual_direction": "higher",
+      "actual_sp_pct": 0.78,
+      "best_sector": "Technology",
+      "worst_sector": "Real Estate",
+      "biggest_mover": "VRT +8.9%",
+      "date": "2026-06-30"
     }
   ],
   "lessons_learned": [
@@ -277,6 +286,12 @@
       "called": "higher",
       "actual": "higher",
       "accurate": true
+    },
+    {
+      "date": "2026-06-30",
+      "called": "mixed",
+      "actual": "higher",
+      "accurate": false
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
