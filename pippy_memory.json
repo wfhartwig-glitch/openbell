@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 39,
-  "last_session": "2026-07-01T20:01:33.103638",
+  "session_count": 40,
+  "last_session": "2026-07-02T13:31:20.815613",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -38,9 +38,9 @@
       "source_headline_published": "2026-06-27"
     }
   ],
-  "email_count": 26,
-  "last_email_sent": "2026-07-01T20:01:33.102560",
-  "last_email_summary": "close sent Wednesday, July 01, 2026",
+  "email_count": 27,
+  "last_email_sent": "2026-07-02T13:31:20.814412",
+  "last_email_summary": "morning sent Thursday, July 02, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -263,6 +263,16 @@
       "worst_sector": "Technology",
       "biggest_mover": "APP +9.6%",
       "date": "2026-07-01"
+    },
+    {
+      "type": "morning",
+      "direction_called": "higher",
+      "leading_index": "Dow",
+      "lagging_index": "",
+      "headline_theme": "jobs data",
+      "commodity_note": "Gold up 1.1%",
+      "picks_status": "holding",
+      "date": "2026-07-02"
     }
   ],
   "lessons_learned": [
@@ -326,6 +336,7 @@
     "macro / Fed policy": 1,
     "emerging technology": 1,
     "geopolitical tensions": 1,
-    "earnings season": 1
+    "earnings season": 1,
+    "jobs data": 1
   }
 }
