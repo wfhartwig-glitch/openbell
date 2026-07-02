@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 40,
-  "last_session": "2026-07-02T13:31:20.815613",
+  "session_count": 41,
+  "last_session": "2026-07-02T20:01:15.708286",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -38,9 +38,9 @@
       "source_headline_published": "2026-06-27"
     }
   ],
-  "email_count": 27,
-  "last_email_sent": "2026-07-02T13:31:20.814412",
-  "last_email_summary": "morning sent Thursday, July 02, 2026",
+  "email_count": 28,
+  "last_email_sent": "2026-07-02T20:01:15.707169",
+  "last_email_summary": "close sent Thursday, July 02, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -273,6 +273,15 @@
       "commodity_note": "Gold up 1.1%",
       "picks_status": "holding",
       "date": "2026-07-02"
+    },
+    {
+      "type": "close",
+      "actual_direction": "mixed",
+      "actual_sp_pct": -0.01,
+      "best_sector": "Health Care",
+      "worst_sector": "Technology",
+      "biggest_mover": "AAPL +4.8%",
+      "date": "2026-07-02"
     }
   ],
   "lessons_learned": [
@@ -327,6 +336,12 @@
       "called": "lower",
       "actual": "lower",
       "accurate": true
+    },
+    {
+      "date": "2026-07-02",
+      "called": "higher",
+      "actual": "mixed",
+      "accurate": false
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
