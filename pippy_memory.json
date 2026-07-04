@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 43,
-  "last_session": "2026-07-03T13:30:47.219456",
+  "session_count": 45,
+  "last_session": "2026-07-04T13:30:55.868270",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -43,11 +43,18 @@
       "topic": "ETF Zoo: Mid-Year Check-In  the AI Trade That Won\u2019t Quit",
       "triggered_by": "\"ETF Zoo: Mid-Year Check-In  the AI Trade That Won\u2019t Quit\" via etf.com",
       "source_headline_published": "2026-07-03"
+    },
+    {
+      "date": "2026-07-04",
+      "category": "sector rotation",
+      "topic": "Dow vs. Nasdaq \u2014 1.94% spread points to value over growth rotation",
+      "triggered_by": "Index divergence at Thursday's close: Dow +1.14%, Nasdaq -0.80%",
+      "source_headline_published": ""
     }
   ],
-  "email_count": 29,
-  "last_email_sent": "2026-07-03T13:30:47.218310",
-  "last_email_summary": "deepdive sent Friday, July 03, 2026",
+  "email_count": 30,
+  "last_email_sent": "2026-07-04T13:30:55.867141",
+  "last_email_summary": "deepdive sent Saturday, July 04, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -295,6 +302,12 @@
       "theme": "emerging technology",
       "topic": "ETF Zoo: Mid-Year Check-In  the AI Trade That Won\u2019t Quit",
       "date": "2026-07-03"
+    },
+    {
+      "type": "deepdive",
+      "theme": "sector rotation",
+      "topic": "Dow vs. Nasdaq \u2014 1.94% spread points to value over growth rotation",
+      "date": "2026-07-04"
     }
   ],
   "lessons_learned": [
@@ -365,6 +378,7 @@
     "emerging technology": 2,
     "geopolitical tensions": 1,
     "earnings season": 1,
-    "jobs data": 1
+    "jobs data": 1,
+    "sector rotation": 1
   }
 }
