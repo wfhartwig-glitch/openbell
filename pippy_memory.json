@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 48,
-  "last_session": "2026-07-06T13:31:21.108002",
+  "session_count": 49,
+  "last_session": "2026-07-06T20:01:24.883439",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -59,9 +59,9 @@
       "source_headline_published": ""
     }
   ],
-  "email_count": 32,
-  "last_email_sent": "2026-07-06T13:31:21.106684",
-  "last_email_summary": "morning sent Monday, July 06, 2026",
+  "email_count": 33,
+  "last_email_sent": "2026-07-06T20:01:24.882221",
+  "last_email_summary": "close sent Monday, July 06, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -331,6 +331,15 @@
       "commodity_note": "",
       "picks_status": "holding",
       "date": "2026-07-06"
+    },
+    {
+      "type": "close",
+      "actual_direction": "higher",
+      "actual_sp_pct": 0.8,
+      "best_sector": "Financials",
+      "worst_sector": "Consumer Staples",
+      "biggest_mover": "ANET +8.0%",
+      "date": "2026-07-06"
     }
   ],
   "lessons_learned": [
@@ -395,6 +404,12 @@
       "called": "higher",
       "actual": "mixed",
       "accurate": false
+    },
+    {
+      "date": "2026-07-06",
+      "called": "higher",
+      "actual": "higher",
+      "accurate": true
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
