@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 49,
-  "last_session": "2026-07-06T20:01:24.883439",
+  "session_count": 50,
+  "last_session": "2026-07-07T13:31:18.666159",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -59,9 +59,9 @@
       "source_headline_published": ""
     }
   ],
-  "email_count": 33,
-  "last_email_sent": "2026-07-06T20:01:24.882221",
-  "last_email_summary": "close sent Monday, July 06, 2026",
+  "email_count": 34,
+  "last_email_sent": "2026-07-07T13:31:18.665165",
+  "last_email_summary": "morning sent Tuesday, July 07, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -340,6 +340,16 @@
       "worst_sector": "Consumer Staples",
       "biggest_mover": "ANET +8.0%",
       "date": "2026-07-06"
+    },
+    {
+      "type": "morning",
+      "direction_called": "mixed",
+      "leading_index": "",
+      "lagging_index": "Nasdaq",
+      "headline_theme": "earnings season",
+      "commodity_note": "",
+      "picks_status": "holding",
+      "date": "2026-07-07"
     }
   ],
   "lessons_learned": [
@@ -419,7 +429,7 @@
     "macro / Fed policy": 1,
     "emerging technology": 2,
     "geopolitical tensions": 1,
-    "earnings season": 1,
+    "earnings season": 2,
     "jobs data": 1,
     "sector rotation": 2
   }
