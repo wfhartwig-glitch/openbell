@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 51,
-  "last_session": "2026-07-07T20:01:41.075694",
+  "session_count": 52,
+  "last_session": "2026-07-08T13:31:49.193273",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -59,9 +59,9 @@
       "source_headline_published": ""
     }
   ],
-  "email_count": 35,
-  "last_email_sent": "2026-07-07T20:01:41.074383",
-  "last_email_summary": "close sent Tuesday, July 07, 2026",
+  "email_count": 36,
+  "last_email_sent": "2026-07-08T13:31:49.192200",
+  "last_email_summary": "morning sent Wednesday, July 08, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -359,6 +359,16 @@
       "worst_sector": "Technology",
       "biggest_mover": "AXON +2.9%",
       "date": "2026-07-07"
+    },
+    {
+      "type": "morning",
+      "direction_called": "lower",
+      "leading_index": "",
+      "lagging_index": "Dow",
+      "headline_theme": "geopolitical tensions",
+      "commodity_note": "WTI Crude Oil up 2.2%",
+      "picks_status": "holding",
+      "date": "2026-07-08"
     }
   ],
   "lessons_learned": [
@@ -443,7 +453,7 @@
     "inflation data": 1,
     "macro / Fed policy": 1,
     "emerging technology": 2,
-    "geopolitical tensions": 1,
+    "geopolitical tensions": 2,
     "earnings season": 2,
     "jobs data": 1,
     "sector rotation": 2
