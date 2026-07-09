@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 53,
-  "last_session": "2026-07-08T20:01:56.078519",
+  "session_count": 54,
+  "last_session": "2026-07-09T13:31:37.739074",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -59,9 +59,9 @@
       "source_headline_published": ""
     }
   ],
-  "email_count": 37,
-  "last_email_sent": "2026-07-08T20:01:56.077043",
-  "last_email_summary": "close sent Wednesday, July 08, 2026",
+  "email_count": 38,
+  "last_email_sent": "2026-07-09T13:31:37.737634",
+  "last_email_summary": "morning sent Thursday, July 09, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -378,6 +378,16 @@
       "worst_sector": "Materials",
       "biggest_mover": "ANET +9.1%",
       "date": "2026-07-08"
+    },
+    {
+      "type": "morning",
+      "direction_called": "higher",
+      "leading_index": "Nasdaq",
+      "lagging_index": "",
+      "headline_theme": "geopolitical tensions",
+      "commodity_note": "WTI Crude Oil down 1.7%",
+      "picks_status": "holding",
+      "date": "2026-07-09"
     }
   ],
   "lessons_learned": [
@@ -468,7 +478,7 @@
     "inflation data": 1,
     "macro / Fed policy": 1,
     "emerging technology": 2,
-    "geopolitical tensions": 2,
+    "geopolitical tensions": 3,
     "earnings season": 2,
     "jobs data": 1,
     "sector rotation": 2
