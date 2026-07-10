@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 55,
-  "last_session": "2026-07-09T20:01:26.633530",
+  "session_count": 56,
+  "last_session": "2026-07-10T13:31:09.734253",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -59,9 +59,9 @@
       "source_headline_published": ""
     }
   ],
-  "email_count": 39,
-  "last_email_sent": "2026-07-09T20:01:26.632049",
-  "last_email_summary": "close sent Thursday, July 09, 2026",
+  "email_count": 40,
+  "last_email_sent": "2026-07-10T13:31:09.732691",
+  "last_email_summary": "morning sent Friday, July 10, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -397,6 +397,16 @@
       "worst_sector": "Consumer Staples",
       "biggest_mover": "META +4.6%",
       "date": "2026-07-09"
+    },
+    {
+      "type": "morning",
+      "direction_called": "mixed",
+      "leading_index": "Dow",
+      "lagging_index": "Nasdaq",
+      "headline_theme": "geopolitical tensions",
+      "commodity_note": "",
+      "picks_status": "holding",
+      "date": "2026-07-10"
     }
   ],
   "lessons_learned": [
@@ -493,7 +503,7 @@
     "inflation data": 1,
     "macro / Fed policy": 1,
     "emerging technology": 2,
-    "geopolitical tensions": 3,
+    "geopolitical tensions": 4,
     "earnings season": 2,
     "jobs data": 1,
     "sector rotation": 2
