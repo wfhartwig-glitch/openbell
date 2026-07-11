@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 57,
-  "last_session": "2026-07-10T20:01:29.802950",
+  "session_count": 59,
+  "last_session": "2026-07-11T13:31:01.641746",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -57,11 +57,18 @@
       "topic": "Dow vs. Nasdaq \u2014 1.94% spread points to value over growth rotation",
       "triggered_by": "Index divergence at Thursday's close: Dow +1.14%, Nasdaq -0.80%",
       "source_headline_published": ""
+    },
+    {
+      "date": "2026-07-11",
+      "category": "market overview",
+      "topic": "A positive but quiet week \u2014 S&P +0.42%, Nasdaq +0.29%",
+      "triggered_by": "No notable divergence or headlines \u2014 plain market summary",
+      "source_headline_published": ""
     }
   ],
-  "email_count": 41,
-  "last_email_sent": "2026-07-10T20:01:29.801538",
-  "last_email_summary": "close sent Friday, July 10, 2026",
+  "email_count": 42,
+  "last_email_sent": "2026-07-11T13:31:01.640174",
+  "last_email_summary": "deepdive sent Saturday, July 11, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -416,6 +423,12 @@
       "worst_sector": "Health Care",
       "biggest_mover": "META +4.6%",
       "date": "2026-07-10"
+    },
+    {
+      "type": "deepdive",
+      "theme": "market overview",
+      "topic": "A positive but quiet week \u2014 S&P +0.42%, Nasdaq +0.29%",
+      "date": "2026-07-11"
     }
   ],
   "lessons_learned": [
@@ -521,6 +534,7 @@
     "geopolitical tensions": 4,
     "earnings season": 2,
     "jobs data": 1,
-    "sector rotation": 2
+    "sector rotation": 2,
+    "market overview": 1
   }
 }
