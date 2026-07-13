@@ -287,103 +287,89 @@ def _enrich_picks_with_perf(picks: list, mem: dict) -> list:
     return enriched
 
 
-def _picks(picks: list, week: str = "", changes: list = None) -> str:
-    if not picks:
+def _unified_picks(picks: list, scan_candidates: list, week: str = "", changes: list = None,
+                   scanned: int = 0, elapsed: float = 0) -> str:
+    """
+    One picks table: held Weekly Picks first, then new daily-scan candidates
+    not already held. A ticker that's both held and top-scored today gets a
+    single row (held) with an inline flag — never two rows with two numbers.
+    """
+    if not picks and not scan_candidates:
         return ""
     risk_colors = {"Low": GREEN, "Medium": "#d97706", "High": RED, "Speculative": "#7c3aed"}
+
+    held_tickers = {p.get("ticker", "") for p in picks}
+    top_scan       = scan_candidates[:5]
+    scan_by_ticker = {c.get("ticker", ""): c for c in top_scan}
+
     rows = ""
     for p in picks:
-        risk   = p.get("risk_level") or p.get("risk", "—")
-        rcolor = risk_colors.get(risk, GRAY)
-        status = p.get("status", "")
-        status_color = GREEN if status == "holding" else "#7c3aed" if status == "new" else GRAY
+        ticker     = p.get("ticker", "")
         weeks_held = p.get("weeks_held", 1)
         pct_since  = p.get("pct_change_since_pick")
         pct_str    = ""
         if pct_since is not None:
             c = GREEN if pct_since >= 0 else RED
-            pct_str = f'<span style="color:{c};font-weight:700">{"▲" if pct_since >= 0 else "▼"} {abs(pct_since):.1f}%</span>'
+            pct_str = f'<span style="color:{c};font-weight:700">{"▲" if pct_since >= 0 else "▼"} {abs(pct_since):.1f}%</span> since entry — '
         note = p.get("note") or p.get("rationale", "")
+
+        flag = ""
+        if ticker in scan_by_ticker:
+            sc = scan_by_ticker[ticker]
+            flag = f' — <span style="color:#7c3aed;font-weight:600">also top-scored today (Score {sc.get("score", 0):.0f})</span>'
+
         rows += f"""
         <tr style="border-top:1px solid #f3f4f6">
-          <td style="padding:10px 10px 10px 0;font-size:13px;font-weight:700;color:#111827;width:55px">{p.get("ticker","")}</td>
+          <td style="padding:10px 10px 10px 0;font-size:13px;font-weight:700;color:#111827;width:55px">{ticker}</td>
           <td style="padding:10px 10px 10px 0;font-size:12px;color:#374151">{p.get("company","")}</td>
           <td style="padding:10px 10px 10px 0;font-size:11px;color:#6b7280">{p.get("sector","")}</td>
-          <td style="padding:10px 10px 10px 0;font-size:10px;font-weight:700;color:{rcolor};text-transform:uppercase;white-space:nowrap">{risk}</td>
-          <td style="padding:10px 10px 10px 0;font-size:11px;color:{status_color};white-space:nowrap">{status} · {weeks_held}w {pct_str}</td>
-          <td style="padding:10px 0;font-size:11px;color:#6b7280">{note}</td>
+          <td style="padding:10px 10px 10px 0;font-size:11px;font-weight:700;color:{GREEN};white-space:nowrap">Holding · {weeks_held}w</td>
+          <td style="padding:10px 0;font-size:11px;color:#6b7280">{pct_str}{note}{flag}</td>
         </tr>"""
+
+    new_candidates = [c for c in top_scan if c.get("ticker", "") not in held_tickers][:4]
+    for c in new_candidates:
+        score    = c.get("score", 0)
+        momentum = c.get("momentum", 0)
+        mom_str  = f'{"▲" if momentum >= 0 else "▼"} {abs(momentum):.1f}% (3mo)'
+        detail   = f"Score {score:.0f} — {c.get('rationale','')} — {mom_str}"
+        rows += f"""
+        <tr style="border-top:1px solid #f3f4f6">
+          <td style="padding:10px 10px 10px 0;font-size:13px;font-weight:700;color:#111827;width:55px">{c.get("ticker","")}</td>
+          <td style="padding:10px 10px 10px 0;font-size:12px;color:#374151">{c.get("company","")}</td>
+          <td style="padding:10px 10px 10px 0;font-size:11px;color:#6b7280">{c.get("sector","")}</td>
+          <td style="padding:10px 10px 10px 0;font-size:11px;font-weight:700;color:#7c3aed;white-space:nowrap">New candidate</td>
+          <td style="padding:10px 0;font-size:11px;color:#6b7280">{detail}</td>
+        </tr>"""
+
     header = """<tr>
       <td style="padding:0 10px 8px 0;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase">Ticker</td>
       <td style="padding:0 10px 8px 0;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase">Company</td>
       <td style="padding:0 10px 8px 0;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase">Sector</td>
-      <td style="padding:0 10px 8px 0;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase">Risk</td>
       <td style="padding:0 10px 8px 0;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase">Status</td>
-      <td style="padding:0 0 8px;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase">Note</td>
+      <td style="padding:0 0 8px;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase">Detail</td>
     </tr>"""
+
     changes_html = ""
     if changes:
         items = "".join(f'<li style="margin:3px 0;font-size:12px;color:#6b7280">{c}</li>' for c in changes)
         changes_html = f'<p style="margin:12px 0 4px;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em">Changes This Week</p><ul style="margin:0;padding-left:18px">{items}</ul>'
+
+    explainer = ('<p style="margin:0 0 12px;font-size:12px;color:#6b7280">'
+                 'Holding = current positions, updated weekly. '
+                 'New candidate = fresh signal from today\'s scan.</p>')
+
+    footer_bits = ["Updated every Monday. Not financial advice."]
+    if scanned:
+        footer_bits.append(f"Daily mechanical scan · {scanned} tickers scored · {elapsed:.0f}s runtime.")
+    footer = f'<p style="margin:10px 0 0;font-size:11px;color:#9ca3af">{" ".join(footer_bits)}</p>'
+
     week_label = f" — {week}" if week else ""
-    return _section(f"Weekly Picks{week_label}",
-        f'<table width="100%" cellpadding="0" cellspacing="0">{header}{rows}</table>'
+    return _section(f"Stock Picks{week_label}",
+        explainer
+        + f'<table width="100%" cellpadding="0" cellspacing="0">{header}{rows}</table>'
         + changes_html
-        + '<p style="margin:10px 0 0;font-size:11px;color:#9ca3af">Updated every Monday. Kept when thesis holds, replaced when conditions shift. Not financial advice.</p>')
-
-
-def _picks_performance(perf_history: list, lessons: list) -> str:
-    """Monday-only section: track record of current and recently dropped picks."""
-    held    = [p for p in perf_history if p.get("still_held")]
-    dropped = [p for p in perf_history if not p.get("still_held") and p.get("week_dropped")]
-    # Only show picks dropped in last 4 weeks
-    dropped = sorted(dropped, key=lambda x: x.get("week_dropped",""), reverse=True)[:4]
-
-    if not held and not dropped:
-        return ""
-
-    rows = ""
-    for p in sorted(held, key=lambda x: x.get("pct_change_since_pick") or 0, reverse=True):
-        pct   = p.get("pct_change_since_pick")
-        color = GREEN if (pct or 0) >= 0 else RED
-        pct_s = f'{"▲" if (pct or 0) >= 0 else "▼"} {abs(pct):.1f}%' if pct is not None else "—"
-        rows += f"""
-        <tr style="border-top:1px solid #f3f4f6">
-          <td style="padding:7px 10px 7px 0;font-size:13px;font-weight:700;color:#111827;width:60px">{p.get("ticker","")}</td>
-          <td style="padding:7px 10px 7px 0;font-size:12px;color:#6b7280">{p.get("sector","")}</td>
-          <td style="padding:7px 10px 7px 0;font-size:12px;color:#374151">since {p.get("week_picked","?")}</td>
-          <td style="padding:7px 0;font-size:13px;font-weight:700;color:{color}">{pct_s}</td>
-        </tr>"""
-
-    if dropped:
-        rows += f'<tr><td colspan="4" style="padding:10px 0 4px;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em">Recently Dropped</td></tr>'
-        for p in dropped:
-            pct   = p.get("pct_change_since_pick")
-            color = GREEN if (pct or 0) >= 0 else RED
-            pct_s = f'{"▲" if (pct or 0) >= 0 else "▼"} {abs(pct):.1f}%' if pct is not None else "—"
-            rows += f"""
-            <tr style="border-top:1px solid #f3f4f6">
-              <td style="padding:7px 10px 7px 0;font-size:13px;font-weight:700;color:#9ca3af;width:60px">{p.get("ticker","")}</td>
-              <td style="padding:7px 10px 7px 0;font-size:12px;color:#9ca3af">{p.get("sector","")}</td>
-              <td style="padding:7px 10px 7px 0;font-size:12px;color:#9ca3af">dropped {p.get("week_dropped","?")}</td>
-              <td style="padding:7px 0;font-size:13px;font-weight:700;color:{color}">{pct_s}</td>
-            </tr>"""
-
-    lesson_html = ""
-    if lessons:
-        last_lesson = lessons[-1].get("note", "")
-        if last_lesson:
-            lesson_html = f'<p style="margin:12px 0 0;font-size:12px;color:#374151;font-style:italic">{last_lesson}</p>'
-
-    header = """<tr>
-      <td style="padding:0 10px 8px 0;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase">Ticker</td>
-      <td style="padding:0 10px 8px 0;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase">Sector</td>
-      <td style="padding:0 10px 8px 0;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase">Held Since</td>
-      <td style="padding:0 0 8px;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase">Return</td>
-    </tr>"""
-    return _section("Pick Performance",
-        f'<table width="100%" cellpadding="0" cellspacing="0">{header}{rows}</table>'
-        + lesson_html)
+        + footer)
 
 
 # ── Learning loop helpers ─────────────────────────────────────────────────────
@@ -1100,12 +1086,6 @@ async def morning(session: ClientSession) -> tuple[str, str]:
         print(f"    pre-market {t}…")
         watchlist.append(await call(session, "fetch_premarket_data", {"ticker": t}))
 
-    perf_section = ""
-    if is_monday:
-        perf_history = mem.get("pick_performance_history", []) if isinstance(mem, dict) else []
-        lessons      = mem.get("lessons_learned", [])          if isinstance(mem, dict) else []
-        perf_section = _picks_performance(perf_history, lessons)
-
     snap_list   = snapshot.get("data", [])
     hl_list     = headlines.get("headlines", [])
     global_list = global_idx.get("indices", [])
@@ -1127,14 +1107,13 @@ async def morning(session: ClientSession) -> tuple[str, str]:
         + _calendar(econ.get("events", []), earnings.get("earnings", []),
                     econ_failed=econ.get("source") == "unavailable")
         + _watchlist(watchlist, "Your Watchlist — Pre-Market")
-        + perf_section
-        + _picks(_enrich_picks_with_perf(picks_data.get("picks", []),
-                                         mem if isinstance(mem, dict) else {}),
-                 week=picks_data.get("week", ""),
-                 changes=picks_data.get("changes_from_last_week", []))
-        + _daily_scan(scan_raw.get("candidates", []),
-                      scanned=scan_raw.get("scanned", 0),
-                      elapsed=scan_raw.get("elapsed_s", 0))
+        + _unified_picks(_enrich_picks_with_perf(picks_data.get("picks", []),
+                                                 mem if isinstance(mem, dict) else {}),
+                        scan_raw.get("candidates", []),
+                        week=picks_data.get("week", ""),
+                        changes=picks_data.get("changes_from_last_week", []),
+                        scanned=scan_raw.get("scanned", 0),
+                        elapsed=scan_raw.get("elapsed_s", 0))
     )
     subject = f"Pippy's Brief — {today_str} Morning Briefing"
     html    = _wrap(body, f"Morning Briefing &nbsp; {today_str}", "Pippy's Brief ☀️")
