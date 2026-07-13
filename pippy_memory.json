@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 63,
-  "last_session": "2026-07-13T20:01:47.879716",
+  "session_count": 24,
+  "last_session": "2026-06-24T13:30:44.921210",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -22,60 +22,11 @@
       "category": "emerging technology",
       "topic": "Why JEPI Investors Gave Up $3,379 in Five-Year Gains",
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
-    },
-    {
-      "date": "2026-06-27",
-      "category": "macro / Fed policy",
-      "topic": "Scott Bessent Defends Tariff Reboot, Unveils \u20183 Through 3\u2019 Plan To Beat \u2018Structural Inflation\u2019",
-      "triggered_by": "\"Scott Bessent Defends Tariff Reboot, Unveils \u20183 Through 3\u2019 Plan To Beat \u2018Structural Inflation\u2019\" via Benzinga",
-      "source_headline_published": "2026-06-27"
-    },
-    {
-      "date": "2026-06-28",
-      "category": "emerging technology",
-      "topic": "Forget the AI Chipmakers. For 0.47% This Fund Owns the Companies Building the Data Centers",
-      "triggered_by": "\"Forget the AI Chipmakers. For 0.47% This Fund Owns the Companies Building the Data Centers\" via 24/7 Wall St.",
-      "source_headline_published": "2026-06-27"
-    },
-    {
-      "date": "2026-07-03",
-      "category": "emerging technology",
-      "topic": "ETF Zoo: Mid-Year Check-In  the AI Trade That Won\u2019t Quit",
-      "triggered_by": "\"ETF Zoo: Mid-Year Check-In  the AI Trade That Won\u2019t Quit\" via etf.com",
-      "source_headline_published": "2026-07-03"
-    },
-    {
-      "date": "2026-07-04",
-      "category": "sector rotation",
-      "topic": "Dow vs. Nasdaq \u2014 1.94% spread points to value over growth rotation",
-      "triggered_by": "Index divergence at Thursday's close: Dow +1.14%, Nasdaq -0.80%",
-      "source_headline_published": ""
-    },
-    {
-      "date": "2026-07-05",
-      "category": "sector rotation",
-      "topic": "Dow vs. Nasdaq \u2014 1.94% spread points to value over growth rotation",
-      "triggered_by": "Index divergence at Thursday's close: Dow +1.14%, Nasdaq -0.80%",
-      "source_headline_published": ""
-    },
-    {
-      "date": "2026-07-11",
-      "category": "market overview",
-      "topic": "A positive but quiet week \u2014 S&P +0.42%, Nasdaq +0.29%",
-      "triggered_by": "No notable divergence or headlines \u2014 plain market summary",
-      "source_headline_published": ""
-    },
-    {
-      "date": "2026-07-12",
-      "category": "market overview",
-      "topic": "A positive but quiet week \u2014 S&P +0.42%, Nasdaq +0.29%",
-      "triggered_by": "No notable divergence or headlines \u2014 plain market summary",
-      "source_headline_published": ""
     }
   ],
-  "email_count": 45,
-  "last_email_sent": "2026-07-13T20:01:47.877976",
-  "last_email_summary": "close sent Monday, July 13, 2026",
+  "email_count": 13,
+  "last_email_sent": "2026-06-24T13:30:44.920336",
+  "last_email_summary": "morning sent Wednesday, June 24, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -84,8 +35,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 376.9,
-      "price_now": 389.55,
-      "pct_change_since_pick": 3.36,
+      "price_now": 368.57,
+      "pct_change_since_pick": -2.21,
       "still_held": true
     },
     {
@@ -95,8 +46,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 571.4,
-      "price_now": 661.24,
-      "pct_change_since_pick": 15.72,
+      "price_now": 562.6,
+      "pct_change_since_pick": -1.54,
       "still_held": true
     },
     {
@@ -106,8 +57,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 212.67,
-      "price_now": 209.85,
-      "pct_change_since_pick": -1.33,
+      "price_now": 194.97,
+      "pct_change_since_pick": -8.32,
       "still_held": true
     },
     {
@@ -117,8 +68,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 7.0,
-      "price_now": 6.66,
-      "pct_change_since_pick": -4.86,
+      "price_now": 6.4,
+      "pct_change_since_pick": -8.57,
       "still_held": true
     },
     {
@@ -128,8 +79,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 29.95,
-      "price_now": 30.38,
-      "pct_change_since_pick": 1.44,
+      "price_now": 29.79,
+      "pct_change_since_pick": -0.53,
       "still_held": true
     },
     {
@@ -139,8 +90,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 411.22,
-      "price_now": 571.84,
-      "pct_change_since_pick": 39.06,
+      "price_now": 510.6,
+      "pct_change_since_pick": 24.17,
       "still_held": true
     }
   ],
@@ -182,285 +133,6 @@
       "commodity_note": "WTI Crude Oil down 3.0%",
       "picks_status": "holding",
       "date": "2026-06-24"
-    },
-    {
-      "type": "close",
-      "actual_direction": "mixed",
-      "actual_sp_pct": -0.09,
-      "best_sector": "Consumer Discret.",
-      "worst_sector": "Energy",
-      "biggest_mover": "AXON +4.8%",
-      "date": "2026-06-24"
-    },
-    {
-      "type": "morning",
-      "direction_called": "higher",
-      "leading_index": "Nasdaq",
-      "lagging_index": "",
-      "headline_theme": "inflation data",
-      "commodity_note": "WTI Crude Oil up 1.0%",
-      "picks_status": "holding",
-      "date": "2026-06-25"
-    },
-    {
-      "type": "close",
-      "actual_direction": "mixed",
-      "actual_sp_pct": -0.03,
-      "best_sector": "Health Care",
-      "worst_sector": "Technology",
-      "biggest_mover": "PLTR -5.7%",
-      "date": "2026-06-25"
-    },
-    {
-      "type": "morning",
-      "direction_called": "lower",
-      "leading_index": "",
-      "lagging_index": "Nasdaq",
-      "headline_theme": "",
-      "commodity_note": "Gold up 1.2%",
-      "picks_status": "holding",
-      "date": "2026-06-26"
-    },
-    {
-      "type": "close",
-      "actual_direction": "lower",
-      "actual_sp_pct": -0.06,
-      "best_sector": "Health Care",
-      "worst_sector": "Industrials",
-      "biggest_mover": "NOW +9.8%",
-      "date": "2026-06-26"
-    },
-    {
-      "type": "deepdive",
-      "theme": "macro / Fed policy",
-      "topic": "Scott Bessent Defends Tariff Reboot, Unveils \u20183 Through 3\u2019 Plan To Beat \u2018Structural Inflation\u2019",
-      "date": "2026-06-27"
-    },
-    {
-      "type": "deepdive",
-      "theme": "emerging technology",
-      "topic": "Forget the AI Chipmakers. For 0.47% This Fund Owns the Companies Building the Data Centers",
-      "date": "2026-06-28"
-    },
-    {
-      "type": "morning",
-      "direction_called": "higher",
-      "leading_index": "Nasdaq",
-      "lagging_index": "",
-      "headline_theme": "geopolitical tensions",
-      "commodity_note": "",
-      "picks_status": "holding",
-      "date": "2026-06-29"
-    },
-    {
-      "type": "close",
-      "actual_direction": "higher",
-      "actual_sp_pct": 1.17,
-      "best_sector": "Consumer Discret.",
-      "worst_sector": "Materials",
-      "biggest_mover": "AXON +10.1%",
-      "date": "2026-06-29"
-    },
-    {
-      "type": "morning",
-      "direction_called": "mixed",
-      "leading_index": "Dow",
-      "lagging_index": "Nasdaq",
-      "headline_theme": "earnings season",
-      "commodity_note": "WTI Crude Oil up 1.0%",
-      "picks_status": "holding",
-      "date": "2026-06-30"
-    },
-    {
-      "type": "close",
-      "actual_direction": "higher",
-      "actual_sp_pct": 0.78,
-      "best_sector": "Technology",
-      "worst_sector": "Real Estate",
-      "biggest_mover": "VRT +8.9%",
-      "date": "2026-06-30"
-    },
-    {
-      "type": "morning",
-      "direction_called": "lower",
-      "leading_index": "",
-      "lagging_index": "Nasdaq",
-      "headline_theme": "Fed policy",
-      "commodity_note": "WTI Crude Oil down 1.3%",
-      "picks_status": "holding",
-      "date": "2026-07-01"
-    },
-    {
-      "type": "close",
-      "actual_direction": "lower",
-      "actual_sp_pct": -0.21,
-      "best_sector": "Financials",
-      "worst_sector": "Technology",
-      "biggest_mover": "APP +9.6%",
-      "date": "2026-07-01"
-    },
-    {
-      "type": "morning",
-      "direction_called": "higher",
-      "leading_index": "Dow",
-      "lagging_index": "",
-      "headline_theme": "jobs data",
-      "commodity_note": "Gold up 1.1%",
-      "picks_status": "holding",
-      "date": "2026-07-02"
-    },
-    {
-      "type": "close",
-      "actual_direction": "mixed",
-      "actual_sp_pct": -0.01,
-      "best_sector": "Health Care",
-      "worst_sector": "Technology",
-      "biggest_mover": "AAPL +4.8%",
-      "date": "2026-07-02"
-    },
-    {
-      "type": "deepdive",
-      "theme": "emerging technology",
-      "topic": "ETF Zoo: Mid-Year Check-In  the AI Trade That Won\u2019t Quit",
-      "date": "2026-07-03"
-    },
-    {
-      "type": "deepdive",
-      "theme": "sector rotation",
-      "topic": "Dow vs. Nasdaq \u2014 1.94% spread points to value over growth rotation",
-      "date": "2026-07-04"
-    },
-    {
-      "type": "deepdive",
-      "theme": "sector rotation",
-      "topic": "Dow vs. Nasdaq \u2014 1.94% spread points to value over growth rotation",
-      "date": "2026-07-05"
-    },
-    {
-      "type": "morning",
-      "direction_called": "higher",
-      "leading_index": "Nasdaq",
-      "lagging_index": "",
-      "headline_theme": "",
-      "commodity_note": "",
-      "picks_status": "holding",
-      "date": "2026-07-06"
-    },
-    {
-      "type": "close",
-      "actual_direction": "higher",
-      "actual_sp_pct": 0.8,
-      "best_sector": "Financials",
-      "worst_sector": "Consumer Staples",
-      "biggest_mover": "ANET +8.0%",
-      "date": "2026-07-06"
-    },
-    {
-      "type": "morning",
-      "direction_called": "mixed",
-      "leading_index": "",
-      "lagging_index": "Nasdaq",
-      "headline_theme": "earnings season",
-      "commodity_note": "",
-      "picks_status": "holding",
-      "date": "2026-07-07"
-    },
-    {
-      "type": "close",
-      "actual_direction": "lower",
-      "actual_sp_pct": -0.46,
-      "best_sector": "Energy",
-      "worst_sector": "Technology",
-      "biggest_mover": "AXON +2.9%",
-      "date": "2026-07-07"
-    },
-    {
-      "type": "morning",
-      "direction_called": "lower",
-      "leading_index": "",
-      "lagging_index": "Dow",
-      "headline_theme": "geopolitical tensions",
-      "commodity_note": "WTI Crude Oil up 2.2%",
-      "picks_status": "holding",
-      "date": "2026-07-08"
-    },
-    {
-      "type": "close",
-      "actual_direction": "mixed",
-      "actual_sp_pct": -0.28,
-      "best_sector": "Technology",
-      "worst_sector": "Materials",
-      "biggest_mover": "ANET +9.1%",
-      "date": "2026-07-08"
-    },
-    {
-      "type": "morning",
-      "direction_called": "higher",
-      "leading_index": "Nasdaq",
-      "lagging_index": "",
-      "headline_theme": "geopolitical tensions",
-      "commodity_note": "WTI Crude Oil down 1.7%",
-      "picks_status": "holding",
-      "date": "2026-07-09"
-    },
-    {
-      "type": "close",
-      "actual_direction": "higher",
-      "actual_sp_pct": 0.83,
-      "best_sector": "Technology",
-      "worst_sector": "Consumer Staples",
-      "biggest_mover": "META +4.6%",
-      "date": "2026-07-09"
-    },
-    {
-      "type": "morning",
-      "direction_called": "mixed",
-      "leading_index": "Dow",
-      "lagging_index": "Nasdaq",
-      "headline_theme": "geopolitical tensions",
-      "commodity_note": "",
-      "picks_status": "holding",
-      "date": "2026-07-10"
-    },
-    {
-      "type": "close",
-      "actual_direction": "higher",
-      "actual_sp_pct": 0.44,
-      "best_sector": "Comm. Services",
-      "worst_sector": "Health Care",
-      "biggest_mover": "META +4.6%",
-      "date": "2026-07-10"
-    },
-    {
-      "type": "deepdive",
-      "theme": "market overview",
-      "topic": "A positive but quiet week \u2014 S&P +0.42%, Nasdaq +0.29%",
-      "date": "2026-07-11"
-    },
-    {
-      "type": "deepdive",
-      "theme": "market overview",
-      "topic": "A positive but quiet week \u2014 S&P +0.42%, Nasdaq +0.29%",
-      "date": "2026-07-12"
-    },
-    {
-      "type": "morning",
-      "direction_called": "mixed",
-      "leading_index": "",
-      "lagging_index": "Nasdaq",
-      "headline_theme": "geopolitical tensions",
-      "commodity_note": "",
-      "picks_status": "holding",
-      "date": "2026-07-13"
-    },
-    {
-      "type": "close",
-      "actual_direction": "lower",
-      "actual_sp_pct": -0.79,
-      "best_sector": "Energy",
-      "worst_sector": "Technology",
-      "biggest_mover": "NOW +3.7%",
-      "date": "2026-07-13"
     }
   ],
   "lessons_learned": [
@@ -470,15 +142,7 @@
     },
     {
       "week": "2026-W26",
-      "note": "Active picks avg +0.4% since entry; Consumer Defensive picks underperforming \u2014 weighting away."
-    },
-    {
-      "week": "2026-W27",
-      "note": "Active picks avg +8.4% since entry; Industrials picks outperforming \u2014 leaning toward more; Technology picks underperforming \u2014 weighting away."
-    },
-    {
-      "week": "2026-W28",
-      "note": "Active picks avg +8.9% since entry; Industrials picks outperforming \u2014 leaning toward more; Technology picks underperforming \u2014 weighting away."
+      "note": "Active picks avg +0.5% since entry; Consumer Defensive picks underperforming \u2014 weighting away."
     }
   ],
   "prediction_accuracy": [
@@ -487,97 +151,10 @@
       "called": "lower",
       "actual": "lower",
       "accurate": true
-    },
-    {
-      "date": "2026-06-24",
-      "called": "mixed",
-      "actual": "mixed",
-      "accurate": true
-    },
-    {
-      "date": "2026-06-25",
-      "called": "higher",
-      "actual": "mixed",
-      "accurate": false
-    },
-    {
-      "date": "2026-06-26",
-      "called": "lower",
-      "actual": "lower",
-      "accurate": true
-    },
-    {
-      "date": "2026-06-29",
-      "called": "higher",
-      "actual": "higher",
-      "accurate": true
-    },
-    {
-      "date": "2026-06-30",
-      "called": "mixed",
-      "actual": "higher",
-      "accurate": false
-    },
-    {
-      "date": "2026-07-01",
-      "called": "lower",
-      "actual": "lower",
-      "accurate": true
-    },
-    {
-      "date": "2026-07-02",
-      "called": "higher",
-      "actual": "mixed",
-      "accurate": false
-    },
-    {
-      "date": "2026-07-06",
-      "called": "higher",
-      "actual": "higher",
-      "accurate": true
-    },
-    {
-      "date": "2026-07-07",
-      "called": "mixed",
-      "actual": "lower",
-      "accurate": false
-    },
-    {
-      "date": "2026-07-08",
-      "called": "lower",
-      "actual": "mixed",
-      "accurate": false
-    },
-    {
-      "date": "2026-07-09",
-      "called": "higher",
-      "actual": "higher",
-      "accurate": true
-    },
-    {
-      "date": "2026-07-10",
-      "called": "mixed",
-      "actual": "higher",
-      "accurate": false
-    },
-    {
-      "date": "2026-07-13",
-      "called": "mixed",
-      "actual": "lower",
-      "accurate": false
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
   "theme_frequency": {
-    "Fed policy": 2,
-    "inflation data": 1,
-    "macro / Fed policy": 1,
-    "emerging technology": 2,
-    "geopolitical tensions": 5,
-    "earnings season": 2,
-    "jobs data": 1,
-    "sector rotation": 2,
-    "market overview": 2
-  },
-  "calibration_note": "Direction-calling accuracy has been 40% over the last 10 sessions \u2014 consider reviewing classification thresholds."
+    "Fed policy": 1
+  }
 }

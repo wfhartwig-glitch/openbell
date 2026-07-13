@@ -13,6 +13,7 @@ import argparse
 import asyncio
 import json
 import os
+import re
 import sys
 from datetime import date, datetime, timedelta
 
@@ -850,6 +851,74 @@ def _morning_summary_html(
     return html, log_data
 
 
+# Sector-family keywords for headline-based causal matching. Word-boundary matched
+# against headline title+snippet — same false-match-safe pattern as _MACRO_KEYWORDS.
+_SECTOR_HEADLINE_KEYWORDS = {
+    "energy":        ["oil", "crude", "opec", "energy prices"],
+    "technology":    ["chip", "semiconductor", "ai stocks", "tech selloff", "downgrade", "guidance cut"],
+    "financial":     ["bank", "rate cut", "rate hike", "yield", "fed"],
+    "health":        ["fda", "drug", "biotech", "trial", "recall"],
+    "real estate":   ["mortgage rate", "housing"],
+    "utilities":     ["rate cut", "rate hike"],
+    "consumer":      ["retail sales", "consumer spending", "holiday sales"],
+    "industrial":    ["manufacturing", "factory", "supply chain", "tariff"],
+    "material":      ["commodity prices", "metals"],
+    "communication": ["streaming", "advertising", "media"],
+}
+
+
+def _sector_family(name: str) -> str:
+    n = (name or "").lower()
+    for fam in _SECTOR_HEADLINE_KEYWORDS:
+        if fam in n:
+            return fam
+    return ""
+
+
+def _find_headline_for_keywords(headlines: list, keywords: list):
+    for h in headlines or []:
+        text = f"{h.get('title','')} {h.get('snippet','')}".lower()
+        for kw in keywords:
+            if re.search(r'\b' + re.escape(kw) + r'\b', text):
+                return h
+    return None
+
+
+_CORP_SUFFIXES = {"corporation", "corp", "inc", "holdings", "holding", "co", "ltd", "plc", "company", "group"}
+
+
+def _company_short_name(name: str) -> str:
+    """Strip trailing corporate suffixes (\"AppLovin Corporation\" -> \"AppLovin\")
+    so headline matching isn't defeated by the formal legal name."""
+    tokens = [t.strip(",.") for t in (name or "").split()]
+    while tokens and tokens[-1].lower().strip(".") in _CORP_SUFFIXES:
+        tokens.pop()
+    return " ".join(tokens)
+
+
+def _find_headline_for_symbol(headlines: list, symbol: str, company_name: str = ""):
+    if not symbol:
+        return None
+    pattern = re.compile(r'\b' + re.escape(symbol) + r'\b')  # case-sensitive — avoids "app"/"APP" false hits
+    name_l  = _company_short_name(company_name).lower()
+    for h in headlines or []:
+        title, snippet = h.get("title", ""), h.get("snippet", "")
+        if pattern.search(title) or pattern.search(snippet):
+            return h
+        if name_l and (name_l in title.lower() or name_l in snippet.lower()):
+            return h
+    return None
+
+
+def _cite_headline(h: dict) -> str:
+    """Quote if <=15 words (copyright-safe), else paraphrase/truncate."""
+    text  = h.get("snippet", "") or h.get("title", "")
+    words = text.split()
+    if len(words) <= 15:
+        return f'"{text.rstrip(".")}."'
+    return text[:140].rstrip(".") + "…"
+
+
 def _build_close_summary(
     snapshot_data: list,
     movers: dict,
@@ -857,6 +926,7 @@ def _build_close_summary(
     commodities: list = None,
     treasury: dict = None,
     earnings: list = None,
+    headlines: list = None,
 ) -> str:
     """3-4 sentence plain-English close-of-day read, 100% deterministic, zero AI."""
     idx = {}
@@ -885,16 +955,14 @@ def _build_close_summary(
             tone = "sold off" if max_abs > 0.5 else "slipped"
         else:
             tone = "finished mixed"
-        named    = {"S&P 500": sp, "Nasdaq": ndx, "Dow": dow}
-        ldr_name = max(named, key=lambda k: abs(named[k]))
-        ldr_val  = named[ldr_name]
-        sp_str   = f" (S&P {_fmt(sp)})" if sp != 0.0 else ""
-        if tone in ("rallied", "sold off", "finished mixed"):
-            s1 = f"Markets {tone} today{sp_str}, with {ldr_name} the biggest mover at {_fmt(ldr_val)}."
-        else:
-            s1 = f"Markets {tone} today{sp_str}."
+        s1 = f"Markets {tone} today."
 
-    # Sentence 2: sector story + optional commodity/yield note
+    headlines_list = headlines if isinstance(headlines, list) else []
+    commodities_list = commodities if isinstance(commodities, list) else []
+
+    # Sentence 2: WHY the leading/lagging sector moved — commodity correlation first,
+    # then headline keyword match, else an honest "no catalyst identified" statement.
+    # Never restates the sector's own pct — that number is in the Sector Performance table.
     s2 = ""
     if sectors:
         try:
@@ -904,16 +972,32 @@ def _build_close_summary(
             worst_pct = float(worst.get("pct") or worst.get("changesPercentage") or 0)
             best_name = best.get("sector", "")
             worst_name= worst.get("sector", "")
+
+            def _explain_sector(name: str, pct: float) -> str:
+                fam = _sector_family(name)
+                if fam == "energy":
+                    oil = next((c for c in commodities_list
+                               if "crude" in c.get("name", "").lower() or "oil" in c.get("name", "").lower()), None)
+                    if oil and oil.get("pct") is not None and (oil["pct"] > 0) == (pct > 0) and abs(oil["pct"]) >= 1.0:
+                        return f"{name} tracked crude oil's {_fmt(oil['pct'])} move today"
+                if fam:
+                    h = _find_headline_for_keywords(headlines_list, _SECTOR_HEADLINE_KEYWORDS[fam])
+                    if h:
+                        return f"{name} moved alongside today's coverage: {_cite_headline(h)}"
+                return f"{name} moved with no single catalyst identified in today's headlines"
+
+            clauses = []
             if best_name and abs(best_pct) > 0.1:
-                s2 = f"{best_name} led the tape at {_fmt(best_pct)}"
-                if worst_name and worst_name != best_name and worst_pct < -0.1:
-                    s2 += f"; {worst_name} was the drag at {_fmt(worst_pct)}."
-                else:
-                    s2 += "."
+                clauses.append(_explain_sector(best_name, best_pct) + " (leading sector)")
+            if worst_name and worst_name != best_name and worst_pct < -0.1:
+                clauses.append(_explain_sector(worst_name, worst_pct) + " (lagging sector)")
+            if clauses:
+                s2 = "; ".join(clauses) + "."
         except Exception:
             pass
 
-    # Sentence 3: biggest mover — with earnings cross-reference if same-day match
+    # Sentence 3: WHY the single biggest mover moved — earnings cross-ref first,
+    # then headline symbol/company match, else an honest "no catalyst found" statement.
     s3 = ""
     today_iso = date.today().isoformat()
     earnings_list  = earnings if isinstance(earnings, list) else []
@@ -934,21 +1018,25 @@ def _build_close_summary(
 
     if biggest and best_abs >= 2.0:
         sym  = biggest.get("symbol", "")
+        name = biggest.get("name", "")
         pct  = float(biggest.get("pct") or biggest.get("changesPercentage") or 0)
-        dir_ = "surged" if pct > 3 else "gained" if pct > 0 else "dropped"
+        dir_ = "surged" if pct > 3 else "gained" if pct > 0 else "dropped" if pct < -3 else "slipped"
         if sym in earnings_today:
             # Hard factual link: same ticker, same day
-            s3 = f"{sym} {dir_} {_fmt(abs(pct))} today following this morning's earnings report."
+            s3 = f"{sym} {dir_} {_fmt(pct)} today following this morning's earnings report."
         else:
-            s3 = f"On the mover board, {sym} {dir_} {_fmt(abs(pct))}."
-    elif commodities:
-        for c in commodities:
+            h = _find_headline_for_symbol(headlines_list, sym, name)
+            if h:
+                s3 = f"{sym} {dir_} {_fmt(pct)} as the day's biggest single mover — today's coverage points to {_cite_headline(h)}"
+            else:
+                s3 = f"{sym} {dir_} {_fmt(pct)} as the day's biggest single mover, with no clear single catalyst found in today's headlines."
+    elif commodities_list:
+        for c in commodities_list:
             try:
                 cpct = float(c.get("pct", 0))
                 if abs(cpct) >= 1.0:
                     cname = c.get("name", "")
-                    dir_c = "moved up" if cpct > 0 else "moved lower"
-                    s3 = f"{cname} {dir_c} {abs(cpct):.1f}% on the day."
+                    s3 = f"{cname} {_fmt(cpct)} on the day."
                     break
             except Exception:
                 pass
@@ -964,8 +1052,9 @@ def _close_summary_html(
     commodities: list = None,
     treasury: dict = None,
     earnings: list = None,
+    headlines: list = None,
 ) -> str:
-    text = _build_close_summary(snapshot_data, movers, sectors, commodities, treasury, earnings)
+    text = _build_close_summary(snapshot_data, movers, sectors, commodities, treasury, earnings, headlines)
     return _section("What Happened Today",
         f'<p style="margin:0;font-size:14px;color:#374151;line-height:1.6">{text}</p>')
 
@@ -1079,7 +1168,8 @@ async def close(session: ClientSession) -> tuple[str, str, dict]:
     earn_list    = earnings_raw.get("earnings", [])
 
     body = (
-        _close_summary_html(snap_list, movers, sectors_list, comm_list, earnings=earn_list)
+        _close_summary_html(snap_list, movers, sectors_list, comm_list, earnings=earn_list,
+                            headlines=headlines.get("headlines", []))
         + _indices(snap_list)
         + _movers(movers.get("gainers", []), movers.get("losers", []))
         + _sectors(sectors_list)
