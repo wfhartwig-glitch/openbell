@@ -346,5 +346,89 @@
       }
     ],
     "changes_from_last_week": []
+  },
+  "2026-W28": {
+    "generated": "2026-07-13T13:32:21.285307",
+    "picks": [
+      {
+        "ticker": "MSFT",
+        "company": "Microsoft Corporation",
+        "sector": "Technology",
+        "risk": "Medium",
+        "rationale": "analyst target implies 48% upside ($379 \u2192 $561). rated strong buy by analysts. earnings up 23% YoY.",
+        "price_now": 389.55,
+        "pct_change_this_week": 3.36,
+        "weeks_held": 5,
+        "status": "holding",
+        "note": "Holding \u2014 thesis intact, analyst target implies 44% upside. rated strong buy by analysts. earnings up 23% YoY.",
+        "price_when_picked": 376.9
+      },
+      {
+        "ticker": "META",
+        "company": "Meta Platforms, Inc.",
+        "sector": "Communication Services",
+        "risk": "Medium",
+        "rationale": "analyst target implies 43% upside ($577 \u2192 $827). rated strong buy by analysts. earnings up 62% YoY.",
+        "price_now": 661.24,
+        "pct_change_this_week": 15.72,
+        "weeks_held": 5,
+        "status": "holding",
+        "note": "Holding \u2014 thesis intact, analyst target implies 25% upside. rated strong buy by analysts. earnings up 62% YoY.",
+        "price_when_picked": 571.4
+      },
+      {
+        "ticker": "NVDA",
+        "company": "NVIDIA Corporation",
+        "sector": "Technology",
+        "risk": "Speculative",
+        "rationale": "analyst target implies 42% upside ($211 \u2192 $299). rated strong buy by analysts. earnings up 214% YoY.",
+        "price_now": 209.85,
+        "pct_change_this_week": -1.32,
+        "weeks_held": 5,
+        "status": "holding",
+        "note": "Holding \u2014 thesis intact, analyst target implies 44% upside. rated strong buy by analysts. earnings up 214% YoY.",
+        "price_when_picked": 212.67
+      },
+      {
+        "ticker": "SOUN",
+        "company": "SoundHound AI, Inc.",
+        "sector": "Technology",
+        "risk": "Speculative",
+        "rationale": "analyst target implies 103% upside ($7 \u2192 $14). rated strong buy by analysts. revenue growing 52% YoY.",
+        "price_now": 6.66,
+        "pct_change_this_week": -4.86,
+        "weeks_held": 5,
+        "status": "holding",
+        "note": "Holding \u2014 thesis intact, analyst target implies 110% upside. revenue growing 52% YoY. forward P/E -55.5x.",
+        "price_when_picked": 7.0
+      },
+      {
+        "ticker": "CELH",
+        "company": "Celsius Holdings, Inc.",
+        "sector": "Consumer Defensive",
+        "risk": "High",
+        "rationale": "analyst target implies 100% upside ($30 \u2192 $61). rated buy by analysts. earnings up 126% YoY.",
+        "price_now": 30.38,
+        "pct_change_this_week": 1.44,
+        "weeks_held": 5,
+        "status": "holding",
+        "note": "Holding \u2014 thesis intact, analyst target implies 87% upside. rated buy by analysts. earnings up 126% YoY.",
+        "price_when_picked": 29.95
+      },
+      {
+        "ticker": "AXON",
+        "company": "Axon Enterprise, Inc.",
+        "sector": "Industrials",
+        "risk": "High",
+        "rationale": "analyst target implies 58% upside ($419 \u2192 $662). rated buy by analysts. earnings up 90% YoY.",
+        "price_now": 571.84,
+        "pct_change_this_week": 39.06,
+        "weeks_held": 5,
+        "status": "holding",
+        "note": "Holding \u2014 thesis intact, analyst target implies 17% upside. rated buy by analysts. earnings up 90% YoY.",
+        "price_when_picked": 411.22
+      }
+    ],
+    "changes_from_last_week": []
   }
 }

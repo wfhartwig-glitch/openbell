@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 61,
-  "last_session": "2026-07-12T13:30:59.474419",
+  "session_count": 62,
+  "last_session": "2026-07-13T13:32:22.862311",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -73,9 +73,9 @@
       "source_headline_published": ""
     }
   ],
-  "email_count": 43,
-  "last_email_sent": "2026-07-12T13:30:59.472825",
-  "last_email_summary": "deepdive sent Sunday, July 12, 2026",
+  "email_count": 44,
+  "last_email_sent": "2026-07-13T13:32:22.860647",
+  "last_email_summary": "morning sent Monday, July 13, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -84,8 +84,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 376.9,
-      "price_now": 388.62,
-      "pct_change_since_pick": 3.11,
+      "price_now": 389.55,
+      "pct_change_since_pick": 3.36,
       "still_held": true
     },
     {
@@ -95,8 +95,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 571.4,
-      "price_now": 595.71,
-      "pct_change_since_pick": 4.25,
+      "price_now": 661.24,
+      "pct_change_since_pick": 15.72,
       "still_held": true
     },
     {
@@ -106,8 +106,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 212.67,
-      "price_now": 194.88,
-      "pct_change_since_pick": -8.37,
+      "price_now": 209.85,
+      "pct_change_since_pick": -1.33,
       "still_held": true
     },
     {
@@ -117,8 +117,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 7.0,
-      "price_now": 6.63,
-      "pct_change_since_pick": -5.29,
+      "price_now": 6.66,
+      "pct_change_since_pick": -4.86,
       "still_held": true
     },
     {
@@ -128,8 +128,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 29.95,
-      "price_now": 33.62,
-      "pct_change_since_pick": 12.25,
+      "price_now": 30.38,
+      "pct_change_since_pick": 1.44,
       "still_held": true
     },
     {
@@ -139,8 +139,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 411.22,
-      "price_now": 594.1,
-      "pct_change_since_pick": 44.47,
+      "price_now": 571.84,
+      "pct_change_since_pick": 39.06,
       "still_held": true
     }
   ],
@@ -442,6 +442,16 @@
       "theme": "market overview",
       "topic": "A positive but quiet week \u2014 S&P +0.42%, Nasdaq +0.29%",
       "date": "2026-07-12"
+    },
+    {
+      "type": "morning",
+      "direction_called": "mixed",
+      "leading_index": "",
+      "lagging_index": "Nasdaq",
+      "headline_theme": "geopolitical tensions",
+      "commodity_note": "",
+      "picks_status": "holding",
+      "date": "2026-07-13"
     }
   ],
   "lessons_learned": [
@@ -456,6 +466,10 @@
     {
       "week": "2026-W27",
       "note": "Active picks avg +8.4% since entry; Industrials picks outperforming \u2014 leaning toward more; Technology picks underperforming \u2014 weighting away."
+    },
+    {
+      "week": "2026-W28",
+      "note": "Active picks avg +8.9% since entry; Industrials picks outperforming \u2014 leaning toward more; Technology picks underperforming \u2014 weighting away."
     }
   ],
   "prediction_accuracy": [
@@ -544,7 +558,7 @@
     "inflation data": 1,
     "macro / Fed policy": 1,
     "emerging technology": 2,
-    "geopolitical tensions": 4,
+    "geopolitical tensions": 5,
     "earnings season": 2,
     "jobs data": 1,
     "sector rotation": 2,
