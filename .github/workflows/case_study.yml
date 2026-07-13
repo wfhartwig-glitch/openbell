@@ -1,0 +1,72 @@
+# Required GitHub Secrets:
+#   GMAIL_ADDRESS
+#   GMAIL_APP_PASSWORD
+#   TO_EMAIL
+#   FMP_API_KEY        ← primary market data (free at financialmodelingprep.com)
+#   NEWS_API_KEY       ← optional headline fallback (free at newsapi.org)
+#
+# NOTE: this workflow sends zero market data — FMP/NEWS_API_KEY are unused by
+# `casestudy` mode specifically, but are listed since this repo's install step
+# is shared across all three workflows.
+
+name: Pippy's Brief — Case Study
+
+on:
+  # PRIMARY trigger: cron-job.org calls this workflow's workflow_dispatch
+  # endpoint at two separate times — same pattern as morning_brief, close_summary,
+  # and the old deep_dive workflow. See the repo README / setup notes for the
+  # exact cron-job.org configuration (two jobs pointing at this one workflow).
+  workflow_dispatch:
+
+  # FALLBACK trigger: native GitHub Actions schedule, in case cron-job.org is
+  # ever misconfigured or down. KNOWN CAVEAT — this project previously found
+  # GitHub's native `schedule:` trigger has a confirmed ~2hr lag specifically
+  # on weekends, which is exactly one of the two schedules this workflow needs.
+  # Treat cron-job.org as the reliable path and this as a backstop only.
+  #
+  # Times below are set for CDT (Central Daylight Time, UTC-5). When the US
+  # flips to CST (Central Standard Time, UTC-6) in November, add one hour to
+  # each UTC time below (17:00 -> 18:00, 13:30 -> 14:30) — cron-job.org should
+  # be adjusted the same way at that time.
+  schedule:
+    - cron: '0 17 * * 1-5'    # Weekdays, noon CT (CDT: UTC-5) — 12:00 PM CT
+    - cron: '30 13 * * 6,0'   # Weekends, 8:30 AM CT (CDT: UTC-5)
+
+permissions:
+  contents: write
+
+jobs:
+  send-case-study:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run case study
+        env:
+          GMAIL_ADDRESS:      ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          TO_EMAIL:           ${{ secrets.TO_EMAIL }}
+          FMP_API_KEY:        ${{ secrets.FMP_API_KEY }}
+          NEWS_API_KEY:       ${{ secrets.NEWS_API_KEY }}
+        run: python openbell.py casestudy
+
+      - name: Commit updated case study history
+        run: |
+          git config user.name "Pippy"
+          git config user.email "pippy@openbell.ai"
+          git add case_study_history.json
+          git diff --staged --quiet || git commit -m "Pippy case study history — $(date +'%Y-%m-%d %H:%M')"
+          git pull --rebase origin main
+          git push

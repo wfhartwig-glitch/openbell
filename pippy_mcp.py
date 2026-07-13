@@ -20,6 +20,8 @@ import yfinance as yf
 from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 
+from case_studies import CASE_STUDIES
+
 load_dotenv()
 
 # Route all MCP/library INFO logs to a file — never to stdout/stderr
@@ -33,6 +35,7 @@ logging.getLogger().setLevel(logging.WARNING)
 PROJECT_DIR        = os.path.dirname(os.path.abspath(__file__))
 MEMORY_FILE        = os.path.join(PROJECT_DIR, "pippy_memory.json")
 PICKS_FILE         = os.path.join(PROJECT_DIR, "picks_cache.json")
+CASE_STUDY_HISTORY_FILE = os.path.join(PROJECT_DIR, "case_study_history.json")
 GMAIL_ADDRESS      = os.getenv("GMAIL_ADDRESS")
 GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD")
 TO_EMAIL           = os.getenv("TO_EMAIL")
@@ -1293,6 +1296,63 @@ def run_daily_scan() -> str:
     return json.dumps({"source": "live", "date": today_s,
                        "candidates": top20, "scanned": len(candidates),
                        "elapsed_s": elapsed, "timestamp": ts})
+
+
+@mcp.tool()
+def get_next_case_study(commit: bool = True) -> str:
+    """
+    Pick the next business-history case study from the hand-curated CASE_STUDIES
+    library, avoiding anything used in the last ~30 sends. Deterministic
+    least-recently-used rotation — no randomness, no AI.
+
+    commit=True (default) records the pick to case_study_history.json.
+    Pass commit=False for dry runs — picks the same way but doesn't advance
+    the rotation, matching this project's rule that dry runs never persist state.
+    """
+    ts      = _ts()
+    today_s = date.today().isoformat()
+
+    history = {"history": []}
+    if os.path.exists(CASE_STUDY_HISTORY_FILE):
+        try:
+            with open(CASE_STUDY_HISTORY_FILE) as f:
+                history = json.load(f)
+        except Exception:
+            pass
+
+    past_entries = history.get("history", [])
+    recent_ids   = {e["id"] for e in past_entries[-30:]}
+
+    candidates = [c for c in CASE_STUDIES if c["id"] not in recent_ids]
+    if not candidates:
+        # Library exhausted within the no-repeat window — fall back to the
+        # full library rather than fail; long-run rotation still holds since
+        # we still pick the least-recently-used entry below.
+        candidates = list(CASE_STUDIES)
+
+    last_used = {e["id"]: e["date"] for e in past_entries}
+    # Least-recently-used first; never-used entries (no last_used date) sort first.
+    candidates.sort(key=lambda c: last_used.get(c["id"], ""))
+    chosen = candidates[0]
+
+    if commit:
+        past_entries.append({"id": chosen["id"], "date": today_s})
+        history["history"] = past_entries[-120:]
+        try:
+            with open(CASE_STUDY_HISTORY_FILE, "w") as f:
+                json.dump(history, f, indent=2)
+        except Exception:
+            pass
+
+    return json.dumps({
+        "id":       chosen["id"],
+        "category": chosen["category"],
+        "topic":    chosen["topic"],
+        "hook":     chosen["hook"],
+        "story":    chosen["story"],
+        "take":     chosen["take"],
+        "timestamp": ts,
+    })
 
 
 if __name__ == "__main__":

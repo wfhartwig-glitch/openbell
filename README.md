@@ -1,7 +1,8 @@
 # Pippy's Brief
 
-Three automated emails, every day. Morning briefing before the open, closing
-summary after the bell, and weekend summaries on Saturdays and Sundays.
+Four automated emails. Morning briefing before the open, closing summary
+after the bell, and a standalone business-history Case Study that fires on
+its own schedule, fully decoupled from market status.
 Powered by FMP (Financial Modeling Prep). Zero AI API cost.
 
 ---
@@ -10,11 +11,12 @@ Powered by FMP (Financial Modeling Prep). Zero AI API cost.
 
 | Time (Central) | Day | Email |
 |---|---|---|
-| 8:30 AM CT | Weekdays | ☀️ Morning Briefing — snapshot, headlines, calendar, watchlist, weekly picks (+ performance report on Mondays) |
-| 3:00 PM CT | Weekdays | 📊 Market Close Summary — closing prices, top movers, sectors, watchlist EOD, headlines |
-| 8:30 AM CT | Weekends | 📚 Weekend Summary — market snapshot, headlines, movers, sectors, earnings calendar |
+| 8:30 AM CT | Weekdays | ☀️ Morning Briefing — snapshot, headlines, calendar, watchlist, unified Stock Picks (skips on non-trading days) |
+| 3:00 PM CT | Weekdays | 📊 Market Close Summary — closing prices, top movers, sectors, watchlist EOD, headlines (skips on non-trading days) |
+| 12:00 PM CT | Weekdays | 🧠 Case Study — business-history narrative (crises, founders, rivalries, product launches), zero market data, fires unconditionally |
+| 8:30 AM CT | Weekends | 🧠 Case Study — same content engine, weekend schedule |
 
-On Mondays the morning briefing also includes a picks performance report — how each pick has done since entry, what changed, and what Pippy is leaning toward this week.
+The Case Study rotates through a hand-curated library of ~40 stories with dedupe logic (won't repeat a topic used in the last ~30 sends).
 
 ---
 
@@ -28,14 +30,10 @@ pip install -r requirements.txt
 cp .env.example .env
 # then edit .env with your keys (see sections below)
 
-# 3. Test one email right now
-python openbell.py --now morning    # send a Morning Briefing immediately
-python openbell.py --now close      # send a Market Close Summary immediately
-python openbell.py --now deepdive   # send a Deep Dive immediately
-python openbell.py --now auto       # use schedule logic (market open? → morning, else → deep dive)
-
-# 4. Run the scheduler (stays running, fires at 09:30 weekdays)
-python openbell.py
+# 3. Test one email right now (add --dry-run to preview without sending)
+python openbell.py morning      # Morning Briefing (skips on non-trading days)
+python openbell.py close        # Market Close Summary (skips on non-trading days)
+python openbell.py casestudy    # Case Study (fires unconditionally, any day)
 ```
 
 ---
@@ -157,7 +155,7 @@ GitHub Actions (cron scheduler)
 | Market open status | FMP `/is-the-market-open` | hardcoded holiday list |
 | All narrative writing | Claude `claude-sonnet-4-6` via tool-use agentic loop | — |
 | Monthly picks | `yfinance` fundamentals scan, cached in `picks_cache.json` | — |
-| Deep dive topics | Claude chooses from 7 categories, rotated via `deep_dive_history` | — |
+| Case Study topics | Hand-curated library in `case_studies.py`, rotated via `case_study_history.json` | — |
 
 ---
 
@@ -178,9 +176,9 @@ This builds a real track record over time instead of resetting fresh every week.
 
 ```bash
 # Send one email right now
-python openbell.py morning
-python openbell.py close
-python openbell.py deepdive   # skips automatically if market is open
+python openbell.py morning     # skips automatically on non-trading days
+python openbell.py close       # skips automatically on non-trading days
+python openbell.py casestudy   # fires unconditionally, any day
 
 # Start the terminal agent
 python pippy.py

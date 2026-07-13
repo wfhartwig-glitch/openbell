@@ -4,9 +4,10 @@ Pippy's Brief — autonomous email agent. Zero Anthropic API cost.
 Runs as an MCP client, calls pippy_mcp.py tools for data, builds HTML, sends email.
 
 Usage:
-  python openbell.py morning    → Morning Briefing (weekdays only)
-  python openbell.py close      → Market Close Summary (weekdays only)
-  python openbell.py deepdive   → Weekend/Holiday Summary (skips if market open)
+  python openbell.py morning     → Morning Briefing (weekdays only; skips on non-trading days)
+  python openbell.py close       → Market Close Summary (weekdays only)
+  python openbell.py casestudy   → Standalone business-history Case Study (fires on its own schedule,
+                                    unconditional on market status — weekday noon CT + weekend 8:30am CT)
 """
 
 import argparse
@@ -1203,387 +1204,21 @@ async def close(session: ClientSession) -> tuple[str, str, dict]:
     return subject, html, log_data
 
 
-# Priority keywords for headline-based topic selection
-_HEADLINE_KEYWORDS = [
-    ("Fed", "macro / Fed policy"),
-    ("Federal Reserve", "macro / Fed policy"),
-    ("rate cut", "macro / Fed policy"),
-    ("rate hike", "macro / Fed policy"),
-    ("interest rate", "macro / Fed policy"),
-    ("inflation", "macro / Fed policy"),
-    ("CPI", "macro / Fed policy"),
-    ("Powell", "macro / Fed policy"),
-    ("IPO", "IPO / public markets"),
-    ("goes public", "IPO / public markets"),
-    ("merger", "private company"),
-    ("acquisition", "private company"),
-    ("acquired", "private company"),
-    ("takeover", "private company"),
-    ("earnings", "earnings"),
-    ("beats", "earnings"),
-    ("misses", "earnings"),
-    ("guidance", "earnings"),
-    ("recession", "macro / Fed policy"),
-    ("GDP", "macro / Fed policy"),
-    ("jobs", "macro / Fed policy"),
-    ("unemployment", "macro / Fed policy"),
-    ("housing", "housing market"),
-    ("mortgage", "housing market"),
-    ("AI", "emerging technology"),
-    ("artificial intelligence", "emerging technology"),
-    ("chip", "emerging technology"),
-    ("semiconductor", "emerging technology"),
-]
-
-
-def _extract_facts(title: str, snippet: str) -> list:
+def _case_study_html(fields: dict, today: str) -> tuple[str, str]:
     """
-    Extract concrete numeric facts (dollar amounts, percentages) from article title + snippet.
-    Numbers are factual data, not protected expression — safe to state directly.
-    Returns a list of dicts: {type, value, source} capped at 4 items.
+    Build the standalone Case Study email HTML. No market data, no tickers,
+    no prices — pure business-history narrative (hook / story / take).
     """
-    import re
-    facts = []
-    combined = f"{title} |SPLIT| {snippet}"
-    split_pos = len(title) + 8
-
-    # Dollar amounts: $3,379 / $1.2 billion / $500K
-    for m in re.finditer(r'\$[\d,]+(?:\.\d+)?(?:\s*(?:million|billion|trillion|[Kk]))?', combined):
-        src = "title" if m.start() < split_pos else "snippet"
-        facts.append({"type": "dollar", "value": m.group().strip(), "source": src})
-
-    # Percentages: 3.4% / 12%
-    for m in re.finditer(r'\b\d+\.?\d*\s*%', combined):
-        src = "title" if m.start() < split_pos else "snippet"
-        facts.append({"type": "pct", "value": m.group().strip(), "source": src})
-
-    # Year references with context ("five-year", "10-year") — skip bare years like 2024
-    for m in re.finditer(r'\b(?:one|two|three|five|ten|20|30)-year\b', combined, re.IGNORECASE):
-        src = "title" if m.start() < split_pos else "snippet"
-        facts.append({"type": "timeframe", "value": m.group().strip(), "source": src})
-
-    return facts[:4]
-
-
-def _build_deep_dive(
-    snapshot_data: list,
-    headline_list: list,
-    movers: dict,
-    sectors: list,
-) -> dict:
-    """
-    Deterministic deep dive builder. Picks the most notable event/signal
-    from real data and writes hook/story/take using template strings.
-    No AI, no external text generation — just conditional logic on real numbers.
-    """
-
-    # ── index numbers ─────────────────────────────────────────────────────────
-    idx = {i.get("name"): i for i in snapshot_data}
-    sp  = idx.get("S&P 500", {})
-    ndx = idx.get("Nasdaq",  {})
-    dow = idx.get("Dow",     {})
-
-    def pct(item): return float(item.get("pct") or 0)
-    def price(item): return float(item.get("price") or 0)
-
-    sp_pct  = pct(sp)
-    ndx_pct = pct(ndx)
-    dow_pct = pct(dow)
-
-    sp_dir  = "up" if sp_pct  >= 0 else "down"
-    ndx_dir = "up" if ndx_pct >= 0 else "down"
-    dow_dir = "up" if dow_pct >= 0 else "down"
-
-    spread = abs(ndx_pct - dow_pct)
-
-    # ── top sector divergence ─────────────────────────────────────────────────
-    sector_vals = [(s.get("sector",""), float(s.get("pct") or 0)) for s in sectors if s.get("pct") is not None]
-    sector_vals.sort(key=lambda x: x[1], reverse=True)
-    top_sector    = sector_vals[0]  if sector_vals else ("—", 0)
-    bottom_sector = sector_vals[-1] if sector_vals else ("—", 0)
-    sector_spread = top_sector[1] - bottom_sector[1]
-
-    # ── top movers ────────────────────────────────────────────────────────────
-    gainers = movers.get("gainers", [])
-    losers  = movers.get("losers",  [])
-    top_gainer = gainers[0] if gainers else {}
-    top_loser  = losers[0]  if losers  else {}
-
-    # ── priority: real headline with keyword match ────────────────────────────
-    matched_headline   = None
-    matched_category   = "market overview"
-    matched_via_kw     = False
-    import re as _re
-    for h in headline_list[:8]:
-        title = h.get("title", "")
-        for kw, cat in _HEADLINE_KEYWORDS:
-            # Use word-boundary match for short/uppercase keywords to avoid false substrings
-            if len(kw) <= 4 and kw == kw.upper():
-                hit = bool(_re.search(r'\b' + _re.escape(kw) + r'\b', title, _re.IGNORECASE))
-            else:
-                hit = kw.lower() in title.lower()
-            if hit:
-                matched_headline = h
-                matched_category = cat
-                matched_via_kw   = True
-                break
-        if matched_headline:
-            break
-
-    # If no keyword match, try first headline if it has extractable facts
-    if not matched_headline and headline_list:
-        candidate = headline_list[0]
-        if _extract_facts(candidate.get("title", ""), candidate.get("snippet", "")):
-            matched_headline = candidate
-            matched_category = "market overview"
-            matched_via_kw   = False
-
-    # ── build the piece ───────────────────────────────────────────────────────
-
-    if matched_headline:
-        title   = matched_headline.get("title", "")
-        site    = matched_headline.get("site", "")
-        snippet = matched_headline.get("snippet", "")
-        facts   = _extract_facts(title, snippet)
-
-        # If no keyword relevance AND no concrete facts, skip this headline —
-        # the market-data paths below are more honest than a vague paraphrase.
-        if not matched_via_kw and not facts:
-            matched_headline = None
-
-    if matched_headline:
-        topic        = title
-        triggered_by = f'"{title}"' + (f" via {site}" if site else "")
-        category     = matched_category
-
-        # Hook: just the headline, no bogus market-timing commentary
-        hook = f'This week\'s notable story: "{title}."'
-
-        story_parts = []
-        main_val    = ""
-
-        if facts:
-            # Surface the first concrete number/fact directly — it's a data point, not quoted prose
-            main_fact = facts[0]
-            main_val  = main_fact["value"]
-
-            if main_fact["source"] == "title":
-                # Number lives in the headline — reference it directly, no quoting needed
-                story_parts.append(
-                    f"The headline centers on a concrete figure: {main_val}. "
-                    f"That's the specific number at the heart of this story, not a vague proxy."
-                )
-            else:
-                # Number from the article body — state it as fact
-                story_parts.append(f"The piece puts a number on it: {main_val}.")
-
-            # Add a timeframe or percentage qualifier from snippet if one exists and adds meaning
-            qualifiers = [
-                f for f in facts[1:]
-                if f["source"] == "snippet" and f["type"] in ("timeframe", "pct") and f["value"] != main_val
-            ]
-            if qualifiers:
-                story_parts.append(f"The {qualifiers[0]['value']} timeframe is the window referenced.")
-
-            story_parts.append(
-                f"Market context this week: S&P {sp_dir} {abs(sp_pct):.2f}%, "
-                f"Nasdaq {ndx_dir} {abs(ndx_pct):.2f}%."
-            )
-
-        elif snippet and matched_via_kw:
-            # Keyword-relevant headline but no extractable numbers — use snippet honestly
-            # One short quoted phrase only if ≤15 words; otherwise paraphrase the fact
-            words = snippet.split()
-            if len(words) <= 15:
-                story_parts.append(f'"{snippet.rstrip(".")}.\"')
-            else:
-                story_parts.append(snippet[:200].rstrip(".") + ".")
-            story_parts.append(
-                f"Broader market: S&P {sp_dir} {abs(sp_pct):.2f}%, "
-                f"Nasdaq {ndx_dir} {abs(ndx_pct):.2f}%, Dow {dow_dir} {abs(dow_pct):.2f}%."
-            )
-
-        else:
-            # Keyword match but no snippet and no facts — market data only
-            story_parts.append(
-                f"S&P {sp_dir} {abs(sp_pct):.2f}%, Nasdaq {ndx_dir} {abs(ndx_pct):.2f}%, "
-                f"Dow {dow_dir} {abs(dow_pct):.2f}% on the week."
-            )
-            if sector_spread > 1.5:
-                story_parts.append(
-                    f"{top_sector[0]} led sectors ({top_sector[1]:+.2f}%) while "
-                    f"{bottom_sector[0]} lagged ({bottom_sector[1]:+.2f}%)."
-                )
-
-        story = " ".join(story_parts[:3])
-
-        # Take: reference the specific number if we have one; honest fallback otherwise
-        if main_val:
-            cat_phrase = f"this kind of story" if matched_category == "market overview" else f"{matched_category}"
-            take = (
-                f"That {main_val} figure is the one to remember — "
-                f"worth filing away next time {cat_phrase} comes up in the tape."
-            )
-        elif matched_category in ("macro / Fed policy", "earnings"):
-            take = (
-                f"Watch how the market digests this heading into next week — "
-                f"{'rate-sensitive names could see volatility' if 'rate' in title.lower() or 'Fed' in title.lower() else 'positioning often shifts after a weekend headline in this category'}."
-            )
-        else:
-            take = f"Worth keeping in mind next time {matched_category} resurfaces in the tape."
-
-    elif spread >= 1.0:
-        # Rotation story — meaningful Nasdaq/Dow divergence, no headline
-        if ndx_pct > dow_pct:
-            leader, laggard, leader_pct, laggard_pct = "Nasdaq", "Dow", ndx_pct, dow_pct
-            rotation_type = "growth over value"
-        else:
-            leader, laggard, leader_pct, laggard_pct = "Dow", "Nasdaq", dow_pct, ndx_pct
-            rotation_type = "value over growth"
-
-        topic        = f"{leader} vs. {laggard} — {spread:.2f}% spread points to {rotation_type} rotation"
-        triggered_by = f"Index divergence at Thursday's close: {leader} {leader_pct:+.2f}%, {laggard} {laggard_pct:+.2f}%"
-        category     = "sector rotation"
-
-        hook = (
-            f"A {spread:.2f}% gap between the {leader} and {laggard} at the weekly close "
-            f"isn't noise — that kind of spread usually signals active rotation, not a broad move."
-        )
-        story = (
-            f"Thursday closed with S&P {sp_dir} {abs(sp_pct):.2f}%, {leader} {'+' if leader_pct>=0 else ''}{leader_pct:.2f}%, "
-            f"and {laggard} {'+' if laggard_pct>=0 else ''}{laggard_pct:.2f}%. "
-            f"Nearly {spread:.0f}% of divergence between {rotation_type.split(' over ')[0]} and "
-            f"{rotation_type.split(' over ')[1]} names in a single session typically reflects institutional repositioning. "
-        )
-        if sector_spread > 1.5:
-            story += (
-                f"Sector data backs it up: {top_sector[0]} led ({'+' if top_sector[1]>=0 else ''}{top_sector[1]:.2f}%) "
-                f"while {bottom_sector[0]} lagged ({'+' if bottom_sector[1]>=0 else ''}{bottom_sector[1]:.2f}%)."
-            )
-        take = (
-            f"Watch equal-weight S&P vs. cap-weight spread Monday morning — "
-            f"if the gap holds, the {rotation_type} trade has legs."
-        )
-
-    elif sector_spread >= 2.0:
-        # Sector divergence story
-        topic        = f"{top_sector[0]} leads, {bottom_sector[0]} lags — {sector_spread:.1f}% sector spread this week"
-        triggered_by = f"Sector divergence: {top_sector[0]} {top_sector[1]:+.2f}% vs {bottom_sector[0]} {bottom_sector[1]:+.2f}%"
-        category     = "sector rotation"
-
-        hook = (
-            f"This week's sector spread hit {sector_spread:.1f}% between {top_sector[0]} and {bottom_sector[0]}. "
-            f"That's wide enough to matter for anyone positioned across sectors."
-        )
-        story = (
-            f"{top_sector[0]} finished the week {'+' if top_sector[1]>=0 else ''}{top_sector[1]:.2f}%, "
-            f"while {bottom_sector[0]} ended at {'+' if bottom_sector[1]>=0 else ''}{bottom_sector[1]:.2f}%. "
-            f"The S&P overall went {sp_dir} {abs(sp_pct):.2f}%, "
-            f"but a {sector_spread:.1f}% range between sectors means the index number hides more than it reveals. "
-            f"Narrow-sector ETF positioning would have made a significant difference in performance this week."
-        )
-        take = (
-            f"If you hold a broad index fund, you got the average — "
-            f"the {top_sector[0]} overweight was this week's real trade."
-        )
-
-    elif top_gainer.get("symbol") and abs(float(top_gainer.get("pct") or 0)) >= 5:
-        # Big single mover story
-        sym      = top_gainer.get("symbol", "")
-        gainer_pct = float(top_gainer.get("pct") or 0)
-        name     = (top_gainer.get("name") or sym)[:40]
-
-        topic        = f"{sym}'s {gainer_pct:.1f}% move — what's behind it"
-        triggered_by = f"Top mover: {sym} up {gainer_pct:.2f}% on Friday's close"
-        category     = "private company"
-
-        hook = (
-            f"{sym} was Friday's standout mover, closing up {gainer_pct:.1f}%. "
-            f"A move that size on a {date.today().strftime('%A')} is worth understanding."
-        )
-        story = (
-            f"{name} posted a {gainer_pct:.1f}% gain in the session. "
-            f"The broader market was less dramatic — S&P {sp_dir} {abs(sp_pct):.2f}%, "
-            f"Nasdaq {ndx_dir} {abs(ndx_pct):.2f}%. "
-            f"Single-stock moves this sharp relative to the index typically trace back to "
-            f"earnings surprise, analyst action, M&A speculation, or a macro read specific to the sector. "
-            f"The move is worth tracking into Monday for follow-through or fade."
-        )
-        take = (
-            f"A {gainer_pct:.0f}% pop with no obvious catalyst is the kind of setup "
-            f"that can cut both ways Monday — confirm the reason before chasing."
-        )
-
-    else:
-        # Quiet week — plain summary
-        direction = "positive" if sp_pct >= 0 else "negative"
-        topic        = f"A {direction} but quiet week — S&P {sp_pct:+.2f}%, Nasdaq {ndx_pct:+.2f}%"
-        triggered_by = "No notable divergence or headlines — plain market summary"
-        category     = "market overview"
-
-        hook = (
-            f"No dramatic divergences this week — the S&P finished {sp_dir} {abs(sp_pct):.2f}%, "
-            f"and the other major indices moved in the same direction."
-        )
-        story = (
-            f"S&P closed {sp_dir} {abs(sp_pct):.2f}%, Nasdaq {ndx_dir} {abs(ndx_pct):.2f}%, "
-            f"Dow {dow_dir} {abs(dow_pct):.2f}%. "
-        )
-        if sector_spread > 0:
-            story += (
-                f"Sector dispersion stayed contained — {top_sector[0]} led at {top_sector[1]:+.2f}% "
-                f"with {bottom_sector[0]} at the bottom at {bottom_sector[1]:+.2f}%. "
-            )
-        story += "Quiet weeks like this are often consolidation before the next directional move."
-        take = "Nothing to chase here — wait for Monday's open to see if the trend resumes or reverses."
+    topic = fields.get("topic", "Today's Case Study")
+    hook  = fields.get("hook", "")
+    story = fields.get("story", "")
+    take  = fields.get("take", "")
 
     word_count = len(f"{hook} {story} {take}".split())
     print(f"    topic: {topic[:80]}")
-    print(f"    category: {category}  |  triggered by: {triggered_by[:60]}")
     print(f"    word count: {word_count}")
 
-    return {
-        "TOPIC":        topic,
-        "CATEGORY":     category,
-        "TRIGGERED_BY": triggered_by,
-        "HOOK":         hook,
-        "STORY":        story,
-        "TAKE":         take,
-    }
-
-
-def _deepdive_html(fields: dict, today: str, snapshot_data: list) -> tuple[str, str]:
-    """Build the short-form deep dive HTML email."""
-    topic        = fields.get("TOPIC", "This Week's Deep Dive")
-    hook         = fields.get("HOOK", "")
-    story        = fields.get("STORY", "")
-    take         = fields.get("TAKE", "")
-    triggered_by = fields.get("TRIGGERED_BY", "")
-
-    # Word count check
-    body_text  = f"{hook} {story} {take}"
-    word_count = len(body_text.split())
-    print(f"    word count: {word_count}")
-
-    # Market snapshot strip (small, above the piece)
-    index_items = ""
-    for item in snapshot_data:
-        pct   = item.get("pct") or 0
-        color = _pct_color(pct)
-        index_items += (
-            f'<span style="margin-right:20px;font-size:12px;color:#6b7280">'
-            f'<strong style="color:#374151">{item.get("name","")}</strong> '
-            f'<span style="color:{color};font-weight:700">{_fmt(pct)}</span>'
-            f'</span>'
-        )
-    snapshot_strip = (
-        f'<tr><td style="padding:12px 32px 0;background:#f9fafb;border-bottom:1px solid #e5e7eb">'
-        f'{index_items}</td></tr>'
-        if index_items else ""
-    )
-
-    # Deep dive body
-    dive_html = f"""
+    body = f"""
     <tr><td style="padding:28px 32px;border-bottom:1px solid #e5e7eb">
 
       <p style="margin:0 0 6px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9ca3af">The Hook</p>
@@ -1597,60 +1232,30 @@ def _deepdive_html(fields: dict, today: str, snapshot_data: list) -> tuple[str, 
         <p style="margin:0;font-size:14px;font-weight:600;color:#111827;line-height:1.5">{take}</p>
       </div>
 
-      {"" if not triggered_by else f'<p style="margin:16px 0 0;font-size:11px;color:#9ca3af;font-style:italic">Triggered by: {triggered_by}</p>'}
-
     </td></tr>"""
 
-    body    = snapshot_strip + dive_html
-    subject = f"Pippy's Brief 📚 — {today}: {topic}"
-    html    = _wrap(body, topic, f"Pippy's Brief 📚 &nbsp;·&nbsp; {today}")
+    subject = f"Pippy's Brief 🧠 — Case Study: {today}"
+    html    = _wrap(body, topic, f"Pippy's Brief 🧠 &nbsp;·&nbsp; {today}")
     return subject, html
 
 
-async def deepdive(session: ClientSession) -> tuple[str, str, dict]:
-    today     = date.today().strftime("%A, %B %d")
-    today_iso = date.today().isoformat()
+async def case_study(session: ClientSession, dry_run: bool = False) -> tuple[str, str, dict]:
+    """
+    Standalone business-history case study — fully decoupled from market
+    status. Zero AI: pulled from the hand-curated CASE_STUDIES library in
+    case_studies.py, rotated via get_next_case_study's dedupe logic.
+    """
+    today = date.today().strftime("%A, %B %d")
 
-    print("    fetching snapshot, headlines, movers, sectors…")
-    snapshot, headlines, movers, sectors, mem = await asyncio.gather(
-        call(session, "fetch_market_snapshot"),
-        call(session, "fetch_top_headlines"),
-        call(session, "fetch_top_movers"),
-        call(session, "fetch_sector_performance"),
-        call(session, "load_memory"),
-    )
+    print("    picking next case study from curated library…")
+    fields = await call(session, "get_next_case_study", {"commit": not dry_run})
 
-    head_list  = headlines.get("headlines", [])
-    index_data = snapshot.get("data", [])
-
-    if not head_list:
-        print("    no headlines returned — will use market data for topic selection")
-
-    # Build the deep dive deterministically from real data — zero AI calls
-    print("    building deep dive from real data…")
-    fields = _build_deep_dive(index_data, head_list, movers, sectors.get("sectors", []))
-
-    # Log to memory — include actual publish date of the source headline
-    source_published = ""
-    if head_list and fields.get("TRIGGERED_BY", "").startswith('"'):
-        source_published = head_list[0].get("published", "")
-    if isinstance(mem, dict):
-        history = mem.get("deep_dive_history", [])
-        history.append({
-            "date":                     today_iso,
-            "category":                 fields.get("CATEGORY", "unknown"),
-            "topic":                    fields.get("TOPIC", ""),
-            "triggered_by":             fields.get("TRIGGERED_BY", ""),
-            "source_headline_published": source_published,
-        })
-        mem["deep_dive_history"] = history[-52:]  # keep ~1 year
-        await call(session, "save_memory", {"data": mem})
-
-    subject, html = _deepdive_html(fields, today, index_data)
+    subject, html = _case_study_html(fields, today)
     log_data = {
-        "type":  "deepdive",
-        "theme": fields.get("CATEGORY", ""),
-        "topic": fields.get("TOPIC", ""),
+        "type":     "case_study",
+        "id":       fields.get("id", ""),
+        "category": fields.get("category", ""),
+        "topic":    fields.get("topic", ""),
     }
     return subject, html, log_data
 
@@ -1679,13 +1284,16 @@ async def run(mode: str, dry_run: bool = False):
             is_open    = bool(market.get("open", False))
             mkt_reason = market.get("reason", "unknown")
 
-            if mode == "deepdive":
-                if is_open:
-                    print("[Pippy's Brief] Market is open — skipping deep dive.")
-                    return
-                subject, html, log_data = await deepdive(session)
+            if mode == "casestudy":
+                # Fully decoupled from market status — fires unconditionally on its
+                # own schedule (weekday noon CT + weekend 8:30am CT).
+                subject, html, log_data = await case_study(session, dry_run=dry_run)
 
             elif mode == "morning":
+                non_trading = "weekend" in mkt_reason or "holiday" in mkt_reason
+                if non_trading:
+                    print(f"[Pippy's Brief] Skipped morning briefing — {mkt_reason}, no session today.")
+                    return
                 subject, html, log_data = await morning(session)
 
             elif mode == "close":
@@ -1730,7 +1338,7 @@ async def run(mode: str, dry_run: bool = False):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=["morning", "close", "deepdive"])
+    parser.add_argument("mode", choices=["morning", "close", "casestudy"])
     parser.add_argument("--dry-run", action="store_true",
                         help="Run full pipeline but skip send_email and save_memory")
     args = parser.parse_args()
