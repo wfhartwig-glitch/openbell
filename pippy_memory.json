@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 26,
-  "last_session": "2026-07-14T13:31:43.615742",
+  "session_count": 27,
+  "last_session": "2026-07-14T17:00:56.258690",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 15,
-  "last_email_sent": "2026-07-14T13:31:43.614670",
-  "last_email_summary": "morning sent Tuesday, July 14, 2026",
+  "email_count": 16,
+  "last_email_sent": "2026-07-14T17:00:56.257773",
+  "last_email_summary": "casestudy sent Tuesday, July 14, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -149,6 +149,13 @@
       "headline_theme": "inflation data",
       "commodity_note": "WTI Crude Oil up 1.0%",
       "picks_status": "holding",
+      "date": "2026-07-14"
+    },
+    {
+      "type": "case_study",
+      "id": "crisis_2008_lehman",
+      "category": "crisis",
+      "topic": "The 2008 Collapse of Lehman Brothers",
       "date": "2026-07-14"
     }
   ],
