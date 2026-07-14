@@ -843,17 +843,27 @@ def _morning_summary_html(
 
 # Sector-family keywords for headline-based causal matching. Word-boundary matched
 # against headline title+snippet — same false-match-safe pattern as _MACRO_KEYWORDS.
+# Kept as explicit plural/compound variants rather than suffix-wildcard regex —
+# wildcarding a short root (e.g. "war" -> "war\w*") would reopen the exact
+# false-match bug class already fixed elsewhere ("war" inside "warehouse").
+# Each variant here is still a full \b-bounded word, just spelled out.
 _SECTOR_HEADLINE_KEYWORDS = {
-    "energy":        ["oil", "crude", "opec", "energy prices"],
-    "technology":    ["chip", "semiconductor", "ai stocks", "tech selloff", "downgrade", "guidance cut"],
-    "financial":     ["bank", "rate cut", "rate hike", "yield", "fed"],
-    "health":        ["fda", "drug", "biotech", "trial", "recall"],
-    "real estate":   ["mortgage rate", "housing"],
-    "utilities":     ["rate cut", "rate hike"],
-    "consumer":      ["retail sales", "consumer spending", "holiday sales"],
-    "industrial":    ["manufacturing", "factory", "supply chain", "tariff"],
-    "material":      ["commodity prices", "metals"],
-    "communication": ["streaming", "advertising", "media"],
+    "energy":        ["oil", "crude", "opec", "energy prices", "natural gas", "oil prices"],
+    "technology":    ["chip", "chips", "chipmaker", "chipmakers", "semiconductor", "semiconductors",
+                      "ai stocks", "ai", "artificial intelligence", "cloud", "cloud computing",
+                      "software", "software stocks", "cybersecurity", "cyberattack", "big tech",
+                      "tech selloff", "tech rally", "downgrade", "guidance cut",
+                      "data center", "data centers"],
+    "financial":     ["bank", "banks", "banking", "rate cut", "rate hike", "yield", "fed",
+                      "lender", "lenders"],
+    "health":        ["fda", "drug", "drugs", "biotech", "trial", "trials", "recall",
+                      "pharma", "pharmaceutical"],
+    "real estate":   ["mortgage rate", "mortgage rates", "housing", "homebuilder", "homebuilders"],
+    "utilities":     ["rate cut", "rate hike", "power grid", "electricity prices"],
+    "consumer":      ["retail sales", "consumer spending", "holiday sales", "retailer", "retailers"],
+    "industrial":    ["manufacturing", "factory", "factories", "supply chain", "tariff", "tariffs"],
+    "material":      ["commodity prices", "metals", "mining"],
+    "communication": ["streaming", "advertising", "media", "telecom"],
 }
 
 
@@ -866,12 +876,22 @@ def _sector_family(name: str) -> str:
 
 
 def _find_headline_for_keywords(headlines: list, keywords: list):
+    """
+    Returns (headline, field) — field is "title" or "snippet", whichever actually
+    contained the matching keyword. Matching against title+snippet combined but
+    then citing a default field (e.g. snippet-first) can quote an unrelated part
+    of the same headline object; tracking the real match location avoids that.
+    """
     for h in headlines or []:
-        text = f"{h.get('title','')} {h.get('snippet','')}".lower()
+        title_l   = (h.get("title", "") or "").lower()
+        snippet_l = (h.get("snippet", "") or "").lower()
         for kw in keywords:
-            if re.search(r'\b' + re.escape(kw) + r'\b', text):
-                return h
-    return None
+            pat = r'\b' + re.escape(kw.lower()) + r'\b'
+            if re.search(pat, title_l):
+                return h, "title"
+            if re.search(pat, snippet_l):
+                return h, "snippet"
+    return None, None
 
 
 _CORP_SUFFIXES = {"corporation", "corp", "inc", "holdings", "holding", "co", "ltd", "plc", "company", "group"}
@@ -886,23 +906,46 @@ def _company_short_name(name: str) -> str:
     return " ".join(tokens)
 
 
-def _find_headline_for_symbol(headlines: list, symbol: str, company_name: str = ""):
-    if not symbol:
-        return None
-    pattern = re.compile(r'\b' + re.escape(symbol) + r'\b')  # case-sensitive — avoids "app"/"APP" false hits
-    name_l  = _company_short_name(company_name).lower()
-    for h in headlines or []:
-        title, snippet = h.get("title", ""), h.get("snippet", "")
-        if pattern.search(title) or pattern.search(snippet):
-            return h
-        if name_l and (name_l in title.lower() or name_l in snippet.lower()):
-            return h
-    return None
+def _find_headline_for_symbol(headlines: list, symbol: str, company_name: str = "", sector: str = ""):
+    """
+    Returns (headline, is_specific, field). is_specific=True means the headline
+    names this exact ticker or company. If no literal match exists, falls back to
+    a sector-category match (e.g. a "cybersecurity stocks" headline for a
+    cybersecurity-sector mover with no ticker of its own in the text) — still
+    real signal, just less specific, so the caller can phrase it honestly. field
+    tracks whether the match landed in the title or snippet, so citation quotes
+    the part that actually matched.
+    """
+    if symbol:
+        pattern = re.compile(r'\b' + re.escape(symbol) + r'\b')  # case-sensitive — avoids "app"/"APP" false hits
+        name_l  = _company_short_name(company_name).lower()
+        for h in headlines or []:
+            title, snippet = h.get("title", "") or "", h.get("snippet", "") or ""
+            if pattern.search(title) or (name_l and name_l in title.lower()):
+                return h, True, "title"
+            if pattern.search(snippet) or (name_l and name_l in snippet.lower()):
+                return h, True, "snippet"
+
+    fam = _sector_family(sector)
+    if fam:
+        h, field = _find_headline_for_keywords(headlines, _SECTOR_HEADLINE_KEYWORDS[fam])
+        if h:
+            return h, False, field
+
+    return None, False, None
 
 
-def _cite_headline(h: dict) -> str:
-    """Quote if <=15 words (copyright-safe), else paraphrase/truncate."""
-    text  = h.get("snippet", "") or h.get("title", "")
+def _cite_headline(h: dict, field: str = None) -> str:
+    """
+    Quote if <=15 words (copyright-safe), else paraphrase/truncate. If field
+    ("title" or "snippet") is given, cite that part specifically — it's the
+    part that actually matched, so this avoids quoting an unrelated portion of
+    the same headline object.
+    """
+    if field == "title":
+        text = h.get("title", "") or h.get("snippet", "")
+    else:
+        text = h.get("snippet", "") or h.get("title", "")
     words = text.split()
     if len(words) <= 15:
         return f'"{text.rstrip(".")}."'
@@ -971,9 +1014,15 @@ def _build_close_summary(
                     if oil and oil.get("pct") is not None and (oil["pct"] > 0) == (pct > 0) and abs(oil["pct"]) >= 1.0:
                         return f"{name} tracked crude oil's {_fmt(oil['pct'])} move today"
                 if fam:
-                    h = _find_headline_for_keywords(headlines_list, _SECTOR_HEADLINE_KEYWORDS[fam])
+                    h, field = _find_headline_for_keywords(headlines_list, _SECTOR_HEADLINE_KEYWORDS[fam])
                     if h:
-                        return f"{name} moved alongside today's coverage: {_cite_headline(h)}"
+                        return f"{name} moved alongside today's coverage: {_cite_headline(h, field)}"
+                # Tier 3: no sector-specific catalyst — fall back to a macro driver
+                # (Fed, CPI, jobs, geopolitical) as general context rather than silence.
+                macro_h, macro_field = _find_headline_for_keywords(headlines_list, list(_MACRO_KEYWORDS.keys()))
+                if macro_h:
+                    return (f"{name} moved with no sector-specific catalyst identified, though the broader "
+                            f"market context today: {_cite_headline(macro_h, macro_field)}")
                 return f"{name} moved with no single catalyst identified in today's headlines"
 
             clauses = []
@@ -1007,19 +1056,31 @@ def _build_close_summary(
             pass
 
     if biggest and best_abs >= 2.0:
-        sym  = biggest.get("symbol", "")
-        name = biggest.get("name", "")
-        pct  = float(biggest.get("pct") or biggest.get("changesPercentage") or 0)
-        dir_ = "surged" if pct > 3 else "gained" if pct > 0 else "dropped" if pct < -3 else "slipped"
+        sym    = biggest.get("symbol", "")
+        name   = biggest.get("name", "")
+        sector = biggest.get("sector", "")
+        pct    = float(biggest.get("pct") or biggest.get("changesPercentage") or 0)
+        dir_   = "surged" if pct > 3 else "gained" if pct > 0 else "dropped" if pct < -3 else "slipped"
         if sym in earnings_today:
             # Hard factual link: same ticker, same day
             s3 = f"{sym} {dir_} {_fmt(pct)} today following this morning's earnings report."
         else:
-            h = _find_headline_for_symbol(headlines_list, sym, name)
-            if h:
-                s3 = f"{sym} {dir_} {_fmt(pct)} as the day's biggest single mover — today's coverage points to {_cite_headline(h)}"
+            h, is_specific, field = _find_headline_for_symbol(headlines_list, sym, name, sector)
+            if h and is_specific:
+                s3 = f"{sym} {dir_} {_fmt(pct)} as the day's biggest single mover — today's coverage points to {_cite_headline(h, field)}"
+            elif h and not is_specific:
+                # Sector-category match, not a literal ticker/company mention — say so honestly
+                fam_label = sector if sector else "its sector"
+                s3 = (f"{sym} {dir_} {_fmt(pct)} as the day's biggest single mover; no {sym}-specific story "
+                      f"ran today, but coverage of {fam_label} broadly may be a factor: {_cite_headline(h, field)}")
             else:
-                s3 = f"{sym} {dir_} {_fmt(pct)} as the day's biggest single mover, with no clear single catalyst found in today's headlines."
+                # Tier 3: no ticker or sector catalyst — fall back to a macro driver as general context
+                macro_h, macro_field = _find_headline_for_keywords(headlines_list, list(_MACRO_KEYWORDS.keys()))
+                if macro_h:
+                    s3 = (f"{sym} {dir_} {_fmt(pct)} as the day's biggest single mover, with no {sym}-specific "
+                          f"catalyst found — broader market backdrop: {_cite_headline(macro_h, macro_field)}")
+                else:
+                    s3 = f"{sym} {dir_} {_fmt(pct)} as the day's biggest single mover, with no clear single catalyst found in today's headlines."
     elif commodities_list:
         for c in commodities_list:
             try:

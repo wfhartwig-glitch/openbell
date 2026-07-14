@@ -480,9 +480,22 @@ def fetch_top_movers() -> str:
                     pct = round((price - prev) / prev * 100, 2)
                     results.append({"symbol": ticker, "pct": pct, "price": round(price, 2)})
             results.sort(key=lambda x: x["pct"], reverse=True)
+            gainers = results[:3]
+            losers  = results[-3:][::-1]
+            # Enrich only the actual top movers (max 6 tickers) with company name +
+            # sector — needed so the close-summary email can match headline coverage
+            # to a mover by company name or sector category, not just a bare ticker.
+            for m in gainers + losers:
+                try:
+                    info = yf.Ticker(m["symbol"]).info
+                    m["name"]   = info.get("shortName") or info.get("longName") or ""
+                    m["sector"] = info.get("sector", "")
+                except Exception:
+                    m["name"]   = ""
+                    m["sector"] = ""
             return json.dumps({"source": "fallback",
-                               "gainers": results[:3],
-                               "losers":  results[-3:][::-1],
+                               "gainers": gainers,
+                               "losers":  losers,
                                "timestamp": ts})
         except Exception as e:
             return json.dumps({"source": "unavailable", "error": str(e), "timestamp": ts})
