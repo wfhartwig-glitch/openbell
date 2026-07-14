@@ -181,7 +181,9 @@ def _daily_scan(candidates: list, scanned: int = 0, elapsed: float = 0) -> str:
     if not candidates:
         return _section("Today's Top Scored Candidates",
                         '<p style="margin:0;font-size:13px;color:#9ca3af">Scan unavailable — no data returned.</p>')
-    rows = ""
+    # Stacked cards, not a wide multi-column table — long rationale text wraps
+    # naturally at any screen width instead of forcing a cramped/overflowing table.
+    cards = ""
     for i, c in enumerate(candidates[:5], 1):
         ticker   = c.get("ticker", "")
         company  = c.get("company", ticker)
@@ -193,27 +195,25 @@ def _daily_scan(candidates: list, scanned: int = 0, elapsed: float = 0) -> str:
         mom_color = GREEN if momentum >= 0 else RED
         mom_str   = f'{"▲" if momentum >= 0 else "▼"} {abs(momentum):.1f}% (3mo)'
         score_color = GREEN if score >= 30 else "#d97706" if score >= 15 else GRAY
-        rows += f"""
-        <tr>
-          <td style="padding:9px 12px 9px 0;vertical-align:top;width:22px">
-            <span style="font-size:11px;font-weight:700;color:#9ca3af">{i}.</span>
-          </td>
-          <td style="padding:9px 12px 9px 0;vertical-align:top">
-            <span style="font-size:14px;font-weight:700;color:#111827">{ticker}</span>
-            <span style="font-size:12px;color:#6b7280;margin-left:6px">{company}</span><br>
-            <span style="font-size:11px;color:#6b7280">{sector}{" · " + risk if risk else ""}</span><br>
-            <span style="font-size:12px;color:#374151;margin-top:2px;display:block">{rationale}</span>
-          </td>
-          <td style="padding:9px 0;vertical-align:top;text-align:right;white-space:nowrap">
-            <span style="font-size:13px;font-weight:700;color:{score_color}">Score {score:.0f}</span><br>
-            <span style="font-size:11px;color:{mom_color}">{mom_str}</span>
-          </td>
-        </tr>"""
+        border = "" if i == 1 else "border-top:1px solid #f3f4f6;"
+        cards += f"""
+        <div style="{border}padding:12px 0">
+          <p style="margin:0 0 3px;font-size:14px;line-height:1.4">
+            <span style="font-weight:700;color:#9ca3af">{i}.</span>
+            <span style="font-weight:700;color:#111827">{ticker}</span>
+            <span style="color:#6b7280;font-size:12px">{company}</span>
+          </p>
+          <p style="margin:0 0 6px;font-size:11px;color:#6b7280;line-height:1.5">
+            {sector}{" · " + risk if risk else ""} ·
+            <span style="font-weight:700;color:{score_color}">Score {score:.0f}</span> ·
+            <span style="font-weight:700;color:{mom_color}">{mom_str}</span>
+          </p>
+          <p style="margin:0;font-size:12px;color:#374151;line-height:1.5">{rationale}</p>
+        </div>"""
     footer = ""
     if scanned:
-        footer = f'<tr><td colspan="3" style="padding:8px 0 0;font-size:11px;color:#9ca3af">Daily mechanical scan · {scanned} tickers scored · {elapsed:.0f}s runtime · separate from your held Weekly Picks</td></tr>'
-    return _section("Today's Top Scored Candidates",
-                    f'<table width="100%" cellpadding="0" cellspacing="0">{rows}{footer}</table>')
+        footer = f'<p style="margin:10px 0 0;font-size:11px;color:#9ca3af">Daily mechanical scan · {scanned} tickers scored · {elapsed:.0f}s runtime · separate from your held Weekly Picks</p>'
+    return _section("Today's Top Scored Candidates", cards + footer)
 
 
 def _sectors(sectors: list) -> str:
@@ -291,19 +291,29 @@ def _enrich_picks_with_perf(picks: list, mem: dict) -> list:
 def _unified_picks(picks: list, scan_candidates: list, week: str = "", changes: list = None,
                    scanned: int = 0, elapsed: float = 0) -> str:
     """
-    One picks table: held Weekly Picks first, then new daily-scan candidates
-    not already held. A ticker that's both held and top-scored today gets a
-    single row (held) with an inline flag — never two rows with two numbers.
+    Stacked cards, not a wide multi-column table — held Weekly Picks first, then
+    new daily-scan candidates not already held. A ticker that's both held and
+    top-scored today gets a single card (held) with an inline flag — never two
+    cards with two numbers. Cards (not table columns) so the long free-text
+    Detail line wraps naturally at any screen width instead of forcing a
+    cramped/overflowing table on mobile.
     """
     if not picks and not scan_candidates:
         return ""
-    risk_colors = {"Low": GREEN, "Medium": "#d97706", "High": RED, "Speculative": "#7c3aed"}
 
     held_tickers = {p.get("ticker", "") for p in picks}
     top_scan       = scan_candidates[:5]
     scan_by_ticker = {c.get("ticker", ""): c for c in top_scan}
 
-    rows = ""
+    cards = ""
+    is_first = True
+
+    def _border():
+        nonlocal is_first
+        b = "" if is_first else "border-top:1px solid #f3f4f6;"
+        is_first = False
+        return b
+
     for p in picks:
         ticker     = p.get("ticker", "")
         weeks_held = p.get("weeks_held", 1)
@@ -319,14 +329,16 @@ def _unified_picks(picks: list, scan_candidates: list, week: str = "", changes: 
             sc = scan_by_ticker[ticker]
             flag = f' — <span style="color:#7c3aed;font-weight:600">also top-scored today (Score {sc.get("score", 0):.0f})</span>'
 
-        rows += f"""
-        <tr style="border-top:1px solid #f3f4f6">
-          <td style="padding:10px 10px 10px 0;font-size:13px;font-weight:700;color:#111827;width:55px">{ticker}</td>
-          <td style="padding:10px 10px 10px 0;font-size:12px;color:#374151">{p.get("company","")}</td>
-          <td style="padding:10px 10px 10px 0;font-size:11px;color:#6b7280">{p.get("sector","")}</td>
-          <td style="padding:10px 10px 10px 0;font-size:11px;font-weight:700;color:{GREEN};white-space:nowrap">Holding · {weeks_held}w</td>
-          <td style="padding:10px 0;font-size:11px;color:#6b7280">{pct_str}{note}{flag}</td>
-        </tr>"""
+        cards += f"""
+        <div style="{_border()}padding:12px 0">
+          <p style="margin:0 0 3px;font-size:14px;font-weight:700;color:#111827">
+            {ticker} <span style="font-weight:500;color:#6b7280;font-size:12px">{p.get("company","")}</span>
+          </p>
+          <p style="margin:0 0 6px;font-size:11px;color:#6b7280">
+            {p.get("sector","")} · <span style="font-weight:700;color:{GREEN}">Holding · {weeks_held}w</span>
+          </p>
+          <p style="margin:0;font-size:12px;color:#374151;line-height:1.5">{pct_str}{note}{flag}</p>
+        </div>"""
 
     new_candidates = [c for c in top_scan if c.get("ticker", "") not in held_tickers][:4]
     for c in new_candidates:
@@ -334,22 +346,16 @@ def _unified_picks(picks: list, scan_candidates: list, week: str = "", changes: 
         momentum = c.get("momentum", 0)
         mom_str  = f'{"▲" if momentum >= 0 else "▼"} {abs(momentum):.1f}% (3mo)'
         detail   = f"Score {score:.0f} — {c.get('rationale','')} — {mom_str}"
-        rows += f"""
-        <tr style="border-top:1px solid #f3f4f6">
-          <td style="padding:10px 10px 10px 0;font-size:13px;font-weight:700;color:#111827;width:55px">{c.get("ticker","")}</td>
-          <td style="padding:10px 10px 10px 0;font-size:12px;color:#374151">{c.get("company","")}</td>
-          <td style="padding:10px 10px 10px 0;font-size:11px;color:#6b7280">{c.get("sector","")}</td>
-          <td style="padding:10px 10px 10px 0;font-size:11px;font-weight:700;color:#7c3aed;white-space:nowrap">New candidate</td>
-          <td style="padding:10px 0;font-size:11px;color:#6b7280">{detail}</td>
-        </tr>"""
-
-    header = """<tr>
-      <td style="padding:0 10px 8px 0;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase">Ticker</td>
-      <td style="padding:0 10px 8px 0;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase">Company</td>
-      <td style="padding:0 10px 8px 0;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase">Sector</td>
-      <td style="padding:0 10px 8px 0;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase">Status</td>
-      <td style="padding:0 0 8px;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase">Detail</td>
-    </tr>"""
+        cards += f"""
+        <div style="{_border()}padding:12px 0">
+          <p style="margin:0 0 3px;font-size:14px;font-weight:700;color:#111827">
+            {c.get("ticker","")} <span style="font-weight:500;color:#6b7280;font-size:12px">{c.get("company","")}</span>
+          </p>
+          <p style="margin:0 0 6px;font-size:11px;color:#6b7280">
+            {c.get("sector","")} · <span style="font-weight:700;color:#7c3aed">New candidate</span>
+          </p>
+          <p style="margin:0;font-size:12px;color:#374151;line-height:1.5">{detail}</p>
+        </div>"""
 
     changes_html = ""
     if changes:
@@ -367,10 +373,7 @@ def _unified_picks(picks: list, scan_candidates: list, week: str = "", changes: 
 
     week_label = f" — {week}" if week else ""
     return _section(f"Stock Picks{week_label}",
-        explainer
-        + f'<table width="100%" cellpadding="0" cellspacing="0">{header}{rows}</table>'
-        + changes_html
-        + footer)
+        explainer + cards + changes_html + footer)
 
 
 # ── Learning loop helpers ─────────────────────────────────────────────────────
