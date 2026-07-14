@@ -66,7 +66,7 @@ jobs:
         run: |
           git config user.name "Pippy"
           git config user.email "pippy@openbell.ai"
-          git add case_study_history.json
+          git add case_study_history.json pippy_memory.json
           git diff --staged --quiet || git commit -m "Pippy case study history — $(date +'%Y-%m-%d %H:%M')"
           git pull --rebase origin main
           git push
