@@ -12,25 +12,15 @@
 name: Pippy's Brief — Case Study
 
 on:
-  # PRIMARY trigger: cron-job.org calls this workflow's workflow_dispatch
-  # endpoint at two separate times — same pattern as morning_brief, close_summary,
-  # and the old deep_dive workflow. See the repo README / setup notes for the
-  # exact cron-job.org configuration (two jobs pointing at this one workflow).
+  # Triggered externally by cron-job.org at two separate times — 12:00 PM CT on
+  # weekdays and 8:30 AM CT on weekends — same pattern as morning_brief and
+  # close_summary. See the repo README / setup notes for the exact cron-job.org
+  # configuration (two jobs pointing at this one workflow's workflow_dispatch
+  # endpoint). No native schedule: trigger — confirmed via duplicate sends that
+  # GitHub's native cron fires up to ~1hr late and double-sends alongside the
+  # on-time cron-job.org call. cron-job.org has proven reliable for both
+  # schedules, so it's the sole trigger.
   workflow_dispatch:
-
-  # FALLBACK trigger: native GitHub Actions schedule, in case cron-job.org is
-  # ever misconfigured or down. KNOWN CAVEAT — this project previously found
-  # GitHub's native `schedule:` trigger has a confirmed ~2hr lag specifically
-  # on weekends, which is exactly one of the two schedules this workflow needs.
-  # Treat cron-job.org as the reliable path and this as a backstop only.
-  #
-  # Times below are set for CDT (Central Daylight Time, UTC-5). When the US
-  # flips to CST (Central Standard Time, UTC-6) in November, add one hour to
-  # each UTC time below (17:00 -> 18:00, 13:30 -> 14:30) — cron-job.org should
-  # be adjusted the same way at that time.
-  schedule:
-    - cron: '0 17 * * 1-5'    # Weekdays, noon CT (CDT: UTC-5) — 12:00 PM CT
-    - cron: '30 13 * * 6,0'   # Weekends, 8:30 AM CT (CDT: UTC-5)
 
 permissions:
   contents: write
