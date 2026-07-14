@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 28,
-  "last_session": "2026-07-14T18:10:41.318585",
+  "session_count": 29,
+  "last_session": "2026-07-14T20:01:37.614257",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 17,
-  "last_email_sent": "2026-07-14T18:10:41.317572",
-  "last_email_summary": "casestudy sent Tuesday, July 14, 2026",
+  "email_count": 18,
+  "last_email_sent": "2026-07-14T20:01:37.613290",
+  "last_email_summary": "close sent Tuesday, July 14, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -164,6 +164,15 @@
       "category": "crisis",
       "topic": "Black Monday, 1987 \u2014 The Day Computers Panicked",
       "date": "2026-07-14"
+    },
+    {
+      "type": "close",
+      "actual_direction": "higher",
+      "actual_sp_pct": 0.38,
+      "best_sector": "Technology",
+      "worst_sector": "Health Care",
+      "biggest_mover": "CRWD +12.9%",
+      "date": "2026-07-14"
     }
   ],
   "lessons_learned": [
@@ -182,6 +191,12 @@
       "called": "lower",
       "actual": "lower",
       "accurate": true
+    },
+    {
+      "date": "2026-07-14",
+      "called": "mixed",
+      "actual": "higher",
+      "accurate": false
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
