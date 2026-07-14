@@ -996,4 +996,458 @@ CASE_STUDIES = [
         ),
         "take": "Like Netflix with DVDs, Amazon chose to build the product that threatened its own most successful existing business rather than wait for a competitor to do it — a hard, counterintuitive call that only makes sense if you genuinely believe the disruption is coming either way.",
     },
+
+    # ── Dramatic personal arcs: rise, fall, controversy, reinvention ──────────
+    {
+        "id": "investor_michael_milken",
+        "category": "investor",
+        "topic": "Michael Milken — From Junk Bond King to Convicted Felon to Cancer Research's Biggest Funder",
+        "hook": "Michael Milken invented an entire corner of Wall Street, made more money in a single year than most companies earn in a decade, and served nearly two years in federal prison for it. Today he's one of the largest funders of cancer research on Earth.",
+        "story": (
+            "In the 1970s, \"junk bonds\" — bonds issued by companies considered too risky to earn an "
+            "investment-grade rating, paying higher interest to compensate investors for that risk — were "
+            "avoided almost entirely by mainstream Wall Street. Milken, working at the investment bank Drexel "
+            "Burnham Lambert, argued that a diversified basket of these bonds actually delivered strong "
+            "returns overall, because their higher yields more than made up for the (real, but historically "
+            "overstated) chance any single one would default. That insight built an enormous, fast-growing "
+            "market: companies once shut out of borrowing could now raise money, often to fund aggressive "
+            "corporate takeovers, and Milken personally earned as much as $550 million in a single year — an "
+            "almost unheard-of sum at the time. But the same access to information that made Milken so "
+            "effective also put him at the center of an insider-trading investigation: prosecutors found he'd "
+            "worked with Wall Street trader Ivan Boesky to trade on nonpublic information about pending deals "
+            "and manipulate securities prices. In 1990, Milken pleaded guilty to six felony securities "
+            "violations, paid hundreds of millions in fines and restitution, and served 22 months in prison. "
+            "Around the same time, he was diagnosed with advanced prostate cancer and given a short life "
+            "expectancy. Rather than fade from view, he redirected his fortune and organizational skill toward "
+            "medical research, building what became one of the largest private funders of prostate cancer "
+            "research in the world — and living for decades past his original prognosis."
+        ),
+        "take": "Milken's story sits right on the blurry line between aggressive financial innovation and outright fraud — and it's also proof that a serious public fall doesn't have to be the last chapter, even though it never erases what came before it.",
+    },
+    {
+        "id": "founder_palmer_luckey",
+        "category": "investor",
+        "topic": "Palmer Luckey — Fired From the Company He Built, He Rebuilt Bigger Out of Spite",
+        "hook": "At 21, Palmer Luckey sold the virtual-reality company he'd built in his parents' garage to Facebook for $2 billion. Two years later he was pushed out over a political controversy — and responded by building a defense-tech company now worth tens of billions.",
+        "story": (
+            "As a teenager, Luckey was obsessed with virtual reality headsets as a hobby, building prototypes "
+            "in his parents' garage that solved a core problem — a wide field of view without the extreme "
+            "bulk and cost of existing systems. He turned this into Oculus, crowdfunded it on Kickstarter, and "
+            "within two years sold the company to Facebook in 2014 for roughly $2 billion, becoming a Silicon "
+            "Valley wunderkind before he was old enough to rent a car in some states. In 2016, it came out "
+            "that Luckey had personally donated to a group supporting Donald Trump's presidential campaign, "
+            "specifically funding pro-Trump internet memes. The backlash inside the tech industry and at "
+            "Facebook was severe, and Luckey was pushed out of the company in 2017 under circumstances Facebook "
+            "never fully explained publicly, which Luckey and others have characterized as a political firing. "
+            "Rather than retreat, Luckey used his fortune to found Anduril Industries in 2017, explicitly "
+            "positioning it to build autonomous defense technology — drones, sensor towers, AI-driven "
+            "surveillance systems — for the U.S. military, an industry Silicon Valley had largely avoided "
+            "working with. Anduril grew rapidly by taking on Pentagon contracts other tech companies wouldn't "
+            "touch, and by the mid-2020s was valued at tens of billions of dollars, making Luckey's second "
+            "company arguably more significant than the one that made him famous."
+        ),
+        "take": "Luckey turned getting pushed out of his own creation into fuel rather than defeat — Anduril reads less like a pivot and more like a direct answer to the people who fired him, betting he could build something even bigger without them.",
+    },
+    {
+        "id": "founder_martha_stewart",
+        "category": "investor",
+        "topic": "Martha Stewart — Convicted, Imprisoned, and Somehow Came Back Bigger",
+        "hook": "Martha Stewart built a lifestyle empire worth hundreds of millions, went to federal prison for lying about a stock sale, and came out the other side with a bigger media deal than she had before — plus an unlikely late-career partnership with Snoop Dogg.",
+        "story": (
+            "By the early 2000s, Stewart had turned a catering business into Martha Stewart Living Omnimedia, "
+            "a publicly traded company spanning magazines, television, and merchandise built entirely around "
+            "her personal brand of domestic expertise. In 2001, she sold shares of a biotech company, ImClone "
+            "Systems, the day before a negative FDA announcement tanked the stock — a sale that came shortly "
+            "after her stockbroker allegedly tipped her off that the ImClone CEO was selling his own shares. "
+            "Stewart was never actually charged with insider trading itself; instead, she was charged with, "
+            "and in 2004 convicted of, lying to federal investigators about the circumstances of the sale — "
+            "obstruction of justice. She served five months in federal prison, plus five months of home "
+            "confinement, and her company's stock and reputation took a serious hit while she was away. Rather "
+            "than quietly retire the brand, Stewart returned to television almost immediately after her "
+            "release, rebuilding her media presence and eventually landing on VH1 as co-host of a cooking-and-"
+            "variety show with rapper Snoop Dogg — an odd-couple pairing that reintroduced her to a much "
+            "younger audience and became a genuine hit. Her company was later sold for a substantial sum, and "
+            "by her 80s, Stewart had become, by some measures, more culturally relevant and financially secure "
+            "than before her conviction."
+        ),
+        "take": "Stewart's comeback worked because she treated the conviction as a chapter to move past publicly rather than hide from — leaning into self-aware reinvention (rather than denial) turned a felony conviction into a stranger, and ultimately more durable, second act.",
+    },
+    {
+        "id": "founder_steve_jobs_apple",
+        "category": "investor",
+        "topic": "Steve Jobs Was Fired From the Company He Founded — Then Came Back to Save It",
+        "hook": "In 1985, Steve Jobs was pushed out of Apple, the company he'd co-founded less than a decade earlier. Twelve years later, Apple was on the verge of bankruptcy and brought him back to save it.",
+        "story": (
+            "Jobs co-founded Apple in a garage in 1976 and helped turn it into one of the defining companies "
+            "of the personal computer era. In 1983, he personally recruited John Sculley, then a top executive "
+            "at Pepsi, to become Apple's CEO, reportedly convincing him with the line \"Do you want to sell "
+            "sugar water for the rest of your life, or do you want to come with me and change the world?\" "
+            "The partnership soured within two years: after the underperforming Macintosh launch and a power "
+            "struggle over company direction, Apple's board sided with Sculley, and Jobs was stripped of his "
+            "operational role in 1985. He resigned from Apple entirely soon after. Rather than disappear, Jobs "
+            "founded a new computer company, NeXT, and separately bought a small computer-graphics division "
+            "from Lucasfilm that he renamed Pixar — a company that would go on to create Toy Story and "
+            "redefine animated film. Meanwhile, Apple struggled badly through the 1990s without him, cycling "
+            "through CEOs, losing market share, and coming close to running out of cash entirely by 1996. That "
+            "year, Apple acquired NeXT for its operating system technology — and, effectively, to bring Jobs "
+            "back into the fold. He became interim CEO in 1997 and permanent CEO shortly after, overseeing the "
+            "iMac, iPod, iPhone, and iPad over the following decade, transforming Apple into the most valuable "
+            "company in the world before his death in 2011."
+        ),
+        "take": "Apple didn't just rehire Jobs — it bought an entire company to get him back, a rare admission that the person it fired twelve years earlier turned out to be irreplaceable after all.",
+    },
+    {
+        "id": "founder_walt_disney",
+        "category": "investor",
+        "topic": "Walt Disney Went Bankrupt, Had a Breakdown, and Bet Everything on a Theme Park No Bank Would Fund",
+        "hook": "Before Mickey Mouse, Walt Disney's first animation studio went bankrupt. Decades later, with a media empire already built, he personally borrowed against his own life insurance because no bank would finance Disneyland.",
+        "story": (
+            "Disney's first company, Laugh-O-Gram Studio in Kansas City, went bankrupt in 1923 after running "
+            "out of money mid-production. He moved to Hollywood and, with his brother Roy, built a new studio "
+            "around an original character, Oswald the Lucky Rabbit — only to discover his distributor owned "
+            "the legal rights to Oswald under their contract, and lost the character (and most of his "
+            "animation staff, who the distributor poached) in one blow. In response, Disney created a new "
+            "character with a similar look but full ownership retained: Mickey Mouse. Success followed through "
+            "the 1930s, but the pressure of running a growing studio and pouring the company's finances into "
+            "the risky, unprecedented feature film Snow White and the Seven Dwarfs reportedly contributed to "
+            "Disney suffering what was described at the time as a nervous breakdown around 1931, prompting a "
+            "doctor-recommended vacation to recover. Decades later, wanting to build a themed amusement park — "
+            "an idea most banks and investors considered a poor and unproven business, since amusement parks "
+            "of the era had a seedy, low-margin reputation — Disney struggled for years to secure financing. "
+            "He ultimately borrowed against his own life insurance policy and pulled together financing "
+            "through a television deal with ABC (which wanted programming rights in exchange for investment) "
+            "to fund Disneyland, which opened in 1955 and became the template for the modern theme park "
+            "industry."
+        ),
+        "take": "Disney's career is a repeating pattern of losing everything on one bet and rebuilding on the next — Disneyland almost didn't happen not because the vision was wrong, but because nobody with money believed in an idea that obvious in hindsight.",
+    },
+    {
+        "id": "founder_pt_barnum",
+        "category": "investor",
+        "topic": "P.T. Barnum Went Bankrupt Chasing Schemes for Decades Before Building His Famous Circus",
+        "hook": "The man behind \"The Greatest Show on Earth\" spent much of his life broke, publicly humiliated, and bouncing between failed ventures — he didn't build the circus he's remembered for until he was nearly 60.",
+        "story": (
+            "Long before the circus, Barnum tried and mostly failed at a string of ventures: a lottery "
+            "business, a small newspaper that landed him briefly in jail for libel, and a traveling exhibition "
+            "business built on curiosities and human oddities, some of it built on outright hoaxes designed to "
+            "generate publicity and controversy rather than honest attractions. His American Museum in New "
+            "York, opened in 1841, was a genuine commercial success for years, mixing legitimate curiosities "
+            "with theatrical exaggeration — a mix Barnum openly defended as entertainment rather than fraud. "
+            "In the 1850s, flush with museum money, he invested heavily in a clock-manufacturing company as a "
+            "favor to a business partner; the company collapsed in 1856, and Barnum — having personally "
+            "guaranteed its debts — was left publicly bankrupt and humiliated, his name in newspapers as a "
+            "cautionary tale. He spent the following years rebuilding through paid lecture tours (including "
+            "one on the very subject of how he'd gone broke) and writing, slowly restoring both his finances "
+            "and his reputation. It wasn't until 1871, when he was in his early 60s, that Barnum founded the "
+            "traveling circus that would eventually merge with a rival to become Barnum & Bailey Circus, the "
+            "venture that made his name synonymous with American showmanship for the next century."
+        ),
+        "take": "Barnum's most famous venture didn't come from his first burst of success — it came after multiple public collapses, at an age when most people would have considered their working life essentially over.",
+    },
+    {
+        "id": "founder_milton_hershey",
+        "category": "investor",
+        "topic": "Milton Hershey Failed at Candy Three Times Before Building an Empire on His Fourth Try",
+        "hook": "Milton Hershey failed at candy-making in Philadelphia, failed again in Chicago, and failed a third time in New York badly enough to leave him seriously in debt — all before he ever built the chocolate company that bears his name.",
+        "story": (
+            "Hershey apprenticed as a confectioner as a teenager and struck out on his own with a candy "
+            "business in Philadelphia in his early twenties; it failed within a few years. He tried again in "
+            "Chicago, then again in New York, each venture ending in failure — the New York attempt left him "
+            "seriously in debt and forced him to return, broke, to his hometown of Lancaster, Pennsylvania, "
+            "where relatives were reportedly reluctant to lend him more money given his track record. In "
+            "Lancaster, he started over with a caramel-making business, and this time the product caught on: "
+            "his caramels, made with fresh milk, developed a strong reputation, and he sold the Lancaster "
+            "Caramel Company in 1900 for roughly $1 million — a substantial fortune at the time, and finally "
+            "genuine proof his earlier failures hadn't been a permanent verdict on his judgment. Rather than "
+            "retire on the sale, Hershey pivoted entirely: at the 1893 World's Columbian Exposition in "
+            "Chicago, he'd been struck by German chocolate-making machinery on display, and he used the "
+            "caramel-company proceeds to build a mass-market milk chocolate business, betting correctly that "
+            "chocolate — then a relative luxury item — could be manufactured cheaply enough to sell to "
+            "ordinary Americans. He built an entire company town, Hershey, Pennsylvania, around the factory for "
+            "his workers, and later gave away the bulk of his fortune to found a school for orphaned children."
+        ),
+        "take": "Three consecutive business failures didn't disqualify Hershey from eventually building one of the most recognizable brands in American history — they were simply what it took for him to find the one idea (mass-market milk chocolate) that actually worked.",
+    },
+    {
+        "id": "investor_charles_goodyear",
+        "category": "investor",
+        "topic": "Charles Goodyear Went to Debtors' Prison Chasing an Obsession — Then Died Poor After Solving It",
+        "hook": "Charles Goodyear was so consumed by his obsession with rubber that it landed him in debtors' prison more than once. He finally cracked the problem by accident — and still died broke while other people got rich off his idea.",
+        "story": (
+            "In the 1830s, natural rubber had an obvious commercial problem: it turned brittle and cracked in "
+            "cold weather and became a sticky, foul-smelling mess in heat, making it impractical for most "
+            "serious uses. Goodyear became fixated on solving this, experimenting relentlessly with rubber "
+            "mixed with various chemicals despite having no formal scientific training and, increasingly, no "
+            "money — his obsession repeatedly drained his family's finances and landed him in debtors' prison "
+            "(a now-abolished practice of jailing people who couldn't pay what they owed) on more than one "
+            "occasion. In 1839, according to the account Goodyear told for the rest of his life, he "
+            "accidentally dropped a rubber-and-sulfur mixture onto a hot stove, and instead of melting into a "
+            "gooey mess, it charred into a stable, flexible material that held up in both heat and cold. This "
+            "process, later named vulcanization, was exactly the breakthrough the rubber industry needed. But "
+            "Goodyear was a poor businessman and worse at protecting his own invention: he spent years and "
+            "large sums fighting patent infringement cases (at one point hiring the prominent lawyer and "
+            "statesman Daniel Webster for an enormous fee), while a British inventor, Thomas Hancock, patented "
+            "a very similar process in England just weeks before Goodyear secured his own British patent, "
+            "profiting substantially from it. Goodyear died in debt in 1860. The Goodyear Tire & Rubber "
+            "Company, founded nearly forty years later in 1898, was simply named in his honor by its founder — "
+            "Goodyear himself never had any ownership stake in it."
+        ),
+        "take": "Goodyear's story is a stark reminder that inventing something enormously valuable and successfully capturing its value are two entirely different skills — he nailed the first and never came close to the second.",
+    },
+    {
+        "id": "investor_charles_ponzi",
+        "category": "investor",
+        "topic": "The Real Charles Ponzi — The Actual Man Behind the Scheme Everyone Names but Few Know",
+        "hook": "Everyone knows the term \"Ponzi scheme.\" Almost nobody knows that Charles Ponzi's original scam was built around a genuinely real, if wildly impractical, financial loophole involving international postage stamps.",
+        "story": (
+            "Ponzi, an Italian immigrant living in Boston, discovered in 1919 that international postal reply "
+            "coupons — a system that let someone in one country prepay return postage for someone in another "
+            "country — could technically be bought cheaply in nations with weak currencies (like postwar Italy) "
+            "and redeemed for more valuable U.S. postage, creating a legitimate, if small, arbitrage "
+            "opportunity (profiting from a price difference for the same underlying thing across two "
+            "markets). The real version of this trade was far too slow and limited in scale to generate "
+            "serious money. But Ponzi began promising investors a 50% return within 45 days, funded almost "
+            "entirely not by actual postal-coupon trading but by using new investors' money to pay off earlier "
+            "investors — the scheme that now bears his name, though he wasn't the first to use the underlying "
+            "structure historically, just the one whose scale made it famous. Word spread fast, and within "
+            "months Ponzi was taking in millions of dollars from ordinary Bostonians eager for the promised "
+            "returns, living lavishly and becoming a minor celebrity. The scheme collapsed in mid-1920 after a "
+            "Boston Post investigation, working with financial analysts, demonstrated mathematically that the "
+            "volume of actual postal coupons Ponzi claimed to be trading didn't exist in anywhere near "
+            "sufficient quantity worldwide to support his promised returns. Thousands of investors lost "
+            "everything, Ponzi was convicted of mail fraud, and after prison and a deportation, he died poor "
+            "in Brazil in 1949."
+        ),
+        "take": "Ponzi's scheme worked, for a while, precisely because it was built on a kernel of something real — the lesson isn't that all such promises are fake, it's that a legitimate opportunity that small can never honestly scale into the returns he was promising.",
+    },
+    {
+        "id": "investor_ivan_boesky",
+        "category": "investor",
+        "topic": "Ivan Boesky Said \"Greed Is Healthy\" on Stage — Then Wore a Wire to Take Down Wall Street",
+        "hook": "Ivan Boesky once told business school graduates that greed was healthy, in a speech later echoed almost word-for-word by Gordon Gekko in the film Wall Street. Within a year, he was secretly recording his own colleagues for the government.",
+        "story": (
+            "Boesky built his career and reputation as a Wall Street arbitrageur — someone who bets on the "
+            "likely outcome of pending corporate mergers and takeovers, profiting from the price gap between "
+            "a target company's current stock price and what it will likely be worth once a deal closes. Done "
+            "legally, this requires only public information and good judgment about which deals will actually "
+            "close. In a widely quoted 1986 commencement address at UC Berkeley's business school, Boesky told "
+            "graduates, \"I think greed is healthy. You can be greedy and still feel good about yourself\" — a "
+            "line that captured the era's ethos so precisely it was echoed almost directly the following year "
+            "in the film Wall Street's famous \"greed is good\" speech. What wasn't public at the time was that "
+            "Boesky had been trading on illegal inside information about pending mergers, obtained through a "
+            "network that included tips traced back to associates of Michael Milken at Drexel Burnham Lambert. "
+            "When the Securities and Exchange Commission caught him in 1986, Boesky struck a deal: in exchange "
+            "for a reduced sentence, he agreed to cooperate with investigators, including secretly recording "
+            "conversations with other Wall Street figures. The evidence he provided became central to the case "
+            "that eventually brought down Milken. Boesky still paid a then-record $100 million in fines and "
+            "penalties and served time in prison, and — unlike some others in this story — never staged a "
+            "public comeback, largely disappearing from prominent business life afterward."
+        ),
+        "take": "Boesky's public philosophy and his private conduct turned out to be the exact same thing, just described differently in each — and once caught, the fastest way out was helping prosecutors dismantle the very network he'd built his fortune inside.",
+    },
+    {
+        "id": "founder_conrad_hilton",
+        "category": "investor",
+        "topic": "Conrad Hilton Nearly Lost Everything in the Depression — Then Built a Global Hotel Empire",
+        "hook": "Conrad Hilton built a chain of Texas hotels in the 1920s oil boom, then watched the Great Depression bring him so close to ruin he had to personally beg employees to keep one hotel's lights on. He rebuilt it into one of the largest hotel companies on Earth.",
+        "story": (
+            "Hilton bought his first hotel, the Mobley in Cisco, Texas, in 1919, during an oil boom that made "
+            "hotel rooms scarce and profitable. He expanded aggressively through the 1920s, buying up hotels "
+            "across Texas and building new ones, betting the boom-driven demand would continue. When the Great "
+            "Depression hit in the early 1930s, hotel occupancy collapsed nationwide, and Hilton's highly "
+            "leveraged expansion — much of it financed with borrowed money — became a serious liability. By "
+            "1931, he couldn't cover roughly $300,000 in debts (a substantial sum at the time), and creditors "
+            "seized several of his hotels outright. At his lowest point, Hilton reportedly had to personally "
+            "appeal to employees and vendors at his remaining properties to keep operating with minimal or "
+            "delayed payment, simply to avoid losing everything entirely. He held on to a small handful of "
+            "properties through the worst years of the Depression and slowly began rebuilding through the "
+            "mid-to-late 1930s as the economy recovered and hotel demand returned. By 1946, Hilton had "
+            "rebuilt enough to found Hilton Hotels Corporation, which that year became the first hotel company "
+            "listed on the New York Stock Exchange. From there the company expanded internationally in the "
+            "following decades, building the globally recognized hospitality brand that still carries his "
+            "name today, run in later generations by his descendants."
+        ),
+        "take": "Hilton's empire wasn't built in a straight line — it survived only because he was willing to shrink down to almost nothing during the Depression rather than lose the whole business, and rebuild patiently once conditions actually allowed it.",
+    },
+    {
+        "id": "founder_howard_hughes",
+        "category": "investor",
+        "topic": "Howard Hughes Built an Aviation and Film Empire, Then Withdrew From the World Entirely",
+        "hook": "Howard Hughes was once one of the most famous men in America — a record-setting pilot, a Hollywood producer, and a major industrialist. In his later years, he lived in nearly complete isolation, his health severely affected by mental illness that went largely untreated.",
+        "story": (
+            "Hughes inherited a substantial fortune as a young man from his father's tool manufacturing "
+            "company and used it to fund an unusually wide range of ambitions: he produced and directed "
+            "Hollywood films (including the costly 1930 aviation epic Hell's Angels), personally piloted "
+            "aircraft to multiple speed and distance world records, and later acquired a controlling stake in "
+            "TWA, then one of the major U.S. airlines, helping shape its early growth. For years he was a "
+            "prominent, if famously eccentric, public figure, known both for his business ambitions and his "
+            "high-profile personal life. Over time, however, Hughes developed severe obsessive-compulsive "
+            "disorder, a mental health condition involving intrusive, repetitive thoughts and compulsive "
+            "behaviors, which in his case centered heavily on an escalating fear of germs and contamination. "
+            "This progressed into extreme reclusiveness: by his final years, Hughes lived largely isolated in "
+            "hotel suites, avoided in-person contact with nearly everyone, and by multiple accounts his "
+            "physical health deteriorated severely, in part because his compulsions interfered with basic "
+            "self-care. His business holdings, including TWA and his other companies, continued to be managed "
+            "by aides and executives even as Hughes himself became increasingly disconnected from day-to-day "
+            "involvement. He died in 1976 in a condition that shocked many who remembered his earlier public "
+            "image, having gone years without being seen by most people outside his immediate caretaking "
+            "staff."
+        ),
+        "take": "Hughes's story is less a business lesson than a sobering reminder that enormous success and resources don't protect anyone from serious untreated mental illness — and that the public image of a person can diverge completely from what's actually happening in their life.",
+    },
+    {
+        "id": "founder_adam_neumann",
+        "category": "investor",
+        "topic": "Adam Neumann Built WeWork to a $47 Billion \"Vision\" — Then Lost It Within Weeks",
+        "hook": "Adam Neumann convinced investors his shared-office company was worth $47 billion by selling a vision of community and consciousness elevation, not just real estate. When the company tried to go public, the numbers behind the vision fell apart in days.",
+        "story": (
+            "Neumann co-founded WeWork in 2010, renting large office spaces, subdividing them into stylish "
+            "shared workspaces, and subletting desks and small offices to freelancers and companies — "
+            "essentially a real estate arbitrage business (leasing space long-term at one price and "
+            "re-renting smaller units at a higher combined price), but pitched to investors as a "
+            "community-driven lifestyle brand rather than a property company. That framing, combined with "
+            "Neumann's forceful personal salesmanship, helped WeWork raise enormous funding rounds, "
+            "particularly from Japanese conglomerate SoftBank, reaching a peak private valuation of $47 "
+            "billion by 2019 despite the company losing large amounts of money every year. When WeWork filed "
+            "paperwork to go public later that year, the details became visible to outside investors for the "
+            "first time: enormous ongoing losses, unusual arrangements where Neumann personally owned several "
+            "buildings that WeWork then leased back from him, and a corporate structure giving Neumann "
+            "outsized voting control. Public investors reacted with alarm, the planned valuation was slashed "
+            "dramatically, the IPO was withdrawn entirely within weeks, and WeWork's board forced Neumann out "
+            "as CEO in September 2019. SoftBank subsequently poured billions more into a bailout to keep the "
+            "company alive, though WeWork ultimately filed for bankruptcy in 2023. Neumann himself, having "
+            "exited with a substantial personal payout as part of his departure agreement, went on to raise "
+            "significant new venture funding in 2022 for a different real estate startup, Flow."
+        ),
+        "take": "WeWork's collapse shows how far a compelling personal narrative can carry a company's valuation even while the underlying financials say something very different — and how quickly that gap gets exposed the moment outside scrutiny actually arrives.",
+    },
+    {
+        "id": "founder_travis_kalanick",
+        "category": "investor",
+        "topic": "Travis Kalanick Built Uber Through Sheer Aggression — Then Got Forced Out by It",
+        "hook": "Travis Kalanick built Uber into a global ride-hailing giant by fighting regulators, taxi commissions, and rivals in city after city. In 2017, that same combative culture caught up with him, and investors forced him out of his own company.",
+        "story": (
+            "Kalanick co-founded Uber in 2009 and drove its expansion with a deliberately aggressive strategy: "
+            "launch in a new city first, often without seeking permission from local taxi regulators, and deal "
+            "with the legal and political fallout afterward, betting that consumer demand would make the "
+            "service too popular to shut down once people were using it. This worked, and Uber grew into one "
+            "of the most valuable private companies in the world under Kalanick's leadership. But the same "
+            "combative, rules-optional culture that fueled Uber's growth also created serious internal "
+            "problems. In early 2017, a former Uber engineer published a detailed blog post alleging systemic "
+            "sexual harassment and a dismissive human resources response inside the company, triggering a "
+            "wave of public scrutiny. The same year, video surfaced of Kalanick angrily berating an Uber driver "
+            "who confronted him about falling fares, and reporting revealed the company had used a tool called "
+            "\"Greyball\" to identify and evade regulators investigating whether Uber was operating illegally "
+            "in certain cities. Facing mounting scandals, a lawsuit from Google's self-driving car unit "
+            "Waymo, and pressure from major investors, Kalanick resigned as CEO in June 2017. He remained on "
+            "Uber's board for a period afterward but stepped back from day-to-day involvement, eventually "
+            "selling most of his remaining shares. He later founded CloudKitchens, a company building "
+            "delivery-only commercial kitchen space for restaurants, run with a far lower public profile than "
+            "his time at Uber."
+        ),
+        "take": "The same aggressive approach that let Uber outrun regulators in city after city also produced a culture that, once it drew serious scrutiny, gave Kalanick's own board and investors the exact justification they needed to remove him.",
+    },
+    {
+        "id": "founder_aubrey_mcclendon",
+        "category": "investor",
+        "topic": "Aubrey McClendon Built an Empire on Shale Gas — and Lost It the Same Way",
+        "hook": "Aubrey McClendon helped pioneer the shale gas boom that turned the United States into a major energy producer. He built his company on enormous debt, was forced out amid a conflict-of-interest scandal, and was indicted on federal charges the day before his death in a car accident.",
+        "story": (
+            "McClendon co-founded Chesapeake Energy in 1989 and became one of the earliest and most aggressive "
+            "advocates of a drilling technique combining hydraulic fracturing (\"fracking\" — injecting "
+            "high-pressure fluid into rock formations to release trapped natural gas) with horizontal "
+            "drilling, betting heavily and early that this combination would unlock vast new natural gas "
+            "reserves across the U.S. He was right about the resource, and Chesapeake grew into one of the "
+            "largest natural gas producers in the country. But McClendon financed this growth with enormous "
+            "amounts of borrowed money, and Chesapeake also gave him a personal perk that later drew serious "
+            "scrutiny: the right to buy a small ownership stake in every well the company drilled, financed "
+            "through loans McClendon took out personally, some of them from parties who also did other "
+            "business with Chesapeake. When this arrangement became public in 2012 reporting, it raised "
+            "serious conflict-of-interest questions — was McClendon making decisions that benefited his own "
+            "personal well stakes rather than the company's shareholders — and combined with Chesapeake's "
+            "heavy debt load amid falling natural gas prices, the board forced him out as CEO in 2013. He "
+            "founded a new company, American Energy Partners, continuing to pursue similar shale strategies. "
+            "In March 2016, McClendon was indicted by a federal grand jury on charges of conspiring to rig "
+            "bids for oil and natural gas leases. The following day, he died in a single-vehicle car crash in "
+            "Oklahoma City; the crash was officially ruled an accident by investigators."
+        ),
+        "take": "McClendon's story is a reminder that the same aggressive, debt-fueled conviction that can genuinely reshape an entire industry is often inseparable from the risk-taking that eventually brings it down — the fracking boom he helped create outlived the empire he built on top of it.",
+    },
+    {
+        "id": "founder_elizabeth_holmes",
+        "category": "investor",
+        "topic": "Elizabeth Holmes Built a $9 Billion Company on Technology That Never Actually Worked",
+        "hook": "Elizabeth Holmes dropped out of Stanford at 19 to build a blood-testing company she said would run hundreds of tests from a single finger-prick of blood. It was valued at $9 billion before anyone outside the company discovered the technology didn't really work.",
+        "story": (
+            "Holmes founded Theranos in 2003, pitching an ambitious idea: a device that could run comprehensive "
+            "blood tests from just a few drops taken via a simple finger prick, instead of the multiple vials "
+            "drawn from a vein that standard lab testing required. The idea was compelling enough to attract "
+            "hundreds of millions of dollars in funding and a board stacked with prominent former government "
+            "and military officials, helping Theranos reach a peak private valuation of roughly $9 billion by "
+            "2014, with Holmes herself celebrated in business media as a young, groundbreaking founder. Behind "
+            "the scenes, however, the core technology reportedly never worked reliably enough for real "
+            "clinical use: internal accounts that later became public described Theranos running most actual "
+            "patient tests on modified conventional lab machines rather than its own proprietary device, while "
+            "continuing to market the finger-prick technology to investors, partners, and the public as fully "
+            "functional. This came apart in 2015, when Wall Street Journal reporter John Carreyrou published a "
+            "detailed investigation, based on former employees' accounts, revealing the gap between Theranos's "
+            "public claims and its actual capabilities. Regulators subsequently found serious problems with the "
+            "company's testing accuracy, partnerships collapsed, and the company shut down entirely by 2018. "
+            "Holmes and Theranos's former president (and her one-time romantic partner) Sunny Balwani were "
+            "both charged with fraud; Holmes was convicted on multiple counts in 2022 and sentenced to more "
+            "than 11 years in prison, which she is currently serving."
+        ),
+        "take": "Theranos shows how far a confident story can carry a company when its board, investors, and press coverage all decline to independently verify the underlying technology — the conviction ultimately came down to the gap between what Holmes said the device could do and what it actually could.",
+    },
+    {
+        "id": "founder_coco_chanel",
+        "category": "investor",
+        "topic": "Coco Chanel Rose From an Orphanage to Fashion Royalty — Then Fled Wartime Collaboration Accusations",
+        "hook": "Coco Chanel, raised partly in an orphanage, became one of the most powerful fashion designers of the 20th century. During WWII she was involved with a Nazi intelligence officer and accused of collaborationist business dealings — and still staged one of fashion's great comebacks at 70.",
+        "story": (
+            "Gabrielle \"Coco\" Chanel spent part of her childhood in an orphanage after her mother's death, "
+            "and worked as a seamstress and cabaret singer before opening a hat shop in Paris around 1910. She "
+            "expanded into clothing and built a reputation for simplifying women's fashion — moving away from "
+            "restrictive corsets toward comfortable jersey fabric (a soft, stretchy knit previously used mainly "
+            "for men's underwear), popularizing the \"little black dress,\" and launching the enormously "
+            "successful Chanel No. 5 perfume. By the 1930s she was one of the most powerful designers in the "
+            "world. During the German occupation of Paris in WWII, Chanel had a relationship with a Nazi "
+            "intelligence officer, and she attempted to use wartime \"Aryanization\" laws — which allowed "
+            "Jewish-owned business assets to be seized — to try to take full personal control of the lucrative "
+            "Chanel perfume business away from her Jewish business partners, the Wertheimer family, who had "
+            "co-owned it with her for years. The attempt ultimately failed, in part because the Wertheimers had "
+            "anticipated the risk and transferred formal control elsewhere in advance. After the war, facing "
+            "accusations of collaboration, Chanel left France for Switzerland and lived there quietly for "
+            "roughly a decade. In 1954, at 70 years old, she staged a remarkable comeback, reopening her "
+            "fashion house in Paris. French critics were initially dismissive, but American audiences and "
+            "press embraced the relaunch enthusiastically, and Chanel rebuilt her reputation and business "
+            "before her death in 1971."
+        ),
+        "take": "Chanel's wartime conduct is a genuinely dark chapter that sits uneasily alongside her fashion legacy — her later comeback shows reinvention is possible even after serious controversy, but it doesn't erase or resolve what came before it.",
+    },
+    {
+        "id": "founder_sean_parker",
+        "category": "investor",
+        "topic": "Sean Parker Was Pushed Out of Two Companies Before Facebook Made Him a Billionaire Anyway",
+        "hook": "Sean Parker co-founded Napster at 19 and watched it get sued into oblivion. He was pushed out of his next company too, and then out of Facebook after a drug arrest — yet still walked away from Facebook's IPO with roughly $2 billion.",
+        "story": (
+            "In 1999, at 19, Parker co-founded Napster, a service that let users share music files directly "
+            "with each other over the internet, bypassing record labels entirely — a genuinely revolutionary "
+            "idea that also amounted to mass copyright infringement at scale. The recording industry sued "
+            "aggressively, and Napster was forced to shut down within about two years, before Parker or his "
+            "co-founders ever turned it into a lasting business. He went on to co-found Plaxo, an online "
+            "contact-management service, but was pushed out of that company as well, following conflicts with "
+            "its venture capital investors over his management style. In 2004, Parker met a young Mark "
+            "Zuckerberg and became Facebook's first president, helping the young company professionalize its "
+            "operations and secure crucial early venture funding that let it grow rapidly. In 2005, Parker was "
+            "arrested at a house where cocaine was found, on charges that were ultimately dropped, but the "
+            "incident spooked Facebook's board and investors badly enough that Parker was forced to resign "
+            "from his operating role, though he retained his equity stake in the company and continued as an "
+            "advisor and board member for a period afterward. When Facebook went public in 2012, that retained "
+            "stake was worth an estimated $2 billion, turning yet another abrupt professional exit into a life-"
+            "changing payday. Parker later became a significant philanthropist, funding cancer immunotherapy "
+            "research through his own foundation."
+        ),
+        "take": "Parker was pushed out of three consecutive companies for three different reasons, and still ended up extraordinarily wealthy from the one he was forced out of last — sometimes the equity you hold onto matters more than the job title you lose.",
+    },
 ]
