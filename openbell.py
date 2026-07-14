@@ -1245,7 +1245,11 @@ async def case_study(session: ClientSession, dry_run: bool = False) -> tuple[str
     status. Zero AI: pulled from the hand-curated CASE_STUDIES library in
     case_studies.py, rotated via get_next_case_study's dedupe logic.
     """
-    today = date.today().strftime("%A, %B %d")
+    import pytz
+    # Use Central time (this email's own schedule), not server/UTC time — otherwise
+    # a run near the UTC midnight boundary can display the wrong calendar day.
+    ct    = pytz.timezone("America/Chicago")
+    today = datetime.now(ct).strftime("%A, %B %d")
 
     print("    picking next case study from curated library…")
     fields = await call(session, "get_next_case_study", {"commit": not dry_run})

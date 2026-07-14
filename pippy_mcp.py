@@ -1309,8 +1309,12 @@ def get_next_case_study(commit: bool = True) -> str:
     Pass commit=False for dry runs — picks the same way but doesn't advance
     the rotation, matching this project's rule that dry runs never persist state.
     """
+    import pytz
     ts      = _ts()
-    today_s = date.today().isoformat()
+    # Use Central time (this email's own schedule), not server/UTC time — otherwise
+    # a run near the UTC midnight boundary can record the wrong calendar day.
+    ct      = pytz.timezone("America/Chicago")
+    today_s = datetime.now(ct).date().isoformat()
 
     history = {"history": []}
     if os.path.exists(CASE_STUDY_HISTORY_FILE):
