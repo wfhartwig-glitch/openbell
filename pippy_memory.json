@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 27,
-  "last_session": "2026-07-14T17:00:56.258690",
+  "session_count": 28,
+  "last_session": "2026-07-14T18:10:41.318585",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,8 +24,8 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 16,
-  "last_email_sent": "2026-07-14T17:00:56.257773",
+  "email_count": 17,
+  "last_email_sent": "2026-07-14T18:10:41.317572",
   "last_email_summary": "casestudy sent Tuesday, July 14, 2026",
   "pick_performance_history": [
     {
@@ -156,6 +156,13 @@
       "id": "crisis_2008_lehman",
       "category": "crisis",
       "topic": "The 2008 Collapse of Lehman Brothers",
+      "date": "2026-07-14"
+    },
+    {
+      "type": "case_study",
+      "id": "crash_1987_black_monday",
+      "category": "crisis",
+      "topic": "Black Monday, 1987 \u2014 The Day Computers Panicked",
       "date": "2026-07-14"
     }
   ],
