@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 30,
-  "last_session": "2026-07-15T13:31:45.500603",
+  "session_count": 31,
+  "last_session": "2026-07-15T17:01:05.931058",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 19,
-  "last_email_sent": "2026-07-15T13:31:45.499673",
-  "last_email_summary": "morning sent Wednesday, July 15, 2026",
+  "email_count": 20,
+  "last_email_sent": "2026-07-15T17:01:05.930001",
+  "last_email_summary": "casestudy sent Wednesday, July 15, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -182,6 +182,15 @@
       "headline_theme": "inflation data",
       "commodity_note": "",
       "picks_status": "holding",
+      "date": "2026-07-15"
+    },
+    {
+      "type": "case_study",
+      "id": "bubble_dotcom",
+      "category": "crisis",
+      "topic": "The Dot-Com Bust \u2014 When \".com\" Was Enough",
+      "remaining_in_pass": 100,
+      "low_inventory_alert": false,
       "date": "2026-07-15"
     }
   ],

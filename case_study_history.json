@@ -11,6 +11,11 @@
     {
       "id": "crash_1987_black_monday",
       "date": "2026-07-14"
+    },
+    {
+      "id": "bubble_dotcom",
+      "date": "2026-07-15"
     }
-  ]
+  ],
+  "low_inventory_alert_sent": false
 }
