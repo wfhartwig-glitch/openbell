@@ -1324,6 +1324,8 @@ async def case_study(session: ClientSession, dry_run: bool = False) -> tuple[str
         "id":       fields.get("id", ""),
         "category": fields.get("category", ""),
         "topic":    fields.get("topic", ""),
+        "remaining_in_pass":   fields.get("remaining_in_pass"),
+        "low_inventory_alert": fields.get("low_inventory_alert", False),
     }
     return subject, html, log_data
 
@@ -1385,6 +1387,9 @@ async def run(mode: str, dry_run: bool = False):
                 print(html[:6000])
                 if len(html) > 6000:
                     print(f"  … (truncated, {len(html) - 6000} more chars)")
+                if log_data.get("low_inventory_alert"):
+                    remaining = log_data.get("remaining_in_pass", 0)
+                    print(f"\n--- WOULD ALSO SEND LOW-INVENTORY ALERT ({remaining} case studies remaining) ---")
                 print("\n=== DRY RUN COMPLETE — no email sent, no memory saved ===")
             else:
                 send_ts = datetime.now().strftime("%H:%M:%S UTC")
@@ -1392,6 +1397,16 @@ async def run(mode: str, dry_run: bool = False):
                 result = await call(session, "send_email",
                                     {"subject": subject, "html_body": html})
                 print(f"  {result}")
+
+                if log_data.get("low_inventory_alert"):
+                    remaining = log_data.get("remaining_in_pass", 0)
+                    alert_subject = "Pippy's Brief — Case Study Library Running Low"
+                    alert_body = (f"<p>Only {remaining} case studies left before the rotation repeats. "
+                                  f"Reload the library through Claude.</p>")
+                    print(f"  → Sending low-inventory alert ({remaining} remaining)…")
+                    alert_result = await call(session, "send_email",
+                                              {"subject": alert_subject, "html_body": alert_body})
+                    print(f"  {alert_result}")
 
                 mem = await call(session, "load_memory")
                 if isinstance(mem, dict):

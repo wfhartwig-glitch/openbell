@@ -1311,6 +1311,24 @@ def run_daily_scan() -> str:
                        "elapsed_s": elapsed, "timestamp": ts})
 
 
+def _remaining_in_current_pass(past_entries: list, library_ids: set) -> int:
+    """
+    How many distinct current-library stories are still unused in the current
+    rotation pass — walks backward through history collecting distinct ids
+    until every library id has been seen (a full pass) or history runs out.
+    Since get_next_case_study always picks the least-recently-used candidate,
+    a full pass touches every library id exactly once before any repeat.
+    """
+    seen = set()
+    for entry in reversed(past_entries):
+        eid = entry.get("id")
+        if eid in library_ids:
+            seen.add(eid)
+        if len(seen) >= len(library_ids):
+            break
+    return len(library_ids) - len(seen)
+
+
 @mcp.tool()
 def get_next_case_study(commit: bool = True) -> str:
     """
@@ -1347,19 +1365,45 @@ def get_next_case_study(commit: bool = True) -> str:
         # we still pick the least-recently-used entry below.
         candidates = list(CASE_STUDIES)
 
-    last_used = {e["id"]: e["date"] for e in past_entries}
-    # Least-recently-used first; never-used entries (no last_used date) sort first.
-    candidates.sort(key=lambda c: last_used.get(c["id"], ""))
+    # Sort by sequence position, not the raw date string — multiple picks within
+    # the same calendar day (rapid manual testing, retries) would otherwise all
+    # share an identical date and tie-break back to original list order, causing
+    # repeats even though the library isn't actually exhausted.
+    last_used_index = {e["id"]: i for i, e in enumerate(past_entries)}
+    # Least-recently-used first; never-used entries (no prior index) sort first.
+    candidates.sort(key=lambda c: last_used_index.get(c["id"], -1))
     chosen = candidates[0]
+
+    library_ids = {c["id"] for c in CASE_STUDIES}
+    low_inventory_alert = False
+    remaining = None
 
     if commit:
         past_entries.append({"id": chosen["id"], "date": today_s})
         history["history"] = past_entries[-120:]
+
+        remaining = _remaining_in_current_pass(past_entries, library_ids)
+        already_sent = history.get("low_inventory_alert_sent", False)
+        if remaining <= 3:
+            if not already_sent:
+                low_inventory_alert = True
+                history["low_inventory_alert_sent"] = True
+            # else: already alerted this cycle — don't re-send every day
+        else:
+            # Library's been reloaded (or a fresh cycle started) — re-arm for next time
+            history["low_inventory_alert_sent"] = False
+
         try:
             with open(CASE_STUDY_HISTORY_FILE, "w") as f:
                 json.dump(history, f, indent=2)
         except Exception:
             pass
+    else:
+        # Dry run — compute what WOULD happen for visibility, but never persist
+        # the alert flag (dry runs never persist state, matching this project's rule).
+        preview_entries = past_entries + [{"id": chosen["id"], "date": today_s}]
+        remaining = _remaining_in_current_pass(preview_entries, library_ids)
+        low_inventory_alert = remaining <= 3 and not history.get("low_inventory_alert_sent", False)
 
     return json.dumps({
         "id":       chosen["id"],
@@ -1368,6 +1412,8 @@ def get_next_case_study(commit: bool = True) -> str:
         "hook":     chosen["hook"],
         "story":    chosen["story"],
         "take":     chosen["take"],
+        "remaining_in_pass":   remaining,
+        "low_inventory_alert": low_inventory_alert,
         "timestamp": ts,
     })
 
