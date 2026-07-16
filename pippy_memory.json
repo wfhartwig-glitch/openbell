@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 32,
-  "last_session": "2026-07-15T20:02:20.119774",
+  "session_count": 33,
+  "last_session": "2026-07-16T13:31:55.478807",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 21,
-  "last_email_sent": "2026-07-15T20:02:20.118677",
-  "last_email_summary": "close sent Wednesday, July 15, 2026",
+  "email_count": 22,
+  "last_email_sent": "2026-07-16T13:31:55.477824",
+  "last_email_summary": "morning sent Thursday, July 16, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -201,6 +201,16 @@
       "worst_sector": "Utilities",
       "biggest_mover": "HIMS +5.4%",
       "date": "2026-07-15"
+    },
+    {
+      "type": "morning",
+      "direction_called": "mixed",
+      "leading_index": "",
+      "lagging_index": "Nasdaq",
+      "headline_theme": "",
+      "commodity_note": "WTI Crude Oil up 1.2%",
+      "picks_status": "holding",
+      "date": "2026-07-16"
     }
   ],
   "lessons_learned": [
