@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 33,
-  "last_session": "2026-07-16T13:31:55.478807",
+  "session_count": 34,
+  "last_session": "2026-07-16T17:00:42.713133",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 22,
-  "last_email_sent": "2026-07-16T13:31:55.477824",
-  "last_email_summary": "morning sent Thursday, July 16, 2026",
+  "email_count": 23,
+  "last_email_sent": "2026-07-16T17:00:42.712099",
+  "last_email_summary": "casestudy sent Thursday, July 16, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -210,6 +210,15 @@
       "headline_theme": "",
       "commodity_note": "WTI Crude Oil up 1.2%",
       "picks_status": "holding",
+      "date": "2026-07-16"
+    },
+    {
+      "type": "case_study",
+      "id": "crisis_ltcm",
+      "category": "crisis",
+      "topic": "Long-Term Capital Management \u2014 When the Smartest People in the Room Were Wrong",
+      "remaining_in_pass": 99,
+      "low_inventory_alert": false,
       "date": "2026-07-16"
     }
   ],

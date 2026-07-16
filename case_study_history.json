@@ -15,6 +15,10 @@
     {
       "id": "bubble_dotcom",
       "date": "2026-07-15"
+    },
+    {
+      "id": "crisis_ltcm",
+      "date": "2026-07-16"
     }
   ],
   "low_inventory_alert_sent": false
