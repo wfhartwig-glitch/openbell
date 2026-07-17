@@ -19,6 +19,10 @@
     {
       "id": "crisis_ltcm",
       "date": "2026-07-16"
+    },
+    {
+      "id": "crisis_enron",
+      "date": "2026-07-17"
     }
   ],
   "low_inventory_alert_sent": false
