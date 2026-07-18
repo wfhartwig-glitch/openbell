@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 38,
-  "last_session": "2026-07-17T20:02:12.113466",
+  "session_count": 39,
+  "last_session": "2026-07-18T13:30:26.959513",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 27,
-  "last_email_sent": "2026-07-17T20:02:12.111805",
-  "last_email_summary": "close sent Friday, July 17, 2026",
+  "email_count": 28,
+  "last_email_sent": "2026-07-18T13:30:26.958399",
+  "last_email_summary": "casestudy sent Saturday, July 18, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -257,6 +257,15 @@
       "worst_sector": "Comm. Services",
       "biggest_mover": "AXON -5.9%",
       "date": "2026-07-17"
+    },
+    {
+      "type": "case_study",
+      "id": "squeeze_gamestop_2021",
+      "category": "crisis",
+      "topic": "GameStop and the Squeeze That Shook Wall Street",
+      "remaining_in_pass": 97,
+      "low_inventory_alert": false,
+      "date": "2026-07-18"
     }
   ],
   "lessons_learned": [

@@ -23,6 +23,10 @@
     {
       "id": "crisis_enron",
       "date": "2026-07-17"
+    },
+    {
+      "id": "squeeze_gamestop_2021",
+      "date": "2026-07-18"
     }
   ],
   "low_inventory_alert_sent": false
