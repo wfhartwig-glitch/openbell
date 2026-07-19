@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 39,
-  "last_session": "2026-07-18T13:30:26.959513",
+  "session_count": 40,
+  "last_session": "2026-07-19T13:30:32.059827",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 28,
-  "last_email_sent": "2026-07-18T13:30:26.958399",
-  "last_email_summary": "casestudy sent Saturday, July 18, 2026",
+  "email_count": 29,
+  "last_email_sent": "2026-07-19T13:30:32.058600",
+  "last_email_summary": "casestudy sent Sunday, July 19, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -266,6 +266,15 @@
       "remaining_in_pass": 97,
       "low_inventory_alert": false,
       "date": "2026-07-18"
+    },
+    {
+      "type": "case_study",
+      "id": "startup_airbnb",
+      "category": "startup",
+      "topic": "Airbnb \u2014 Three Air Mattresses and a Design Conference",
+      "remaining_in_pass": 96,
+      "low_inventory_alert": false,
+      "date": "2026-07-19"
     }
   ],
   "lessons_learned": [
