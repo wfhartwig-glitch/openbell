@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 42,
-  "last_session": "2026-07-20T17:00:46.660962",
+  "session_count": 43,
+  "last_session": "2026-07-20T20:01:36.512878",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 31,
-  "last_email_sent": "2026-07-20T17:00:46.659928",
-  "last_email_summary": "casestudy sent Monday, July 20, 2026",
+  "email_count": 32,
+  "last_email_sent": "2026-07-20T20:01:36.511572",
+  "last_email_summary": "close sent Monday, July 20, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -294,6 +294,15 @@
       "remaining_in_pass": 95,
       "low_inventory_alert": false,
       "date": "2026-07-20"
+    },
+    {
+      "type": "close",
+      "actual_direction": "lower",
+      "actual_sp_pct": -0.19,
+      "best_sector": "Energy",
+      "worst_sector": "Materials",
+      "biggest_mover": "AXON +3.4%",
+      "date": "2026-07-20"
     }
   ],
   "lessons_learned": [
@@ -340,6 +349,12 @@
       "called": "lower",
       "actual": "lower",
       "accurate": true
+    },
+    {
+      "date": "2026-07-20",
+      "called": "higher",
+      "actual": "lower",
+      "accurate": false
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
