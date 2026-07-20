@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 41,
-  "last_session": "2026-07-20T13:31:31.380677",
+  "session_count": 42,
+  "last_session": "2026-07-20T17:00:46.660962",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 30,
-  "last_email_sent": "2026-07-20T13:31:31.379782",
-  "last_email_summary": "morning sent Monday, July 20, 2026",
+  "email_count": 31,
+  "last_email_sent": "2026-07-20T17:00:46.659928",
+  "last_email_summary": "casestudy sent Monday, July 20, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -284,6 +284,15 @@
       "headline_theme": "earnings season",
       "commodity_note": "WTI Crude Oil down 2.4%",
       "picks_status": "holding",
+      "date": "2026-07-20"
+    },
+    {
+      "type": "case_study",
+      "id": "startup_nike",
+      "category": "startup",
+      "topic": "Nike \u2014 A Waffle Iron and a Trunk Full of Sneakers",
+      "remaining_in_pass": 95,
+      "low_inventory_alert": false,
       "date": "2026-07-20"
     }
   ],

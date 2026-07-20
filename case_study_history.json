@@ -31,6 +31,10 @@
     {
       "id": "startup_airbnb",
       "date": "2026-07-19"
+    },
+    {
+      "id": "startup_nike",
+      "date": "2026-07-20"
     }
   ],
   "low_inventory_alert_sent": false
