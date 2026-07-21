@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 45,
-  "last_session": "2026-07-21T17:00:42.345195",
+  "session_count": 46,
+  "last_session": "2026-07-21T20:01:57.251071",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 34,
-  "last_email_sent": "2026-07-21T17:00:42.344051",
-  "last_email_summary": "casestudy sent Tuesday, July 21, 2026",
+  "email_count": 35,
+  "last_email_sent": "2026-07-21T20:01:57.249788",
+  "last_email_summary": "close sent Tuesday, July 21, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -322,6 +322,15 @@
       "remaining_in_pass": 94,
       "low_inventory_alert": false,
       "date": "2026-07-21"
+    },
+    {
+      "type": "close",
+      "actual_direction": "higher",
+      "actual_sp_pct": 0.89,
+      "best_sector": "Technology",
+      "worst_sector": "Consumer Staples",
+      "biggest_mover": "HOOD +7.2%",
+      "date": "2026-07-21"
     }
   ],
   "lessons_learned": [
@@ -374,6 +383,12 @@
       "called": "higher",
       "actual": "lower",
       "accurate": false
+    },
+    {
+      "date": "2026-07-21",
+      "called": "higher",
+      "actual": "higher",
+      "accurate": true
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
