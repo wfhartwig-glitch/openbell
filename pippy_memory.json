@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 44,
-  "last_session": "2026-07-21T13:31:36.921958",
+  "session_count": 45,
+  "last_session": "2026-07-21T17:00:42.345195",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 33,
-  "last_email_sent": "2026-07-21T13:31:36.921028",
-  "last_email_summary": "morning sent Tuesday, July 21, 2026",
+  "email_count": 34,
+  "last_email_sent": "2026-07-21T17:00:42.344051",
+  "last_email_summary": "casestudy sent Tuesday, July 21, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -312,6 +312,15 @@
       "headline_theme": "",
       "commodity_note": "WTI Crude Oil up 2.5%",
       "picks_status": "holding",
+      "date": "2026-07-21"
+    },
+    {
+      "type": "case_study",
+      "id": "startup_patagonia",
+      "category": "startup",
+      "topic": "Patagonia \u2014 The Climber Who Gave His Company Away",
+      "remaining_in_pass": 94,
+      "low_inventory_alert": false,
       "date": "2026-07-21"
     }
   ],

@@ -35,6 +35,10 @@
     {
       "id": "startup_nike",
       "date": "2026-07-20"
+    },
+    {
+      "id": "startup_patagonia",
+      "date": "2026-07-21"
     }
   ],
   "low_inventory_alert_sent": false
