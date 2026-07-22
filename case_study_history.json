@@ -39,6 +39,10 @@
     {
       "id": "startup_patagonia",
       "date": "2026-07-21"
+    },
+    {
+      "id": "startup_instagram_pivot",
+      "date": "2026-07-22"
     }
   ],
   "low_inventory_alert_sent": false

@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 47,
-  "last_session": "2026-07-22T13:33:11.590644",
+  "session_count": 48,
+  "last_session": "2026-07-22T17:00:39.586976",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 36,
-  "last_email_sent": "2026-07-22T13:33:11.589274",
-  "last_email_summary": "morning sent Wednesday, July 22, 2026",
+  "email_count": 37,
+  "last_email_sent": "2026-07-22T17:00:39.585723",
+  "last_email_summary": "casestudy sent Wednesday, July 22, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -340,6 +340,15 @@
       "headline_theme": "earnings season",
       "commodity_note": "WTI Crude Oil up 1.2%",
       "picks_status": "holding",
+      "date": "2026-07-22"
+    },
+    {
+      "type": "case_study",
+      "id": "startup_instagram_pivot",
+      "category": "startup",
+      "topic": "Instagram \u2014 The App That Started as Something Else Entirely",
+      "remaining_in_pass": 93,
+      "low_inventory_alert": false,
       "date": "2026-07-22"
     }
   ],
