@@ -43,6 +43,10 @@
     {
       "id": "startup_instagram_pivot",
       "date": "2026-07-22"
+    },
+    {
+      "id": "startup_slack_pivot",
+      "date": "2026-07-23"
     }
   ],
   "low_inventory_alert_sent": false
