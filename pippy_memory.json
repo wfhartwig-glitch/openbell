@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 54,
-  "last_session": "2026-07-24T17:00:40.447513",
+  "session_count": 55,
+  "last_session": "2026-07-24T20:01:20.444581",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 43,
-  "last_email_sent": "2026-07-24T17:00:40.446195",
-  "last_email_summary": "casestudy sent Friday, July 24, 2026",
+  "email_count": 44,
+  "last_email_sent": "2026-07-24T20:01:20.443213",
+  "last_email_summary": "close sent Friday, July 24, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -406,6 +406,15 @@
       "remaining_in_pass": 91,
       "low_inventory_alert": false,
       "date": "2026-07-24"
+    },
+    {
+      "type": "close",
+      "actual_direction": "mixed",
+      "actual_sp_pct": 0.05,
+      "best_sector": "Real Estate",
+      "worst_sector": "Technology",
+      "biggest_mover": "NOW +7.2%",
+      "date": "2026-07-24"
     }
   ],
   "lessons_learned": [
@@ -475,6 +484,12 @@
       "date": "2026-07-23",
       "called": "lower",
       "actual": "lower",
+      "accurate": true
+    },
+    {
+      "date": "2026-07-24",
+      "called": "mixed",
+      "actual": "mixed",
       "accurate": true
     }
   ],
