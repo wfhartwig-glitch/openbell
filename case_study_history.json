@@ -55,6 +55,10 @@
     {
       "id": "startup_amazon",
       "date": "2026-07-25"
+    },
+    {
+      "id": "decision_blockbuster_netflix",
+      "date": "2026-07-26"
     }
   ],
   "low_inventory_alert_sent": false

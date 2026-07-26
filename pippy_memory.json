@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 56,
-  "last_session": "2026-07-25T13:30:28.131920",
+  "session_count": 57,
+  "last_session": "2026-07-26T13:30:29.759598",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 45,
-  "last_email_sent": "2026-07-25T13:30:28.130695",
-  "last_email_summary": "casestudy sent Saturday, July 25, 2026",
+  "email_count": 46,
+  "last_email_sent": "2026-07-26T13:30:29.758025",
+  "last_email_summary": "casestudy sent Sunday, July 26, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -424,6 +424,15 @@
       "remaining_in_pass": 90,
       "low_inventory_alert": false,
       "date": "2026-07-25"
+    },
+    {
+      "type": "case_study",
+      "id": "decision_blockbuster_netflix",
+      "category": "decision",
+      "topic": "Blockbuster's $50 Million Mistake",
+      "remaining_in_pass": 89,
+      "low_inventory_alert": false,
+      "date": "2026-07-26"
     }
   ],
   "lessons_learned": [
