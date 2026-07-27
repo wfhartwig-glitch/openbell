@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 58,
-  "last_session": "2026-07-27T13:31:35.188259",
+  "session_count": 59,
+  "last_session": "2026-07-27T17:00:40.833281",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 47,
-  "last_email_sent": "2026-07-27T13:31:35.186794",
-  "last_email_summary": "morning sent Monday, July 27, 2026",
+  "email_count": 48,
+  "last_email_sent": "2026-07-27T17:00:40.831966",
+  "last_email_summary": "casestudy sent Monday, July 27, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -442,6 +442,15 @@
       "headline_theme": "Fed policy",
       "commodity_note": "",
       "picks_status": "holding",
+      "date": "2026-07-27"
+    },
+    {
+      "type": "case_study",
+      "id": "decision_kodak_digital",
+      "category": "decision",
+      "topic": "Kodak Invented the Digital Camera \u2014 Then Buried It",
+      "remaining_in_pass": 88,
+      "low_inventory_alert": false,
       "date": "2026-07-27"
     }
   ],

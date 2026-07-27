@@ -59,6 +59,10 @@
     {
       "id": "decision_blockbuster_netflix",
       "date": "2026-07-26"
+    },
+    {
+      "id": "decision_kodak_digital",
+      "date": "2026-07-27"
     }
   ],
   "low_inventory_alert_sent": false
