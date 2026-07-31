@@ -63,6 +63,10 @@
     {
       "id": "decision_kodak_digital",
       "date": "2026-07-27"
+    },
+    {
+      "id": "decision_new_coke",
+      "date": "2026-07-31"
     }
   ],
   "low_inventory_alert_sent": false

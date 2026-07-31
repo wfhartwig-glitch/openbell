@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 61,
-  "last_session": "2026-07-28T13:31:22.819772",
+  "session_count": 62,
+  "last_session": "2026-07-31T20:09:06.291571",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 50,
-  "last_email_sent": "2026-07-28T13:31:22.818058",
-  "last_email_summary": "morning sent Tuesday, July 28, 2026",
+  "email_count": 51,
+  "last_email_sent": "2026-07-31T20:09:06.290061",
+  "last_email_summary": "casestudy sent Friday, July 31, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -471,6 +471,15 @@
       "commodity_note": "",
       "picks_status": "holding",
       "date": "2026-07-28"
+    },
+    {
+      "type": "case_study",
+      "id": "decision_new_coke",
+      "category": "decision",
+      "topic": "New Coke \u2014 The Taste Test Coca-Cola Won and Lost Anyway",
+      "remaining_in_pass": 87,
+      "low_inventory_alert": false,
+      "date": "2026-07-31"
     }
   ],
   "lessons_learned": [
