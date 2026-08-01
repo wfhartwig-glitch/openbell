@@ -67,6 +67,10 @@
     {
       "id": "decision_new_coke",
       "date": "2026-07-31"
+    },
+    {
+      "id": "decision_excite_google",
+      "date": "2026-08-01"
     }
   ],
   "low_inventory_alert_sent": false
