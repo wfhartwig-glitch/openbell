@@ -71,6 +71,10 @@
     {
       "id": "decision_excite_google",
       "date": "2026-08-01"
+    },
+    {
+      "id": "decision_nokia_blackberry_iphone",
+      "date": "2026-08-02"
     }
   ],
   "low_inventory_alert_sent": false
