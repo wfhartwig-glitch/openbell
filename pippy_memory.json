@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 65,
-  "last_session": "2026-08-02T13:30:39.166376",
+  "session_count": 66,
+  "last_session": "2026-08-03T13:31:15.344114",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 54,
-  "last_email_sent": "2026-08-02T13:30:39.164902",
-  "last_email_summary": "casestudy sent Sunday, August 02, 2026",
+  "email_count": 55,
+  "last_email_sent": "2026-08-03T13:31:15.342933",
+  "last_email_summary": "morning sent Monday, August 03, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -35,8 +35,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 376.9,
-      "price_now": 391.17,
-      "pct_change_since_pick": 3.79,
+      "price_now": 478.38,
+      "pct_change_since_pick": 26.92,
       "still_held": true
     },
     {
@@ -46,8 +46,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 571.4,
-      "price_now": 603.04,
-      "pct_change_since_pick": 5.54,
+      "price_now": 561.81,
+      "pct_change_since_pick": -1.68,
       "still_held": true
     },
     {
@@ -57,8 +57,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 212.67,
-      "price_now": 206.75,
-      "pct_change_since_pick": -2.78,
+      "price_now": 198.62,
+      "pct_change_since_pick": -6.61,
       "still_held": true
     },
     {
@@ -66,11 +66,11 @@
       "sector": "Technology",
       "risk_level": "",
       "week_picked": "2026-W25",
-      "week_dropped": null,
+      "week_dropped": "2026-W31",
       "price_when_picked": 7.0,
       "price_now": 6.41,
       "pct_change_since_pick": -8.43,
-      "still_held": true
+      "still_held": false
     },
     {
       "ticker": "CELH",
@@ -79,8 +79,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 29.95,
-      "price_now": 27.86,
-      "pct_change_since_pick": -6.98,
+      "price_now": 29.39,
+      "pct_change_since_pick": -1.87,
       "still_held": true
     },
     {
@@ -90,8 +90,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 411.22,
-      "price_now": 524.89,
-      "pct_change_since_pick": 27.64,
+      "price_now": 549.34,
+      "pct_change_since_pick": 33.59,
       "still_held": true
     }
   ],
@@ -508,6 +508,16 @@
       "remaining_in_pass": 85,
       "low_inventory_alert": false,
       "date": "2026-08-02"
+    },
+    {
+      "type": "morning",
+      "direction_called": "higher",
+      "leading_index": "Dow",
+      "lagging_index": "",
+      "headline_theme": "geopolitical tensions",
+      "commodity_note": "",
+      "picks_status": "rotated",
+      "date": "2026-08-03"
     }
   ],
   "lessons_learned": [
@@ -526,6 +536,10 @@
     {
       "week": "2026-W30",
       "note": "Active picks avg +3.1% since entry; Industrials picks outperforming \u2014 leaning toward more; Consumer Defensive picks underperforming \u2014 weighting away."
+    },
+    {
+      "week": "2026-W31",
+      "note": "Active picks avg +10.1% since entry; Industrials picks outperforming \u2014 leaning toward more; Consumer Defensive picks underperforming \u2014 weighting away."
     }
   ],
   "prediction_accuracy": [
@@ -600,7 +614,8 @@
   "theme_frequency": {
     "Fed policy": 4,
     "inflation data": 2,
-    "earnings season": 3
+    "earnings season": 3,
+    "geopolitical tensions": 1
   },
   "calibration_note": "Direction-calling accuracy has been 40% over the last 10 sessions \u2014 consider reviewing classification thresholds."
 }
