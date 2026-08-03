@@ -75,6 +75,10 @@
     {
       "id": "decision_nokia_blackberry_iphone",
       "date": "2026-08-02"
+    },
+    {
+      "id": "decision_netflix_streaming_pivot",
+      "date": "2026-08-03"
     }
   ],
   "low_inventory_alert_sent": false

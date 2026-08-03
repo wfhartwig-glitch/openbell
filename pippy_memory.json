@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 66,
-  "last_session": "2026-08-03T13:31:15.344114",
+  "session_count": 67,
+  "last_session": "2026-08-03T17:00:35.982006",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 55,
-  "last_email_sent": "2026-08-03T13:31:15.342933",
-  "last_email_summary": "morning sent Monday, August 03, 2026",
+  "email_count": 56,
+  "last_email_sent": "2026-08-03T17:00:35.980427",
+  "last_email_summary": "casestudy sent Monday, August 03, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -517,6 +517,15 @@
       "headline_theme": "geopolitical tensions",
       "commodity_note": "",
       "picks_status": "rotated",
+      "date": "2026-08-03"
+    },
+    {
+      "type": "case_study",
+      "id": "decision_netflix_streaming_pivot",
+      "category": "decision",
+      "topic": "Netflix Bet Against Its Own Cash Cow",
+      "remaining_in_pass": 84,
+      "low_inventory_alert": false,
       "date": "2026-08-03"
     }
   ],
