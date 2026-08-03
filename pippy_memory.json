@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 67,
-  "last_session": "2026-08-03T17:00:35.982006",
+  "session_count": 68,
+  "last_session": "2026-08-03T20:01:06.302962",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 56,
-  "last_email_sent": "2026-08-03T17:00:35.980427",
-  "last_email_summary": "casestudy sent Monday, August 03, 2026",
+  "email_count": 57,
+  "last_email_sent": "2026-08-03T20:01:06.301435",
+  "last_email_summary": "close sent Monday, August 03, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -527,6 +527,15 @@
       "remaining_in_pass": 84,
       "low_inventory_alert": false,
       "date": "2026-08-03"
+    },
+    {
+      "type": "close",
+      "actual_direction": "higher",
+      "actual_sp_pct": 1.48,
+      "best_sector": "Comm. Services",
+      "worst_sector": "Energy",
+      "biggest_mover": "HIMS +11.7%",
+      "date": "2026-08-03"
     }
   ],
   "lessons_learned": [
@@ -617,6 +626,12 @@
       "called": "higher",
       "actual": "mixed",
       "accurate": false
+    },
+    {
+      "date": "2026-08-03",
+      "called": "higher",
+      "actual": "higher",
+      "accurate": true
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
@@ -625,6 +640,5 @@
     "inflation data": 2,
     "earnings season": 3,
     "geopolitical tensions": 1
-  },
-  "calibration_note": "Direction-calling accuracy has been 40% over the last 10 sessions \u2014 consider reviewing classification thresholds."
+  }
 }
