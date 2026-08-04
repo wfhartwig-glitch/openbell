@@ -79,6 +79,10 @@
     {
       "id": "decision_netflix_streaming_pivot",
       "date": "2026-08-03"
+    },
+    {
+      "id": "investor_buffett_berkshire",
+      "date": "2026-08-04"
     }
   ],
   "low_inventory_alert_sent": false

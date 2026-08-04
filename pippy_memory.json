@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 69,
-  "last_session": "2026-08-04T13:31:27.161092",
+  "session_count": 70,
+  "last_session": "2026-08-04T17:00:44.647972",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 58,
-  "last_email_sent": "2026-08-04T13:31:27.159852",
-  "last_email_summary": "morning sent Tuesday, August 04, 2026",
+  "email_count": 59,
+  "last_email_sent": "2026-08-04T17:00:44.646782",
+  "last_email_summary": "casestudy sent Tuesday, August 04, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -545,6 +545,15 @@
       "headline_theme": "",
       "commodity_note": "WTI Crude Oil down 4.5%",
       "picks_status": "rotated",
+      "date": "2026-08-04"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_buffett_berkshire",
+      "category": "investor",
+      "topic": "Warren Buffett's $25 Million Mistake That Became Berkshire Hathaway",
+      "remaining_in_pass": 83,
+      "low_inventory_alert": false,
       "date": "2026-08-04"
     }
   ],
