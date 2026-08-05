@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 72,
-  "last_session": "2026-08-05T13:31:16.860816",
+  "session_count": 73,
+  "last_session": "2026-08-05T17:00:41.908402",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 61,
-  "last_email_sent": "2026-08-05T13:31:16.859150",
-  "last_email_summary": "morning sent Wednesday, August 05, 2026",
+  "email_count": 62,
+  "last_email_sent": "2026-08-05T17:00:41.906907",
+  "last_email_summary": "casestudy sent Wednesday, August 05, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -573,6 +573,15 @@
       "headline_theme": "earnings season",
       "commodity_note": "WTI Crude Oil up 1.6%",
       "picks_status": "rotated",
+      "date": "2026-08-05"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_bogle_index_fund",
+      "category": "investor",
+      "topic": "John Bogle's Boring Idea That Wall Street Hated",
+      "remaining_in_pass": 82,
+      "low_inventory_alert": false,
       "date": "2026-08-05"
     }
   ],

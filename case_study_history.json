@@ -83,6 +83,10 @@
     {
       "id": "investor_buffett_berkshire",
       "date": "2026-08-04"
+    },
+    {
+      "id": "investor_bogle_index_fund",
+      "date": "2026-08-05"
     }
   ],
   "low_inventory_alert_sent": false
