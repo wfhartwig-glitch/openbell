@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 71,
-  "last_session": "2026-08-04T20:01:25.599039",
+  "session_count": 72,
+  "last_session": "2026-08-05T13:31:16.860816",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 60,
-  "last_email_sent": "2026-08-04T20:01:25.597516",
-  "last_email_summary": "close sent Tuesday, August 04, 2026",
+  "email_count": 61,
+  "last_email_sent": "2026-08-05T13:31:16.859150",
+  "last_email_summary": "morning sent Wednesday, August 05, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -564,6 +564,16 @@
       "worst_sector": "Energy",
       "biggest_mover": "PLTR +12.6%",
       "date": "2026-08-04"
+    },
+    {
+      "type": "morning",
+      "direction_called": "higher",
+      "leading_index": "Dow",
+      "lagging_index": "",
+      "headline_theme": "earnings season",
+      "commodity_note": "WTI Crude Oil up 1.6%",
+      "picks_status": "rotated",
+      "date": "2026-08-05"
     }
   ],
   "lessons_learned": [
@@ -672,7 +682,7 @@
   "theme_frequency": {
     "Fed policy": 4,
     "inflation data": 2,
-    "earnings season": 3,
+    "earnings season": 4,
     "geopolitical tensions": 1
   }
 }
