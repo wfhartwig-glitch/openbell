@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 75,
-  "last_session": "2026-08-06T13:31:37.601854",
+  "session_count": 76,
+  "last_session": "2026-08-06T21:55:55.517450",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 64,
-  "last_email_sent": "2026-08-06T13:31:37.600263",
-  "last_email_summary": "morning sent Thursday, August 06, 2026",
+  "email_count": 65,
+  "last_email_sent": "2026-08-06T21:55:55.515856",
+  "last_email_summary": "casestudy sent Thursday, August 06, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -601,6 +601,15 @@
       "headline_theme": "earnings season",
       "commodity_note": "WTI Crude Oil up 1.8%",
       "picks_status": "rotated",
+      "date": "2026-08-06"
+    },
+    {
+      "type": "case_study",
+      "id": "founder_sam_walton_walmart",
+      "category": "investor",
+      "topic": "Sam Walton and the Small-Town Bet Nobody Else Would Make",
+      "remaining_in_pass": 81,
+      "low_inventory_alert": false,
       "date": "2026-08-06"
     }
   ],

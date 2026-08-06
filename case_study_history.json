@@ -87,6 +87,10 @@
     {
       "id": "investor_bogle_index_fund",
       "date": "2026-08-05"
+    },
+    {
+      "id": "founder_sam_walton_walmart",
+      "date": "2026-08-06"
     }
   ],
   "low_inventory_alert_sent": false
