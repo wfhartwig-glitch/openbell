@@ -91,6 +91,10 @@
     {
       "id": "founder_sam_walton_walmart",
       "date": "2026-08-06"
+    },
+    {
+      "id": "investor_dalio_bridgewater",
+      "date": "2026-08-07"
     }
   ],
   "low_inventory_alert_sent": false

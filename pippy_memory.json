@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 78,
-  "last_session": "2026-08-07T13:31:12.206875",
+  "session_count": 79,
+  "last_session": "2026-08-07T17:00:33.844484",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 67,
-  "last_email_sent": "2026-08-07T13:31:12.205136",
-  "last_email_summary": "morning sent Friday, August 07, 2026",
+  "email_count": 68,
+  "last_email_sent": "2026-08-07T17:00:33.843126",
+  "last_email_summary": "casestudy sent Friday, August 07, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -629,6 +629,15 @@
       "headline_theme": "",
       "commodity_note": "WTI Crude Oil down 1.6%",
       "picks_status": "rotated",
+      "date": "2026-08-07"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_dalio_bridgewater",
+      "category": "investor",
+      "topic": "Ray Dalio's Public Failure That Rebuilt His Investing Philosophy",
+      "remaining_in_pass": 80,
+      "low_inventory_alert": false,
       "date": "2026-08-07"
     }
   ],
