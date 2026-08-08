@@ -95,6 +95,10 @@
     {
       "id": "investor_dalio_bridgewater",
       "date": "2026-08-07"
+    },
+    {
+      "id": "founder_estee_lauder",
+      "date": "2026-08-08"
     }
   ],
   "low_inventory_alert_sent": false

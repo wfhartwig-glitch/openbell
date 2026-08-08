@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 80,
-  "last_session": "2026-08-07T20:01:55.939220",
+  "session_count": 81,
+  "last_session": "2026-08-08T13:30:26.955260",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 69,
-  "last_email_sent": "2026-08-07T20:01:55.937255",
-  "last_email_summary": "close sent Friday, August 07, 2026",
+  "email_count": 70,
+  "last_email_sent": "2026-08-08T13:30:26.953722",
+  "last_email_summary": "casestudy sent Saturday, August 08, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -96,15 +96,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "mixed",
-      "actual_sp_pct": -0.33,
-      "best_sector": "Industrials",
-      "worst_sector": "Consumer Discret.",
-      "biggest_mover": "VRT +6.3%",
-      "date": "2026-06-22"
-    },
     {
       "type": "morning",
       "direction_called": "lower",
@@ -648,6 +639,15 @@
       "worst_sector": "Energy",
       "biggest_mover": "CELH +15.1%",
       "date": "2026-08-07"
+    },
+    {
+      "type": "case_study",
+      "id": "founder_estee_lauder",
+      "category": "investor",
+      "topic": "Est\u00e9e Lauder Built an Empire From Her Uncle's Kitchen",
+      "remaining_in_pass": 79,
+      "low_inventory_alert": false,
+      "date": "2026-08-08"
     }
   ],
   "lessons_learned": [
