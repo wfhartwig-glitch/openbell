@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 84,
-  "last_session": "2026-08-10T17:00:33.283270",
+  "session_count": 85,
+  "last_session": "2026-08-10T20:01:12.958423",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 73,
-  "last_email_sent": "2026-08-10T17:00:33.281634",
-  "last_email_summary": "casestudy sent Monday, August 10, 2026",
+  "email_count": 74,
+  "last_email_sent": "2026-08-10T20:01:12.956639",
+  "last_email_summary": "close sent Monday, August 10, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,13 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "crash_1929",
-      "category": "crisis",
-      "topic": "The 1929 Crash and the Myth of the Permanent Boom",
-      "date": "2026-07-14"
-    },
     {
       "type": "morning",
       "direction_called": "mixed",
@@ -658,6 +651,15 @@
       "remaining_in_pass": 77,
       "low_inventory_alert": false,
       "date": "2026-08-10"
+    },
+    {
+      "type": "close",
+      "actual_direction": "lower",
+      "actual_sp_pct": -0.03,
+      "best_sector": "Energy",
+      "worst_sector": "Utilities",
+      "biggest_mover": "DDOG +10.7%",
+      "date": "2026-08-10"
     }
   ],
   "lessons_learned": [
@@ -781,6 +783,12 @@
       "date": "2026-08-07",
       "called": "higher",
       "actual": "higher",
+      "accurate": true
+    },
+    {
+      "date": "2026-08-10",
+      "called": "lower",
+      "actual": "lower",
       "accurate": true
     }
   ],
