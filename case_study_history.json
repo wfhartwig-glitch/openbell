@@ -103,6 +103,10 @@
     {
       "id": "bubble_tulip_mania",
       "date": "2026-08-09"
+    },
+    {
+      "id": "bubble_south_sea",
+      "date": "2026-08-10"
     }
   ],
   "low_inventory_alert_sent": false

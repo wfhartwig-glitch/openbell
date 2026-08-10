@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 83,
-  "last_session": "2026-08-10T13:31:21.591394",
+  "session_count": 84,
+  "last_session": "2026-08-10T17:00:33.283270",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 72,
-  "last_email_sent": "2026-08-10T13:31:21.589729",
-  "last_email_summary": "morning sent Monday, August 10, 2026",
+  "email_count": 73,
+  "last_email_sent": "2026-08-10T17:00:33.281634",
+  "last_email_summary": "casestudy sent Monday, August 10, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "mixed",
-      "leading_index": "S&P 500",
-      "lagging_index": "Dow",
-      "headline_theme": "Fed policy",
-      "commodity_note": "WTI Crude Oil down 3.0%",
-      "picks_status": "holding",
-      "date": "2026-06-24"
-    },
     {
       "type": "case_study",
       "id": "crash_1929",
@@ -658,6 +648,15 @@
       "headline_theme": "",
       "commodity_note": "",
       "picks_status": "rotated",
+      "date": "2026-08-10"
+    },
+    {
+      "type": "case_study",
+      "id": "bubble_south_sea",
+      "category": "crisis",
+      "topic": "The South Sea Bubble \u2014 When Isaac Newton Lost a Fortune",
+      "remaining_in_pass": 77,
+      "low_inventory_alert": false,
       "date": "2026-08-10"
     }
   ],
