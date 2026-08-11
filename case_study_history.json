@@ -107,6 +107,10 @@
     {
       "id": "bubble_south_sea",
       "date": "2026-08-10"
+    },
+    {
+      "id": "origin_fedex",
+      "date": "2026-08-11"
     }
   ],
   "low_inventory_alert_sent": false
