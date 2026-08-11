@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 87,
-  "last_session": "2026-08-11T17:00:37.092678",
+  "session_count": 88,
+  "last_session": "2026-08-11T20:01:21.217903",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 76,
-  "last_email_sent": "2026-08-11T17:00:37.090328",
-  "last_email_summary": "casestudy sent Tuesday, August 11, 2026",
+  "email_count": 77,
+  "last_email_sent": "2026-08-11T20:01:21.215996",
+  "last_email_summary": "close sent Tuesday, August 11, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,13 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "crash_1987_black_monday",
-      "category": "crisis",
-      "topic": "Black Monday, 1987 \u2014 The Day Computers Panicked",
-      "date": "2026-07-14"
-    },
     {
       "type": "close",
       "actual_direction": "higher",
@@ -662,6 +655,15 @@
       "remaining_in_pass": 76,
       "low_inventory_alert": false,
       "date": "2026-08-11"
+    },
+    {
+      "type": "close",
+      "actual_direction": "lower",
+      "actual_sp_pct": -0.32,
+      "best_sector": "Energy",
+      "worst_sector": "Real Estate",
+      "biggest_mover": "AXON +6.9%",
+      "date": "2026-08-11"
     }
   ],
   "lessons_learned": [
@@ -792,6 +794,12 @@
       "called": "lower",
       "actual": "lower",
       "accurate": true
+    },
+    {
+      "date": "2026-08-11",
+      "called": "higher",
+      "actual": "lower",
+      "accurate": false
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
