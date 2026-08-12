@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 89,
-  "last_session": "2026-08-12T13:31:24.539892",
+  "session_count": 90,
+  "last_session": "2026-08-12T17:00:33.208429",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 78,
-  "last_email_sent": "2026-08-12T13:31:24.538231",
-  "last_email_summary": "morning sent Wednesday, August 12, 2026",
+  "email_count": 79,
+  "last_email_sent": "2026-08-12T17:00:33.206760",
+  "last_email_summary": "casestudy sent Wednesday, August 12, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "mixed",
-      "leading_index": "Nasdaq",
-      "lagging_index": "Dow",
-      "headline_theme": "inflation data",
-      "commodity_note": "",
-      "picks_status": "holding",
-      "date": "2026-07-15"
-    },
     {
       "type": "case_study",
       "id": "bubble_dotcom",
@@ -664,6 +654,15 @@
       "headline_theme": "inflation data",
       "commodity_note": "WTI Crude Oil down 1.9%",
       "picks_status": "rotated",
+      "date": "2026-08-12"
+    },
+    {
+      "type": "case_study",
+      "id": "origin_mcdonalds_kroc",
+      "category": "origin",
+      "topic": "McDonald's \u2014 The Milkshake Salesman Who Took Over",
+      "remaining_in_pass": 75,
+      "low_inventory_alert": false,
       "date": "2026-08-12"
     }
   ],
