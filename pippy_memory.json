@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 90,
-  "last_session": "2026-08-12T17:00:33.208429",
+  "session_count": 91,
+  "last_session": "2026-08-12T20:01:18.600543",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 79,
-  "last_email_sent": "2026-08-12T17:00:33.206760",
-  "last_email_summary": "casestudy sent Wednesday, August 12, 2026",
+  "email_count": 80,
+  "last_email_sent": "2026-08-12T20:01:18.598914",
+  "last_email_summary": "close sent Wednesday, August 12, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "bubble_dotcom",
-      "category": "crisis",
-      "topic": "The Dot-Com Bust \u2014 When \".com\" Was Enough",
-      "remaining_in_pass": 100,
-      "low_inventory_alert": false,
-      "date": "2026-07-15"
-    },
     {
       "type": "close",
       "actual_direction": "higher",
@@ -664,6 +655,15 @@
       "remaining_in_pass": 75,
       "low_inventory_alert": false,
       "date": "2026-08-12"
+    },
+    {
+      "type": "close",
+      "actual_direction": "mixed",
+      "actual_sp_pct": 0.27,
+      "best_sector": "Technology",
+      "worst_sector": "Consumer Discret.",
+      "biggest_mover": "ANET +6.2%",
+      "date": "2026-08-12"
     }
   ],
   "lessons_learned": [
@@ -799,6 +799,12 @@
       "date": "2026-08-11",
       "called": "higher",
       "actual": "lower",
+      "accurate": false
+    },
+    {
+      "date": "2026-08-12",
+      "called": "higher",
+      "actual": "mixed",
       "accurate": false
     }
   ],
