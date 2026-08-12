@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 88,
-  "last_session": "2026-08-11T20:01:21.217903",
+  "session_count": 89,
+  "last_session": "2026-08-12T13:31:24.539892",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 77,
-  "last_email_sent": "2026-08-11T20:01:21.215996",
-  "last_email_summary": "close sent Tuesday, August 11, 2026",
+  "email_count": 78,
+  "last_email_sent": "2026-08-12T13:31:24.538231",
+  "last_email_summary": "morning sent Wednesday, August 12, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "higher",
-      "actual_sp_pct": 0.38,
-      "best_sector": "Technology",
-      "worst_sector": "Health Care",
-      "biggest_mover": "CRWD +12.9%",
-      "date": "2026-07-14"
-    },
     {
       "type": "morning",
       "direction_called": "mixed",
@@ -664,6 +655,16 @@
       "worst_sector": "Real Estate",
       "biggest_mover": "AXON +6.9%",
       "date": "2026-08-11"
+    },
+    {
+      "type": "morning",
+      "direction_called": "higher",
+      "leading_index": "Nasdaq",
+      "lagging_index": "",
+      "headline_theme": "inflation data",
+      "commodity_note": "WTI Crude Oil down 1.9%",
+      "picks_status": "rotated",
+      "date": "2026-08-12"
     }
   ],
   "lessons_learned": [
@@ -805,7 +806,7 @@
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
   "theme_frequency": {
     "Fed policy": 4,
-    "inflation data": 2,
+    "inflation data": 3,
     "earnings season": 5,
     "geopolitical tensions": 2
   }
