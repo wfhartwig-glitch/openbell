@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 91,
-  "last_session": "2026-08-12T20:01:18.600543",
+  "session_count": 92,
+  "last_session": "2026-08-13T13:31:34.972644",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 80,
-  "last_email_sent": "2026-08-12T20:01:18.598914",
-  "last_email_summary": "close sent Wednesday, August 12, 2026",
+  "email_count": 81,
+  "last_email_sent": "2026-08-13T13:31:34.970833",
+  "last_email_summary": "morning sent Thursday, August 13, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "higher",
-      "actual_sp_pct": 0.37,
-      "best_sector": "Comm. Services",
-      "worst_sector": "Utilities",
-      "biggest_mover": "HIMS +5.4%",
-      "date": "2026-07-15"
-    },
     {
       "type": "morning",
       "direction_called": "mixed",
@@ -664,6 +655,16 @@
       "worst_sector": "Consumer Discret.",
       "biggest_mover": "ANET +6.2%",
       "date": "2026-08-12"
+    },
+    {
+      "type": "morning",
+      "direction_called": "higher",
+      "leading_index": "Dow",
+      "lagging_index": "",
+      "headline_theme": "inflation data",
+      "commodity_note": "WTI Crude Oil down 1.9%",
+      "picks_status": "rotated",
+      "date": "2026-08-13"
     }
   ],
   "lessons_learned": [
@@ -811,7 +812,7 @@
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
   "theme_frequency": {
     "Fed policy": 4,
-    "inflation data": 3,
+    "inflation data": 4,
     "earnings season": 5,
     "geopolitical tensions": 2
   }
