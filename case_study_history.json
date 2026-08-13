@@ -115,6 +115,10 @@
     {
       "id": "origin_mcdonalds_kroc",
       "date": "2026-08-12"
+    },
+    {
+      "id": "origin_southwest_airlines",
+      "date": "2026-08-13"
     }
   ],
   "low_inventory_alert_sent": false

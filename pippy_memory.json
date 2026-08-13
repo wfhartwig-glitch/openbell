@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 92,
-  "last_session": "2026-08-13T13:31:34.972644",
+  "session_count": 93,
+  "last_session": "2026-08-13T17:00:36.932504",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 81,
-  "last_email_sent": "2026-08-13T13:31:34.970833",
-  "last_email_summary": "morning sent Thursday, August 13, 2026",
+  "email_count": 82,
+  "last_email_sent": "2026-08-13T17:00:36.931046",
+  "last_email_summary": "casestudy sent Thursday, August 13, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "mixed",
-      "leading_index": "",
-      "lagging_index": "Nasdaq",
-      "headline_theme": "",
-      "commodity_note": "WTI Crude Oil up 1.2%",
-      "picks_status": "holding",
-      "date": "2026-07-16"
-    },
     {
       "type": "case_study",
       "id": "crisis_ltcm",
@@ -664,6 +654,15 @@
       "headline_theme": "inflation data",
       "commodity_note": "WTI Crude Oil down 1.9%",
       "picks_status": "rotated",
+      "date": "2026-08-13"
+    },
+    {
+      "type": "case_study",
+      "id": "origin_southwest_airlines",
+      "category": "origin",
+      "topic": "Southwest Airlines \u2014 Sketched on a Napkin, Nearly Grounded Before It Flew",
+      "remaining_in_pass": 74,
+      "low_inventory_alert": false,
       "date": "2026-08-13"
     }
   ],
