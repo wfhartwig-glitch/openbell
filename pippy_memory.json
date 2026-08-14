@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 94,
-  "last_session": "2026-08-13T20:01:19.581634",
+  "session_count": 95,
+  "last_session": "2026-08-14T13:31:32.822216",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 83,
-  "last_email_sent": "2026-08-13T20:01:19.579852",
-  "last_email_summary": "close sent Thursday, August 13, 2026",
+  "email_count": 84,
+  "last_email_sent": "2026-08-14T13:31:32.820343",
+  "last_email_summary": "morning sent Friday, August 14, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "lower",
-      "actual_sp_pct": -0.51,
-      "best_sector": "Consumer Staples",
-      "worst_sector": "Technology",
-      "biggest_mover": "HIMS -9.2%",
-      "date": "2026-07-16"
-    },
     {
       "type": "morning",
       "direction_called": "lower",
@@ -664,6 +655,16 @@
       "worst_sector": "Materials",
       "biggest_mover": "TTD +8.1%",
       "date": "2026-08-13"
+    },
+    {
+      "type": "morning",
+      "direction_called": "mixed",
+      "leading_index": "",
+      "lagging_index": "Dow",
+      "headline_theme": "",
+      "commodity_note": "Gold up 1.3%",
+      "picks_status": "rotated",
+      "date": "2026-08-14"
     }
   ],
   "lessons_learned": [
