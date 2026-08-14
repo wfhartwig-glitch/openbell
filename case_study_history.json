@@ -119,6 +119,10 @@
     {
       "id": "origin_southwest_airlines",
       "date": "2026-08-13"
+    },
+    {
+      "id": "origin_toyota_production_system",
+      "date": "2026-08-14"
     }
   ],
   "low_inventory_alert_sent": false
