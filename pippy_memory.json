@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 97,
-  "last_session": "2026-08-14T20:01:17.779191",
+  "session_count": 98,
+  "last_session": "2026-08-15T13:30:30.318977",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 86,
-  "last_email_sent": "2026-08-14T20:01:17.777442",
-  "last_email_summary": "close sent Friday, August 14, 2026",
+  "email_count": 87,
+  "last_email_sent": "2026-08-15T13:30:30.317241",
+  "last_email_summary": "casestudy sent Saturday, August 15, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "lower",
-      "actual_sp_pct": -1.01,
-      "best_sector": "Energy",
-      "worst_sector": "Comm. Services",
-      "biggest_mover": "AXON -5.9%",
-      "date": "2026-07-17"
-    },
     {
       "type": "case_study",
       "id": "squeeze_gamestop_2021",
@@ -664,6 +655,15 @@
       "worst_sector": "Health Care",
       "biggest_mover": "AVGO -6.1%",
       "date": "2026-08-14"
+    },
+    {
+      "type": "case_study",
+      "id": "origin_levis_jeans",
+      "category": "origin",
+      "topic": "Levi's Jeans \u2014 Built for Gold Miners, Worn by Everyone Since",
+      "remaining_in_pass": 72,
+      "low_inventory_alert": false,
+      "date": "2026-08-15"
     }
   ],
   "lessons_learned": [

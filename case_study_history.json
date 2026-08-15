@@ -123,6 +123,10 @@
     {
       "id": "origin_toyota_production_system",
       "date": "2026-08-14"
+    },
+    {
+      "id": "origin_levis_jeans",
+      "date": "2026-08-15"
     }
   ],
   "low_inventory_alert_sent": false
