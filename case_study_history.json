@@ -127,6 +127,10 @@
     {
       "id": "origin_levis_jeans",
       "date": "2026-08-15"
+    },
+    {
+      "id": "rivalry_coke_pepsi",
+      "date": "2026-08-16"
     }
   ],
   "low_inventory_alert_sent": false

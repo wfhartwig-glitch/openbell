@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 98,
-  "last_session": "2026-08-15T13:30:30.318977",
+  "session_count": 99,
+  "last_session": "2026-08-16T13:30:29.359023",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 87,
-  "last_email_sent": "2026-08-15T13:30:30.317241",
-  "last_email_summary": "casestudy sent Saturday, August 15, 2026",
+  "email_count": 88,
+  "last_email_sent": "2026-08-16T13:30:29.357409",
+  "last_email_summary": "casestudy sent Sunday, August 16, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "squeeze_gamestop_2021",
-      "category": "crisis",
-      "topic": "GameStop and the Squeeze That Shook Wall Street",
-      "remaining_in_pass": 97,
-      "low_inventory_alert": false,
-      "date": "2026-07-18"
-    },
     {
       "type": "case_study",
       "id": "startup_airbnb",
@@ -664,6 +655,15 @@
       "remaining_in_pass": 72,
       "low_inventory_alert": false,
       "date": "2026-08-15"
+    },
+    {
+      "type": "case_study",
+      "id": "rivalry_coke_pepsi",
+      "category": "rivalry",
+      "topic": "Coke vs. Pepsi \u2014 A Rivalry a Century in the Making",
+      "remaining_in_pass": 71,
+      "low_inventory_alert": false,
+      "date": "2026-08-16"
     }
   ],
   "lessons_learned": [
