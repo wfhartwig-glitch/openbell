@@ -131,6 +131,10 @@
     {
       "id": "rivalry_coke_pepsi",
       "date": "2026-08-16"
+    },
+    {
+      "id": "rivalry_vhs_betamax",
+      "date": "2026-08-17"
     }
   ],
   "low_inventory_alert_sent": false

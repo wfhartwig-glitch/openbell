@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 100,
-  "last_session": "2026-08-17T13:31:37.088664",
+  "session_count": 101,
+  "last_session": "2026-08-17T17:00:34.632338",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 89,
-  "last_email_sent": "2026-08-17T13:31:37.086954",
-  "last_email_summary": "morning sent Monday, August 17, 2026",
+  "email_count": 90,
+  "last_email_sent": "2026-08-17T17:00:34.630745",
+  "last_email_summary": "casestudy sent Monday, August 17, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "higher",
-      "leading_index": "Nasdaq",
-      "lagging_index": "",
-      "headline_theme": "earnings season",
-      "commodity_note": "WTI Crude Oil down 2.4%",
-      "picks_status": "holding",
-      "date": "2026-07-20"
-    },
     {
       "type": "case_study",
       "id": "startup_nike",
@@ -664,6 +654,15 @@
       "headline_theme": "rate expectations",
       "commodity_note": "",
       "picks_status": "holding",
+      "date": "2026-08-17"
+    },
+    {
+      "type": "case_study",
+      "id": "rivalry_vhs_betamax",
+      "category": "rivalry",
+      "topic": "VHS vs. Betamax \u2014 The Format War Sony Lost by Being Too Cautious",
+      "remaining_in_pass": 70,
+      "low_inventory_alert": false,
       "date": "2026-08-17"
     }
   ],
