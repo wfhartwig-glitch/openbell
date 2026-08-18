@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 102,
-  "last_session": "2026-08-17T20:01:35.923448",
+  "session_count": 103,
+  "last_session": "2026-08-18T13:31:32.479124",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 91,
-  "last_email_sent": "2026-08-17T20:01:35.921765",
-  "last_email_summary": "close sent Monday, August 17, 2026",
+  "email_count": 92,
+  "last_email_sent": "2026-08-18T13:31:32.477466",
+  "last_email_summary": "morning sent Tuesday, August 18, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "lower",
-      "actual_sp_pct": -0.19,
-      "best_sector": "Energy",
-      "worst_sector": "Materials",
-      "biggest_mover": "AXON +3.4%",
-      "date": "2026-07-20"
-    },
     {
       "type": "morning",
       "direction_called": "higher",
@@ -664,6 +655,16 @@
       "worst_sector": "Comm. Services",
       "biggest_mover": "CELH +2.4%",
       "date": "2026-08-17"
+    },
+    {
+      "type": "morning",
+      "direction_called": "lower",
+      "leading_index": "",
+      "lagging_index": "Nasdaq",
+      "headline_theme": "",
+      "commodity_note": "",
+      "picks_status": "holding",
+      "date": "2026-08-18"
     }
   ],
   "lessons_learned": [
