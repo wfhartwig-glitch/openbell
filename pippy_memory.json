@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 106,
-  "last_session": "2026-08-19T13:31:25.870248",
+  "session_count": 107,
+  "last_session": "2026-08-19T17:00:48.455882",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 95,
-  "last_email_sent": "2026-08-19T13:31:25.868272",
-  "last_email_summary": "morning sent Wednesday, August 19, 2026",
+  "email_count": 96,
+  "last_email_sent": "2026-08-19T17:00:48.454282",
+  "last_email_summary": "casestudy sent Wednesday, August 19, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "lower",
-      "leading_index": "",
-      "lagging_index": "Nasdaq",
-      "headline_theme": "earnings season",
-      "commodity_note": "WTI Crude Oil up 1.2%",
-      "picks_status": "holding",
-      "date": "2026-07-22"
-    },
     {
       "type": "case_study",
       "id": "startup_instagram_pivot",
@@ -664,6 +654,15 @@
       "headline_theme": "Fed policy",
       "commodity_note": "Gold up 2.5%",
       "picks_status": "holding",
+      "date": "2026-08-19"
+    },
+    {
+      "type": "case_study",
+      "id": "rivalry_edison_westinghouse",
+      "category": "rivalry",
+      "topic": "The War of the Currents \u2014 Edison, Westinghouse, and the Fight Over How Electricity Would Work",
+      "remaining_in_pass": 68,
+      "low_inventory_alert": false,
       "date": "2026-08-19"
     }
   ],

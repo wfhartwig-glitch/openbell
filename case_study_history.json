@@ -139,6 +139,10 @@
     {
       "id": "rivalry_uber_lyft",
       "date": "2026-08-18"
+    },
+    {
+      "id": "rivalry_edison_westinghouse",
+      "date": "2026-08-19"
     }
   ],
   "low_inventory_alert_sent": false
