@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 107,
-  "last_session": "2026-08-19T17:00:48.455882",
+  "session_count": 108,
+  "last_session": "2026-08-19T20:01:25.728257",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 96,
-  "last_email_sent": "2026-08-19T17:00:48.454282",
-  "last_email_summary": "casestudy sent Wednesday, August 19, 2026",
+  "email_count": 97,
+  "last_email_sent": "2026-08-19T20:01:25.726460",
+  "last_email_summary": "close sent Wednesday, August 19, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "startup_instagram_pivot",
-      "category": "startup",
-      "topic": "Instagram \u2014 The App That Started as Something Else Entirely",
-      "remaining_in_pass": 93,
-      "low_inventory_alert": false,
-      "date": "2026-07-22"
-    },
     {
       "type": "close",
       "actual_direction": "mixed",
@@ -664,6 +655,15 @@
       "remaining_in_pass": 68,
       "low_inventory_alert": false,
       "date": "2026-08-19"
+    },
+    {
+      "type": "close",
+      "actual_direction": "higher",
+      "actual_sp_pct": 0.2,
+      "best_sector": "Health Care",
+      "worst_sector": "Industrials",
+      "biggest_mover": "HIMS +13.6%",
+      "date": "2026-08-19"
     }
   ],
   "lessons_learned": [
@@ -834,6 +834,12 @@
       "called": "lower",
       "actual": "lower",
       "accurate": true
+    },
+    {
+      "date": "2026-08-19",
+      "called": "higher",
+      "actual": "higher",
+      "accurate": true
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
@@ -843,6 +849,5 @@
     "earnings season": 5,
     "geopolitical tensions": 2,
     "rate expectations": 1
-  },
-  "calibration_note": "Direction-calling accuracy has been 40% over the last 10 sessions \u2014 consider reviewing classification thresholds."
+  }
 }
