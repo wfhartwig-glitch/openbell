@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 110,
-  "last_session": "2026-08-20T17:00:37.813235",
+  "session_count": 111,
+  "last_session": "2026-08-20T20:01:19.043875",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 99,
-  "last_email_sent": "2026-08-20T17:00:37.811523",
-  "last_email_summary": "casestudy sent Thursday, August 20, 2026",
+  "email_count": 100,
+  "last_email_sent": "2026-08-20T20:01:19.042031",
+  "last_email_summary": "close sent Thursday, August 20, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "startup_slack_pivot",
-      "category": "startup",
-      "topic": "Slack \u2014 Built From the Ashes of a Failed Video Game",
-      "remaining_in_pass": 92,
-      "low_inventory_alert": false,
-      "date": "2026-07-23"
-    },
     {
       "type": "close",
       "actual_direction": "lower",
@@ -664,6 +655,15 @@
       "remaining_in_pass": 67,
       "low_inventory_alert": false,
       "date": "2026-08-20"
+    },
+    {
+      "type": "close",
+      "actual_direction": "lower",
+      "actual_sp_pct": -0.86,
+      "best_sector": "Energy",
+      "worst_sector": "Health Care",
+      "biggest_mover": "HIMS +3.4%",
+      "date": "2026-08-20"
     }
   ],
   "lessons_learned": [
@@ -839,6 +839,12 @@
       "date": "2026-08-19",
       "called": "higher",
       "actual": "higher",
+      "accurate": true
+    },
+    {
+      "date": "2026-08-20",
+      "called": "lower",
+      "actual": "lower",
       "accurate": true
     }
   ],
