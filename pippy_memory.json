@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 111,
-  "last_session": "2026-08-20T20:01:19.043875",
+  "session_count": 112,
+  "last_session": "2026-08-21T13:31:01.610825",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 100,
-  "last_email_sent": "2026-08-20T20:01:19.042031",
-  "last_email_summary": "close sent Thursday, August 20, 2026",
+  "email_count": 101,
+  "last_email_sent": "2026-08-21T13:31:01.609412",
+  "last_email_summary": "morning sent Friday, August 21, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "lower",
-      "actual_sp_pct": -1.22,
-      "best_sector": "Health Care",
-      "worst_sector": "Consumer Discret.",
-      "biggest_mover": "HIMS +4.0%",
-      "date": "2026-07-23"
-    },
     {
       "type": "morning",
       "direction_called": "mixed",
@@ -664,6 +655,16 @@
       "worst_sector": "Health Care",
       "biggest_mover": "HIMS +3.4%",
       "date": "2026-08-20"
+    },
+    {
+      "type": "morning",
+      "direction_called": "higher",
+      "leading_index": "Dow",
+      "lagging_index": "",
+      "headline_theme": "earnings season",
+      "commodity_note": "Gold up 1.0%",
+      "picks_status": "holding",
+      "date": "2026-08-21"
     }
   ],
   "lessons_learned": [
@@ -852,7 +853,7 @@
   "theme_frequency": {
     "Fed policy": 5,
     "inflation data": 5,
-    "earnings season": 5,
+    "earnings season": 6,
     "geopolitical tensions": 2,
     "rate expectations": 1
   }
