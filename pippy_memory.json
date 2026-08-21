@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 112,
-  "last_session": "2026-08-21T13:31:01.610825",
+  "session_count": 113,
+  "last_session": "2026-08-21T17:00:36.162581",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 101,
-  "last_email_sent": "2026-08-21T13:31:01.609412",
-  "last_email_summary": "morning sent Friday, August 21, 2026",
+  "email_count": 102,
+  "last_email_sent": "2026-08-21T17:00:36.160721",
+  "last_email_summary": "casestudy sent Friday, August 21, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "mixed",
-      "leading_index": "Dow",
-      "lagging_index": "Nasdaq",
-      "headline_theme": "",
-      "commodity_note": "WTI Crude Oil down 2.0%",
-      "picks_status": "holding",
-      "date": "2026-07-24"
-    },
     {
       "type": "case_study",
       "id": "startup_paypal",
@@ -664,6 +654,15 @@
       "headline_theme": "earnings season",
       "commodity_note": "Gold up 1.0%",
       "picks_status": "holding",
+      "date": "2026-08-21"
+    },
+    {
+      "type": "case_study",
+      "id": "launch_ford_model_t",
+      "category": "product_launch",
+      "topic": "The Ford Model T and the Assembly Line That Changed Manufacturing Forever",
+      "remaining_in_pass": 66,
+      "low_inventory_alert": false,
       "date": "2026-08-21"
     }
   ],

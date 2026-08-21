@@ -147,6 +147,10 @@
     {
       "id": "launch_iphone",
       "date": "2026-08-20"
+    },
+    {
+      "id": "launch_ford_model_t",
+      "date": "2026-08-21"
     }
   ],
   "low_inventory_alert_sent": false
