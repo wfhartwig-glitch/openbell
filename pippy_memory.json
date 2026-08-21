@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 113,
-  "last_session": "2026-08-21T17:00:36.162581",
+  "session_count": 114,
+  "last_session": "2026-08-21T20:01:15.935803",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 102,
-  "last_email_sent": "2026-08-21T17:00:36.160721",
-  "last_email_summary": "casestudy sent Friday, August 21, 2026",
+  "email_count": 103,
+  "last_email_sent": "2026-08-21T20:01:15.934037",
+  "last_email_summary": "close sent Friday, August 21, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "startup_paypal",
-      "category": "startup",
-      "topic": "PayPal and the Mafia It Left Behind",
-      "remaining_in_pass": 91,
-      "low_inventory_alert": false,
-      "date": "2026-07-24"
-    },
     {
       "type": "close",
       "actual_direction": "mixed",
@@ -664,6 +655,15 @@
       "remaining_in_pass": 66,
       "low_inventory_alert": false,
       "date": "2026-08-21"
+    },
+    {
+      "type": "close",
+      "actual_direction": "higher",
+      "actual_sp_pct": 0.43,
+      "best_sector": "Materials",
+      "worst_sector": "Utilities",
+      "biggest_mover": "HOOD +13.5%",
+      "date": "2026-08-21"
     }
   ],
   "lessons_learned": [
@@ -845,6 +845,12 @@
       "date": "2026-08-20",
       "called": "lower",
       "actual": "lower",
+      "accurate": true
+    },
+    {
+      "date": "2026-08-21",
+      "called": "higher",
+      "actual": "higher",
       "accurate": true
     }
   ],
