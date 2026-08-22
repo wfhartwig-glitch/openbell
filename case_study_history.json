@@ -151,6 +151,10 @@
     {
       "id": "launch_ford_model_t",
       "date": "2026-08-21"
+    },
+    {
+      "id": "launch_sony_walkman",
+      "date": "2026-08-22"
     }
   ],
   "low_inventory_alert_sent": false
