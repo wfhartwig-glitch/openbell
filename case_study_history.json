@@ -159,6 +159,10 @@
     {
       "id": "launch_amazon_kindle",
       "date": "2026-08-23"
+    },
+    {
+      "id": "investor_michael_milken",
+      "date": "2026-08-24"
     }
   ],
   "low_inventory_alert_sent": false

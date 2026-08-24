@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 117,
-  "last_session": "2026-08-24T13:31:18.530139",
+  "session_count": 118,
+  "last_session": "2026-08-24T17:00:45.406032",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 106,
-  "last_email_sent": "2026-08-24T13:31:18.528374",
-  "last_email_summary": "morning sent Monday, August 24, 2026",
+  "email_count": 107,
+  "last_email_sent": "2026-08-24T17:00:45.404462",
+  "last_email_summary": "casestudy sent Monday, August 24, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "higher",
-      "leading_index": "Nasdaq",
-      "lagging_index": "",
-      "headline_theme": "Fed policy",
-      "commodity_note": "",
-      "picks_status": "holding",
-      "date": "2026-07-27"
-    },
     {
       "type": "case_study",
       "id": "decision_kodak_digital",
@@ -664,6 +654,15 @@
       "headline_theme": "",
       "commodity_note": "",
       "picks_status": "rotated",
+      "date": "2026-08-24"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_michael_milken",
+      "category": "investor",
+      "topic": "Michael Milken \u2014 From Junk Bond King to Convicted Felon to Cancer Research's Biggest Funder",
+      "remaining_in_pass": 63,
+      "low_inventory_alert": false,
       "date": "2026-08-24"
     }
   ],
