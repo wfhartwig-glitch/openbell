@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 116,
-  "last_session": "2026-08-23T13:30:26.823759",
+  "session_count": 117,
+  "last_session": "2026-08-24T13:31:18.530139",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 105,
-  "last_email_sent": "2026-08-23T13:30:26.822070",
-  "last_email_summary": "casestudy sent Sunday, August 23, 2026",
+  "email_count": 106,
+  "last_email_sent": "2026-08-24T13:31:18.528374",
+  "last_email_summary": "morning sent Monday, August 24, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -35,8 +35,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 376.9,
-      "price_now": 491.2,
-      "pct_change_since_pick": 30.33,
+      "price_now": 482.76,
+      "pct_change_since_pick": 28.09,
       "still_held": true
     },
     {
@@ -46,8 +46,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 571.4,
-      "price_now": 583.9,
-      "pct_change_since_pick": 2.19,
+      "price_now": 550.54,
+      "pct_change_since_pick": -3.65,
       "still_held": true
     },
     {
@@ -57,8 +57,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 212.67,
-      "price_now": 226.84,
-      "pct_change_since_pick": 6.66,
+      "price_now": 214.38,
+      "pct_change_since_pick": 0.8,
       "still_held": true
     },
     {
@@ -90,8 +90,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 411.22,
-      "price_now": 611.53,
-      "pct_change_since_pick": 48.71,
+      "price_now": 634.5,
+      "pct_change_since_pick": 54.3,
       "still_held": true
     },
     {
@@ -99,23 +99,14 @@
       "sector": "Technology",
       "risk_level": "High",
       "week_picked": "2026-W32",
-      "week_dropped": null,
+      "week_dropped": "2026-W34",
       "price_when_picked": 430.95,
-      "price_now": 396.95,
-      "pct_change_since_pick": -7.89,
-      "still_held": true
+      "price_now": 364.55,
+      "pct_change_since_pick": -15.41,
+      "still_held": false
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "decision_blockbuster_netflix",
-      "category": "decision",
-      "topic": "Blockbuster's $50 Million Mistake",
-      "remaining_in_pass": 89,
-      "low_inventory_alert": false,
-      "date": "2026-07-26"
-    },
     {
       "type": "morning",
       "direction_called": "higher",
@@ -664,6 +655,16 @@
       "remaining_in_pass": 64,
       "low_inventory_alert": false,
       "date": "2026-08-23"
+    },
+    {
+      "type": "morning",
+      "direction_called": "mixed",
+      "leading_index": "",
+      "lagging_index": "Nasdaq",
+      "headline_theme": "",
+      "commodity_note": "",
+      "picks_status": "rotated",
+      "date": "2026-08-24"
     }
   ],
   "lessons_learned": [
@@ -694,6 +695,10 @@
     {
       "week": "2026-W33",
       "note": "Active picks avg +16.0% since entry; Industrials picks outperforming \u2014 leaning toward more."
+    },
+    {
+      "week": "2026-W34",
+      "note": "Active picks avg +19.9% since entry; Industrials picks outperforming \u2014 leaning toward more."
     }
   ],
   "prediction_accuracy": [
