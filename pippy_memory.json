@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 121,
-  "last_session": "2026-08-25T17:00:55.094185",
+  "session_count": 122,
+  "last_session": "2026-08-25T20:01:24.040658",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 110,
-  "last_email_sent": "2026-08-25T17:00:55.092587",
-  "last_email_summary": "casestudy sent Tuesday, August 25, 2026",
+  "email_count": 111,
+  "last_email_sent": "2026-08-25T20:01:24.038726",
+  "last_email_summary": "close sent Tuesday, August 25, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "decision_new_coke",
-      "category": "decision",
-      "topic": "New Coke \u2014 The Taste Test Coca-Cola Won and Lost Anyway",
-      "remaining_in_pass": 87,
-      "low_inventory_alert": false,
-      "date": "2026-07-31"
-    },
     {
       "type": "morning",
       "direction_called": "higher",
@@ -664,6 +655,15 @@
       "remaining_in_pass": 62,
       "low_inventory_alert": false,
       "date": "2026-08-25"
+    },
+    {
+      "type": "close",
+      "actual_direction": "higher",
+      "actual_sp_pct": 0.32,
+      "best_sector": "Technology",
+      "worst_sector": "Energy",
+      "biggest_mover": "HOOD +8.3%",
+      "date": "2026-08-25"
     }
   ],
   "lessons_learned": [
@@ -861,6 +861,12 @@
       "date": "2026-08-24",
       "called": "mixed",
       "actual": "mixed",
+      "accurate": true
+    },
+    {
+      "date": "2026-08-25",
+      "called": "higher",
+      "actual": "higher",
       "accurate": true
     }
   ],
