@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 120,
-  "last_session": "2026-08-25T13:31:14.588660",
+  "session_count": 121,
+  "last_session": "2026-08-25T17:00:55.094185",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 109,
-  "last_email_sent": "2026-08-25T13:31:14.586595",
-  "last_email_summary": "morning sent Tuesday, August 25, 2026",
+  "email_count": 110,
+  "last_email_sent": "2026-08-25T17:00:55.092587",
+  "last_email_summary": "casestudy sent Tuesday, August 25, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "mixed",
-      "leading_index": "Dow",
-      "lagging_index": "Nasdaq",
-      "headline_theme": "Fed policy",
-      "commodity_note": "",
-      "picks_status": "holding",
-      "date": "2026-07-28"
-    },
     {
       "type": "case_study",
       "id": "decision_new_coke",
@@ -664,6 +654,15 @@
       "headline_theme": "",
       "commodity_note": "WTI Crude Oil down 3.6%",
       "picks_status": "rotated",
+      "date": "2026-08-25"
+    },
+    {
+      "type": "case_study",
+      "id": "founder_palmer_luckey",
+      "category": "investor",
+      "topic": "Palmer Luckey \u2014 Fired From the Company He Built, He Rebuilt Bigger Out of Spite",
+      "remaining_in_pass": 62,
+      "low_inventory_alert": false,
       "date": "2026-08-25"
     }
   ],

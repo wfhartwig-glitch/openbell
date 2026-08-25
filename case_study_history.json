@@ -163,6 +163,10 @@
     {
       "id": "investor_michael_milken",
       "date": "2026-08-24"
+    },
+    {
+      "id": "founder_palmer_luckey",
+      "date": "2026-08-25"
     }
   ],
   "low_inventory_alert_sent": false
