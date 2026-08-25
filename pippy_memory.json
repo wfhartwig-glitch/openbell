@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 119,
-  "last_session": "2026-08-24T20:01:17.214460",
+  "session_count": 120,
+  "last_session": "2026-08-25T13:31:14.588660",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 108,
-  "last_email_sent": "2026-08-24T20:01:17.212611",
-  "last_email_summary": "close sent Monday, August 24, 2026",
+  "email_count": 109,
+  "last_email_sent": "2026-08-25T13:31:14.586595",
+  "last_email_summary": "morning sent Tuesday, August 25, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "mixed",
-      "actual_sp_pct": 0.02,
-      "best_sector": "Consumer Staples",
-      "worst_sector": "Energy",
-      "biggest_mover": "HIMS +8.1%",
-      "date": "2026-07-27"
-    },
     {
       "type": "morning",
       "direction_called": "mixed",
@@ -664,6 +655,16 @@
       "worst_sector": "Technology",
       "biggest_mover": "CELH +4.9%",
       "date": "2026-08-24"
+    },
+    {
+      "type": "morning",
+      "direction_called": "higher",
+      "leading_index": "Nasdaq",
+      "lagging_index": "",
+      "headline_theme": "",
+      "commodity_note": "WTI Crude Oil down 3.6%",
+      "picks_status": "rotated",
+      "date": "2026-08-25"
     }
   ],
   "lessons_learned": [
