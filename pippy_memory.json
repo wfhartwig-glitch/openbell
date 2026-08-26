@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 123,
-  "last_session": "2026-08-26T13:31:14.941737",
+  "session_count": 124,
+  "last_session": "2026-08-26T17:00:36.302059",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 112,
-  "last_email_sent": "2026-08-26T13:31:14.939914",
-  "last_email_summary": "morning sent Wednesday, August 26, 2026",
+  "email_count": 113,
+  "last_email_sent": "2026-08-26T17:00:36.300117",
+  "last_email_summary": "casestudy sent Wednesday, August 26, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "decision_excite_google",
-      "category": "decision",
-      "topic": "The Search Engine That Passed on Google for $750,000",
-      "remaining_in_pass": 86,
-      "low_inventory_alert": false,
-      "date": "2026-08-01"
-    },
     {
       "type": "case_study",
       "id": "decision_nokia_blackberry_iphone",
@@ -663,6 +654,15 @@
       "headline_theme": "inflation data",
       "commodity_note": "",
       "picks_status": "rotated",
+      "date": "2026-08-26"
+    },
+    {
+      "type": "case_study",
+      "id": "founder_martha_stewart",
+      "category": "investor",
+      "topic": "Martha Stewart \u2014 Convicted, Imprisoned, and Somehow Came Back Bigger",
+      "remaining_in_pass": 61,
+      "low_inventory_alert": false,
       "date": "2026-08-26"
     }
   ],
