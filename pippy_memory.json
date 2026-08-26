@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 124,
-  "last_session": "2026-08-26T17:00:36.302059",
+  "session_count": 125,
+  "last_session": "2026-08-26T20:01:21.832765",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 113,
-  "last_email_sent": "2026-08-26T17:00:36.300117",
-  "last_email_summary": "casestudy sent Wednesday, August 26, 2026",
+  "email_count": 114,
+  "last_email_sent": "2026-08-26T20:01:21.830858",
+  "last_email_summary": "close sent Wednesday, August 26, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "decision_nokia_blackberry_iphone",
-      "category": "decision",
-      "topic": "Nokia, BlackBerry, and the iPhone Nobody Saw Coming",
-      "remaining_in_pass": 85,
-      "low_inventory_alert": false,
-      "date": "2026-08-02"
-    },
     {
       "type": "morning",
       "direction_called": "higher",
@@ -664,6 +655,15 @@
       "remaining_in_pass": 61,
       "low_inventory_alert": false,
       "date": "2026-08-26"
+    },
+    {
+      "type": "close",
+      "actual_direction": "lower",
+      "actual_sp_pct": -0.02,
+      "best_sector": "Industrials",
+      "worst_sector": "Health Care",
+      "biggest_mover": "ANET +6.1%",
+      "date": "2026-08-26"
     }
   ],
   "lessons_learned": [
@@ -867,6 +867,12 @@
       "date": "2026-08-25",
       "called": "higher",
       "actual": "higher",
+      "accurate": true
+    },
+    {
+      "date": "2026-08-26",
+      "called": "lower",
+      "actual": "lower",
       "accurate": true
     }
   ],
