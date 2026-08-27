@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 126,
-  "last_session": "2026-08-27T13:31:10.651345",
+  "session_count": 127,
+  "last_session": "2026-08-27T17:00:39.143011",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 115,
-  "last_email_sent": "2026-08-27T13:31:10.649461",
-  "last_email_summary": "morning sent Thursday, August 27, 2026",
+  "email_count": 116,
+  "last_email_sent": "2026-08-27T17:00:39.141069",
+  "last_email_summary": "casestudy sent Thursday, August 27, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "decision_netflix_streaming_pivot",
-      "category": "decision",
-      "topic": "Netflix Bet Against Its Own Cash Cow",
-      "remaining_in_pass": 84,
-      "low_inventory_alert": false,
-      "date": "2026-08-03"
-    },
     {
       "type": "close",
       "actual_direction": "higher",
@@ -663,6 +654,15 @@
       "headline_theme": "Fed policy",
       "commodity_note": "",
       "picks_status": "rotated",
+      "date": "2026-08-27"
+    },
+    {
+      "type": "case_study",
+      "id": "founder_steve_jobs_apple",
+      "category": "investor",
+      "topic": "Steve Jobs Was Fired From the Company He Founded \u2014 Then Came Back to Save It",
+      "remaining_in_pass": 60,
+      "low_inventory_alert": false,
       "date": "2026-08-27"
     }
   ],

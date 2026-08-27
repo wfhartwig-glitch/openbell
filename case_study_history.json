@@ -171,6 +171,10 @@
     {
       "id": "founder_martha_stewart",
       "date": "2026-08-26"
+    },
+    {
+      "id": "founder_steve_jobs_apple",
+      "date": "2026-08-27"
     }
   ],
   "low_inventory_alert_sent": false
