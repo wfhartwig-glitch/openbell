@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 129,
-  "last_session": "2026-08-28T13:31:29.547339",
+  "session_count": 130,
+  "last_session": "2026-08-28T17:00:36.997400",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 118,
-  "last_email_sent": "2026-08-28T13:31:29.545116",
-  "last_email_summary": "morning sent Friday, August 28, 2026",
+  "email_count": 119,
+  "last_email_sent": "2026-08-28T17:00:36.995412",
+  "last_email_summary": "casestudy sent Friday, August 28, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "investor_buffett_berkshire",
-      "category": "investor",
-      "topic": "Warren Buffett's $25 Million Mistake That Became Berkshire Hathaway",
-      "remaining_in_pass": 83,
-      "low_inventory_alert": false,
-      "date": "2026-08-04"
-    },
     {
       "type": "close",
       "actual_direction": "higher",
@@ -663,6 +654,15 @@
       "headline_theme": "",
       "commodity_note": "",
       "picks_status": "rotated",
+      "date": "2026-08-28"
+    },
+    {
+      "type": "case_study",
+      "id": "founder_walt_disney",
+      "category": "investor",
+      "topic": "Walt Disney Went Bankrupt, Had a Breakdown, and Bet Everything on a Theme Park No Bank Would Fund",
+      "remaining_in_pass": 59,
+      "low_inventory_alert": false,
       "date": "2026-08-28"
     }
   ],
