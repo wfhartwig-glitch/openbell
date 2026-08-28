@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 128,
-  "last_session": "2026-08-27T20:01:20.144141",
+  "session_count": 129,
+  "last_session": "2026-08-28T13:31:29.547339",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 117,
-  "last_email_sent": "2026-08-27T20:01:20.142318",
-  "last_email_summary": "close sent Thursday, August 27, 2026",
+  "email_count": 118,
+  "last_email_sent": "2026-08-28T13:31:29.545116",
+  "last_email_summary": "morning sent Friday, August 28, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "higher",
-      "leading_index": "Dow",
-      "lagging_index": "",
-      "headline_theme": "",
-      "commodity_note": "WTI Crude Oil down 4.5%",
-      "picks_status": "rotated",
-      "date": "2026-08-04"
-    },
     {
       "type": "case_study",
       "id": "investor_buffett_berkshire",
@@ -664,6 +654,16 @@
       "worst_sector": "Consumer Staples",
       "biggest_mover": "CRWD +9.0%",
       "date": "2026-08-27"
+    },
+    {
+      "type": "morning",
+      "direction_called": "mixed",
+      "leading_index": "Dow",
+      "lagging_index": "Nasdaq",
+      "headline_theme": "",
+      "commodity_note": "",
+      "picks_status": "rotated",
+      "date": "2026-08-28"
     }
   ],
   "lessons_learned": [
