@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 131,
-  "last_session": "2026-08-28T20:01:20.219760",
+  "session_count": 132,
+  "last_session": "2026-08-29T13:30:30.809254",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 120,
-  "last_email_sent": "2026-08-28T20:01:20.217742",
-  "last_email_summary": "close sent Friday, August 28, 2026",
+  "email_count": 121,
+  "last_email_sent": "2026-08-29T13:30:30.807589",
+  "last_email_summary": "casestudy sent Saturday, August 29, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "higher",
-      "leading_index": "Dow",
-      "lagging_index": "",
-      "headline_theme": "earnings season",
-      "commodity_note": "WTI Crude Oil up 1.6%",
-      "picks_status": "rotated",
-      "date": "2026-08-05"
-    },
     {
       "type": "case_study",
       "id": "investor_bogle_index_fund",
@@ -664,6 +654,15 @@
       "worst_sector": "Utilities",
       "biggest_mover": "NOW +5.3%",
       "date": "2026-08-28"
+    },
+    {
+      "type": "case_study",
+      "id": "founder_pt_barnum",
+      "category": "investor",
+      "topic": "P.T. Barnum Went Bankrupt Chasing Schemes for Decades Before Building His Famous Circus",
+      "remaining_in_pass": 58,
+      "low_inventory_alert": false,
+      "date": "2026-08-29"
     }
   ],
   "lessons_learned": [

@@ -179,6 +179,10 @@
     {
       "id": "founder_walt_disney",
       "date": "2026-08-28"
+    },
+    {
+      "id": "founder_pt_barnum",
+      "date": "2026-08-29"
     }
   ],
   "low_inventory_alert_sent": false
