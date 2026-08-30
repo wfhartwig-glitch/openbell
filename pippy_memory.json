@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 132,
-  "last_session": "2026-08-29T13:30:30.809254",
+  "session_count": 133,
+  "last_session": "2026-08-30T13:30:37.683361",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 121,
-  "last_email_sent": "2026-08-29T13:30:30.807589",
-  "last_email_summary": "casestudy sent Saturday, August 29, 2026",
+  "email_count": 122,
+  "last_email_sent": "2026-08-30T13:30:37.681763",
+  "last_email_summary": "casestudy sent Sunday, August 30, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "investor_bogle_index_fund",
-      "category": "investor",
-      "topic": "John Bogle's Boring Idea That Wall Street Hated",
-      "remaining_in_pass": 82,
-      "low_inventory_alert": false,
-      "date": "2026-08-05"
-    },
     {
       "type": "close",
       "actual_direction": "mixed",
@@ -663,6 +654,15 @@
       "remaining_in_pass": 58,
       "low_inventory_alert": false,
       "date": "2026-08-29"
+    },
+    {
+      "type": "case_study",
+      "id": "founder_milton_hershey",
+      "category": "investor",
+      "topic": "Milton Hershey Failed at Candy Three Times Before Building an Empire on His Fourth Try",
+      "remaining_in_pass": 57,
+      "low_inventory_alert": false,
+      "date": "2026-08-30"
     }
   ],
   "lessons_learned": [

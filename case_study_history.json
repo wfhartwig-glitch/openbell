@@ -183,6 +183,10 @@
     {
       "id": "founder_pt_barnum",
       "date": "2026-08-29"
+    },
+    {
+      "id": "founder_milton_hershey",
+      "date": "2026-08-30"
     }
   ],
   "low_inventory_alert_sent": false
