@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 135,
-  "last_session": "2026-08-31T17:00:43.221295",
+  "session_count": 136,
+  "last_session": "2026-08-31T20:01:15.140507",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 124,
-  "last_email_sent": "2026-08-31T17:00:43.219196",
-  "last_email_summary": "casestudy sent Monday, August 31, 2026",
+  "email_count": 125,
+  "last_email_sent": "2026-08-31T20:01:15.138506",
+  "last_email_summary": "close sent Monday, August 31, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "founder_sam_walton_walmart",
-      "category": "investor",
-      "topic": "Sam Walton and the Small-Town Bet Nobody Else Would Make",
-      "remaining_in_pass": 81,
-      "low_inventory_alert": false,
-      "date": "2026-08-06"
-    },
     {
       "type": "close",
       "actual_direction": "lower",
@@ -663,6 +654,15 @@
       "remaining_in_pass": 56,
       "low_inventory_alert": false,
       "date": "2026-08-31"
+    },
+    {
+      "type": "close",
+      "actual_direction": "lower",
+      "actual_sp_pct": -0.31,
+      "best_sector": "Energy",
+      "worst_sector": "Utilities",
+      "biggest_mover": "CRWD +6.1%",
+      "date": "2026-08-31"
     }
   ],
   "lessons_learned": [
@@ -889,6 +889,12 @@
       "called": "mixed",
       "actual": "lower",
       "accurate": false
+    },
+    {
+      "date": "2026-08-31",
+      "called": "lower",
+      "actual": "lower",
+      "accurate": true
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
