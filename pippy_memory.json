@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 134,
-  "last_session": "2026-08-31T13:31:15.118284",
+  "session_count": 135,
+  "last_session": "2026-08-31T17:00:43.221295",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 123,
-  "last_email_sent": "2026-08-31T13:31:15.116441",
-  "last_email_summary": "morning sent Monday, August 31, 2026",
+  "email_count": 124,
+  "last_email_sent": "2026-08-31T17:00:43.219196",
+  "last_email_summary": "casestudy sent Monday, August 31, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "mixed",
-      "leading_index": "",
-      "lagging_index": "Nasdaq",
-      "headline_theme": "earnings season",
-      "commodity_note": "WTI Crude Oil up 1.8%",
-      "picks_status": "rotated",
-      "date": "2026-08-06"
-    },
     {
       "type": "case_study",
       "id": "founder_sam_walton_walmart",
@@ -663,6 +653,15 @@
       "headline_theme": "",
       "commodity_note": "",
       "picks_status": "holding",
+      "date": "2026-08-31"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_charles_goodyear",
+      "category": "investor",
+      "topic": "Charles Goodyear Went to Debtors' Prison Chasing an Obsession \u2014 Then Died Poor After Solving It",
+      "remaining_in_pass": 56,
+      "low_inventory_alert": false,
       "date": "2026-08-31"
     }
   ],
