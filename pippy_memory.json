@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 133,
-  "last_session": "2026-08-30T13:30:37.683361",
+  "session_count": 134,
+  "last_session": "2026-08-31T13:31:15.118284",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 122,
-  "last_email_sent": "2026-08-30T13:30:37.681763",
-  "last_email_summary": "casestudy sent Sunday, August 30, 2026",
+  "email_count": 123,
+  "last_email_sent": "2026-08-31T13:31:15.116441",
+  "last_email_summary": "morning sent Monday, August 31, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -35,8 +35,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 376.9,
-      "price_now": 482.76,
-      "pct_change_since_pick": 28.09,
+      "price_now": 509.3,
+      "pct_change_since_pick": 35.13,
       "still_held": true
     },
     {
@@ -46,8 +46,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 571.4,
-      "price_now": 550.54,
-      "pct_change_since_pick": -3.65,
+      "price_now": 575.04,
+      "pct_change_since_pick": 0.64,
       "still_held": true
     },
     {
@@ -57,8 +57,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 212.67,
-      "price_now": 214.38,
-      "pct_change_since_pick": 0.8,
+      "price_now": 218.44,
+      "pct_change_since_pick": 2.71,
       "still_held": true
     },
     {
@@ -90,8 +90,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 411.22,
-      "price_now": 634.5,
-      "pct_change_since_pick": 54.3,
+      "price_now": 595.0,
+      "pct_change_since_pick": 44.69,
       "still_held": true
     },
     {
@@ -101,21 +101,12 @@
       "week_picked": "2026-W32",
       "week_dropped": "2026-W34",
       "price_when_picked": 430.95,
-      "price_now": 364.55,
-      "pct_change_since_pick": -15.41,
-      "still_held": false
+      "price_now": 371.25,
+      "pct_change_since_pick": -13.85,
+      "still_held": true
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "mixed",
-      "actual_sp_pct": -0.16,
-      "best_sector": "Materials",
-      "worst_sector": "Energy",
-      "biggest_mover": "VRT +2.4%",
-      "date": "2026-08-05"
-    },
     {
       "type": "morning",
       "direction_called": "mixed",
@@ -663,6 +654,16 @@
       "remaining_in_pass": 57,
       "low_inventory_alert": false,
       "date": "2026-08-30"
+    },
+    {
+      "type": "morning",
+      "direction_called": "lower",
+      "leading_index": "",
+      "lagging_index": "Dow",
+      "headline_theme": "",
+      "commodity_note": "",
+      "picks_status": "holding",
+      "date": "2026-08-31"
     }
   ],
   "lessons_learned": [
@@ -697,6 +698,10 @@
     {
       "week": "2026-W34",
       "note": "Active picks avg +19.9% since entry; Industrials picks outperforming \u2014 leaning toward more."
+    },
+    {
+      "week": "2026-W35",
+      "note": "Active picks avg +13.9% since entry; Industrials picks outperforming \u2014 leaning toward more; Communication Services picks underperforming \u2014 weighting away."
     }
   ],
   "prediction_accuracy": [
