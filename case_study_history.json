@@ -191,6 +191,10 @@
     {
       "id": "investor_charles_goodyear",
       "date": "2026-08-31"
+    },
+    {
+      "id": "investor_charles_ponzi",
+      "date": "2026-09-01"
     }
   ],
   "low_inventory_alert_sent": false

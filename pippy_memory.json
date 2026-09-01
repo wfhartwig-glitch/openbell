@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 137,
-  "last_session": "2026-09-01T13:31:18.086988",
+  "session_count": 138,
+  "last_session": "2026-09-01T17:00:44.262024",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 126,
-  "last_email_sent": "2026-09-01T13:31:18.085136",
-  "last_email_summary": "morning sent Tuesday, September 01, 2026",
+  "email_count": 127,
+  "last_email_sent": "2026-09-01T17:00:44.260351",
+  "last_email_summary": "casestudy sent Tuesday, September 01, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "higher",
-      "leading_index": "Nasdaq",
-      "lagging_index": "",
-      "headline_theme": "",
-      "commodity_note": "WTI Crude Oil down 1.6%",
-      "picks_status": "rotated",
-      "date": "2026-08-07"
-    },
     {
       "type": "case_study",
       "id": "investor_dalio_bridgewater",
@@ -663,6 +653,15 @@
       "headline_theme": "",
       "commodity_note": "WTI Crude Oil up 1.7%",
       "picks_status": "holding",
+      "date": "2026-09-01"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_charles_ponzi",
+      "category": "investor",
+      "topic": "The Real Charles Ponzi \u2014 The Actual Man Behind the Scheme Everyone Names but Few Know",
+      "remaining_in_pass": 55,
+      "low_inventory_alert": false,
       "date": "2026-09-01"
     }
   ],
