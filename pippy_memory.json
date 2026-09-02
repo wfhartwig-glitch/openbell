@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 139,
-  "last_session": "2026-09-01T20:01:31.220251",
+  "session_count": 140,
+  "last_session": "2026-09-02T13:31:14.394393",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 128,
-  "last_email_sent": "2026-09-01T20:01:31.218638",
-  "last_email_summary": "close sent Tuesday, September 01, 2026",
+  "email_count": 129,
+  "last_email_sent": "2026-09-02T13:31:14.392349",
+  "last_email_summary": "morning sent Wednesday, September 02, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "higher",
-      "actual_sp_pct": 0.62,
-      "best_sector": "Materials",
-      "worst_sector": "Energy",
-      "biggest_mover": "CELH +15.1%",
-      "date": "2026-08-07"
-    },
     {
       "type": "case_study",
       "id": "founder_estee_lauder",
@@ -663,6 +654,16 @@
       "worst_sector": "Consumer Discret.",
       "biggest_mover": "AAPL +2.6%",
       "date": "2026-09-01"
+    },
+    {
+      "type": "morning",
+      "direction_called": "mixed",
+      "leading_index": "Dow",
+      "lagging_index": "Nasdaq",
+      "headline_theme": "geopolitical tensions",
+      "commodity_note": "WTI Crude Oil down 1.1%",
+      "picks_status": "holding",
+      "date": "2026-09-02"
     }
   ],
   "lessons_learned": [
@@ -908,7 +909,7 @@
     "Fed policy": 6,
     "inflation data": 6,
     "earnings season": 6,
-    "geopolitical tensions": 2,
+    "geopolitical tensions": 3,
     "rate expectations": 1
   }
 }
