@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 141,
-  "last_session": "2026-09-02T17:00:37.118619",
+  "session_count": 142,
+  "last_session": "2026-09-02T20:01:32.869615",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 130,
-  "last_email_sent": "2026-09-02T17:00:37.117462",
-  "last_email_summary": "casestudy sent Wednesday, September 02, 2026",
+  "email_count": 131,
+  "last_email_sent": "2026-09-02T20:01:32.867444",
+  "last_email_summary": "close sent Wednesday, September 02, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "bubble_tulip_mania",
-      "category": "crisis",
-      "topic": "Tulip Mania \u2014 The 1630s Bubble That Started It All",
-      "remaining_in_pass": 78,
-      "low_inventory_alert": false,
-      "date": "2026-08-09"
-    },
     {
       "type": "morning",
       "direction_called": "lower",
@@ -664,6 +655,15 @@
       "remaining_in_pass": 54,
       "low_inventory_alert": false,
       "date": "2026-09-02"
+    },
+    {
+      "type": "close",
+      "actual_direction": "higher",
+      "actual_sp_pct": 0.45,
+      "best_sector": "Materials",
+      "worst_sector": "Real Estate",
+      "biggest_mover": "TTD +5.5%",
+      "date": "2026-09-02"
     }
   ],
   "lessons_learned": [
@@ -902,6 +902,12 @@
       "called": "lower",
       "actual": "lower",
       "accurate": true
+    },
+    {
+      "date": "2026-09-02",
+      "called": "mixed",
+      "actual": "higher",
+      "accurate": false
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
