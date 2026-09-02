@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 140,
-  "last_session": "2026-09-02T13:31:14.394393",
+  "session_count": 141,
+  "last_session": "2026-09-02T17:00:37.118619",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 129,
-  "last_email_sent": "2026-09-02T13:31:14.392349",
-  "last_email_summary": "morning sent Wednesday, September 02, 2026",
+  "email_count": 130,
+  "last_email_sent": "2026-09-02T17:00:37.117462",
+  "last_email_summary": "casestudy sent Wednesday, September 02, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "founder_estee_lauder",
-      "category": "investor",
-      "topic": "Est\u00e9e Lauder Built an Empire From Her Uncle's Kitchen",
-      "remaining_in_pass": 79,
-      "low_inventory_alert": false,
-      "date": "2026-08-08"
-    },
     {
       "type": "case_study",
       "id": "bubble_tulip_mania",
@@ -663,6 +654,15 @@
       "headline_theme": "geopolitical tensions",
       "commodity_note": "WTI Crude Oil down 1.1%",
       "picks_status": "holding",
+      "date": "2026-09-02"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_ivan_boesky",
+      "category": "investor",
+      "topic": "Ivan Boesky Said \"Greed Is Healthy\" on Stage \u2014 Then Wore a Wire to Take Down Wall Street",
+      "remaining_in_pass": 54,
+      "low_inventory_alert": false,
       "date": "2026-09-02"
     }
   ],

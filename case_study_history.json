@@ -195,6 +195,10 @@
     {
       "id": "investor_charles_ponzi",
       "date": "2026-09-01"
+    },
+    {
+      "id": "investor_ivan_boesky",
+      "date": "2026-09-02"
     }
   ],
   "low_inventory_alert_sent": false
