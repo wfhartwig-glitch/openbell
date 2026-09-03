@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 142,
-  "last_session": "2026-09-02T20:01:32.869615",
+  "session_count": 143,
+  "last_session": "2026-09-03T13:31:01.533370",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 131,
-  "last_email_sent": "2026-09-02T20:01:32.867444",
-  "last_email_summary": "close sent Wednesday, September 02, 2026",
+  "email_count": 132,
+  "last_email_sent": "2026-09-03T13:31:01.531503",
+  "last_email_summary": "morning sent Thursday, September 03, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "lower",
-      "leading_index": "",
-      "lagging_index": "Nasdaq",
-      "headline_theme": "",
-      "commodity_note": "",
-      "picks_status": "rotated",
-      "date": "2026-08-10"
-    },
     {
       "type": "case_study",
       "id": "bubble_south_sea",
@@ -664,6 +654,16 @@
       "worst_sector": "Real Estate",
       "biggest_mover": "TTD +5.5%",
       "date": "2026-09-02"
+    },
+    {
+      "type": "morning",
+      "direction_called": "higher",
+      "leading_index": "Dow",
+      "lagging_index": "",
+      "headline_theme": "earnings season",
+      "commodity_note": "Gold up 1.1%",
+      "picks_status": "holding",
+      "date": "2026-09-03"
     }
   ],
   "lessons_learned": [
@@ -914,7 +914,7 @@
   "theme_frequency": {
     "Fed policy": 6,
     "inflation data": 6,
-    "earnings season": 6,
+    "earnings season": 7,
     "geopolitical tensions": 3,
     "rate expectations": 1
   }
