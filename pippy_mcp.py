@@ -76,6 +76,13 @@ _NYSE_CALENDAR_LAST_YEAR = 2026  # bump this (and the two sets above/below) when
 # close needed that year). Hardcoded the same way NYSE_HOLIDAYS already is; these
 # specific dates haven't been cross-checked against a live NYSE calendar feed —
 # verify before relying on this for a real early-close day.
+#
+# TODO(unverified-data): cross-check every date below against the official NYSE
+# holiday/early-close calendar (nyse.com or a maintained calendar API) before
+# the first one still ahead takes effect. Not urgent as of 2026-09-03 — the
+# 2025 dates are already past, so the next one at risk is 2026-11-27 — but
+# July 3rd specifically depends on which weekday it falls on each year, so
+# don't assume this pattern holds without checking.
 NYSE_EARLY_CLOSES = {
     "2025-07-03": (13, 0),
     "2025-11-28": (13, 0),
