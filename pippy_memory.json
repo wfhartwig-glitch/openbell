@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 143,
-  "last_session": "2026-09-03T13:31:01.533370",
+  "session_count": 144,
+  "last_session": "2026-09-03T17:00:40.275719",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 132,
-  "last_email_sent": "2026-09-03T13:31:01.531503",
-  "last_email_summary": "morning sent Thursday, September 03, 2026",
+  "email_count": 133,
+  "last_email_sent": "2026-09-03T17:00:40.273831",
+  "last_email_summary": "casestudy sent Thursday, September 03, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "bubble_south_sea",
-      "category": "crisis",
-      "topic": "The South Sea Bubble \u2014 When Isaac Newton Lost a Fortune",
-      "remaining_in_pass": 77,
-      "low_inventory_alert": false,
-      "date": "2026-08-10"
-    },
     {
       "type": "close",
       "actual_direction": "lower",
@@ -663,6 +654,15 @@
       "headline_theme": "earnings season",
       "commodity_note": "Gold up 1.1%",
       "picks_status": "holding",
+      "date": "2026-09-03"
+    },
+    {
+      "type": "case_study",
+      "id": "founder_conrad_hilton",
+      "category": "investor",
+      "topic": "Conrad Hilton Nearly Lost Everything in the Depression \u2014 Then Built a Global Hotel Empire",
+      "remaining_in_pass": 53,
+      "low_inventory_alert": false,
       "date": "2026-09-03"
     }
   ],

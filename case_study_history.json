@@ -199,6 +199,10 @@
     {
       "id": "investor_ivan_boesky",
       "date": "2026-09-02"
+    },
+    {
+      "id": "founder_conrad_hilton",
+      "date": "2026-09-03"
     }
   ],
   "low_inventory_alert_sent": false
