@@ -634,9 +634,18 @@ def save_memory(data: dict) -> str:
     """Save updated memory object to pippy_memory.json."""
     data["last_session"]  = datetime.now().isoformat()
     data["session_count"] = data.get("session_count", 0) + 1
-    with open(MEMORY_FILE, "w") as f:
-        json.dump(data, f, indent=2)
-    return f"Memory saved. Session #{data['session_count']}."
+    try:
+        with open(MEMORY_FILE, "w") as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        # Every other tool in this file returns json.dumps(...) so openbell.py's
+        # call() can parse a dict back out. This one used to return a bare
+        # human-readable string instead, which meant call() silently treated
+        # EVERY save_memory response as non-JSON and threw it away as {} — the
+        # save itself still happened, but the caller had no way to tell success
+        # from failure. Now it reports both explicitly.
+        return json.dumps({"status": "error", "error": str(e)})
+    return json.dumps({"status": "ok", "session_count": data["session_count"]})
 
 
 @mcp.tool()
