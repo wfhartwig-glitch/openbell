@@ -27,7 +27,8 @@ permissions:
 
 jobs:
   send-case-study:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04    # pinned — floating "-latest" labels get hit hardest during capacity crunches
+    timeout-minutes: 10      # fail fast instead of hanging in "Waiting for a runner"
 
     steps:
       - name: Checkout repo
@@ -60,3 +61,50 @@ jobs:
           git diff --staged --quiet || git commit -m "Pippy case study history — $(date +'%Y-%m-%d %H:%M')"
           git pull --rebase origin main
           git push
+
+  # KNOWN LIMITATION: this job itself needs a hosted runner to send the alert.
+  # If send-case-study failed because GitHub couldn't acquire a runner at all
+  # (the "not acquired by Runner of type hosted" failure this hardening pass
+  # was built for), this job is requesting a runner for the exact same reason
+  # and can silently fail to fire for the exact same reason — it is NOT a
+  # reliable backstop for that specific failure mode. It's real coverage for
+  # script-level crashes (a Python exception, a bad commit/push) where the
+  # runner itself was available and the job actually ran. The "already sent
+  # today" guard + a cron-job.org catch-up retrigger (see run() in openbell.py)
+  # is the actual fix for the runner-acquisition case; this alert is a second,
+  # narrower layer on top of that, not a replacement for it.
+  alert-on-failure:
+    needs: send-case-study
+    if: failure()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Send failure alert
+        env:
+          GMAIL_ADDRESS:      ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          TO_EMAIL:           ${{ secrets.TO_EMAIL }}
+          FMP_API_KEY:        ${{ secrets.FMP_API_KEY }}
+          NEWS_API_KEY:       ${{ secrets.NEWS_API_KEY }}
+          ALERT_SUBJECT: "Pippy's Brief — Case Study workflow failed"
+          ALERT_BODY: >-
+            <p><strong>Workflow:</strong> ${{ github.workflow }}<br>
+            <strong>Job:</strong> send-case-study<br>
+            <strong>Run:</strong> <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}</a><br>
+            <strong>Note:</strong> the send-case-study job did not complete successfully.
+            This alert fires whether the cause was a GitHub-side runner acquisition failure
+            or a script error — check the run link above for the specific reason.</p>
+        run: python openbell.py alert
