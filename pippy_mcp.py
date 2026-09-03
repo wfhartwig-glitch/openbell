@@ -67,6 +67,61 @@ NYSE_HOLIDAYS = {
     "2026-01-01", "2026-01-19", "2026-02-16", "2026-04-03", "2026-05-25",
     "2026-06-19", "2026-07-03", "2026-09-07", "2026-11-26", "2026-12-25",
 }
+_NYSE_CALENDAR_LAST_YEAR = 2026  # bump this (and the two sets above/below) when extending
+
+# NYSE early closes (1:00 PM ET), populated from the standard recurring pattern —
+# day after Thanksgiving, Christmas Eve, and July 3rd in years it isn't already a
+# full holiday (e.g. 2026-07-03 IS a full holiday above, because July 4 2026 falls
+# on a Saturday and NYSE observes the Friday before instead — no separate early
+# close needed that year). Hardcoded the same way NYSE_HOLIDAYS already is; these
+# specific dates haven't been cross-checked against a live NYSE calendar feed —
+# verify before relying on this for a real early-close day.
+NYSE_EARLY_CLOSES = {
+    "2025-07-03": (13, 0),
+    "2025-11-28": (13, 0),
+    "2025-12-24": (13, 0),
+    "2026-11-27": (13, 0),
+    "2026-12-24": (13, 0),
+}
+
+
+def _classify_market_session(now_et: datetime) -> dict:
+    """
+    Pure decision function: given an ET-aware 'now', returns whether the NYSE
+    regular session is open and why. All the actual open/closed logic lives
+    here, isolated from the live clock, so it can be exercised with frozen/
+    injected timestamps in tests instead of only ever reading datetime.now().
+    `now_et` MUST already be tz-aware in America/New_York — this function does
+    no tz conversion of its own.
+    """
+    today_iso = now_et.date().isoformat()
+
+    if now_et.year > _NYSE_CALENDAR_LAST_YEAR:
+        print(f"[MARKET-CALENDAR] ⚠ NYSE_HOLIDAYS/NYSE_EARLY_CLOSES only cover through "
+              f"{_NYSE_CALENDAR_LAST_YEAR}, but today is {today_iso} — holiday and "
+              f"early-close detection for this year is silently absent. Update both sets.")
+
+    if now_et.weekday() >= 5:
+        return {"open": False, "reason": "weekend"}
+    if today_iso in NYSE_HOLIDAYS:
+        return {"open": False, "reason": "NYSE holiday"}
+
+    open_t = now_et.replace(hour=9, minute=30, second=0, microsecond=0)
+    early  = NYSE_EARLY_CLOSES.get(today_iso)
+    close_h, close_m = early if early else (16, 0)
+    close_t = now_et.replace(hour=close_h, minute=close_m, second=0, microsecond=0)
+
+    is_open = open_t <= now_et < close_t
+    close_label = f"{close_h % 12 or 12}:{close_m:02d} {'AM' if close_h < 12 else 'PM'} ET"
+    if is_open:
+        reason = (f"regular session active (early close today, 9:30 AM – {close_label})"
+                  if early else "regular session active (9:30 AM – 4:00 PM ET)")
+    elif now_et < open_t:
+        reason = "before regular trading hours (opens 9:30 AM ET)"
+    else:
+        reason = (f"outside trading hours (early close today at {close_label})"
+                  if early else "outside trading hours (9:30 AM – 4:00 PM ET)")
+    return {"open": is_open, "reason": reason}
 
 WATCHLIST = [
     "AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "JPM",
@@ -153,43 +208,56 @@ def _ts() -> str:
     return datetime.now().isoformat()
 
 
+def _today_ct(now: datetime = None) -> date:
+    """
+    Canonical "what day is it" for cache/rotation keys (daily scan cache,
+    weekly/monthly picks cache) — always America/Chicago, never bare
+    date.today(), which returns the machine's LOCAL system time. On a GitHub
+    Actions runner (system TZ defaults to UTC) that rolls over to "tomorrow"
+    ~5-6 hours before Chicago does, which could key a day's scan/picks cache
+    to the wrong calendar day on a run near the UTC midnight boundary.
+    Mirrors openbell.py's own _today_ct() — same fix, separate process.
+    `now` is injectable for frozen-timestamp tests.
+    """
+    import pytz
+    ct = pytz.timezone("America/Chicago")
+    if now is None:
+        now = datetime.now(ct)
+    elif now.tzinfo is None:
+        now = ct.localize(now)
+    else:
+        now = now.astimezone(ct)
+    return now.date()
+
+
 # ── Tools ─────────────────────────────────────────────────────────────────────
 
-def _is_market_open_now_fallback() -> bool:
-    """ET time-window check: 9:30 AM – 4:00 PM ET, weekdays, non-holidays."""
+def _is_market_open_now_fallback(now_et: datetime = None) -> bool:
+    """
+    ET time-window check: 9:30 AM – 4:00 PM ET (or 1:00 PM ET on an early-close
+    day), weekdays, non-holidays. All the actual decision logic lives in the
+    injectable/testable _classify_market_session — this is a thin bool wrapper
+    for existing callers. Pass `now_et` (tz-aware, America/New_York) to check a
+    specific instant instead of the live clock.
+    """
     import pytz
-    et      = pytz.timezone("America/New_York")
-    now_et  = datetime.now(et)
-    today   = now_et.date()
-    if now_et.weekday() >= 5:
-        return False
-    if today.isoformat() in NYSE_HOLIDAYS:
-        return False
-    open_t  = now_et.replace(hour=9,  minute=30, second=0, microsecond=0)
-    close_t = now_et.replace(hour=16, minute=0,  second=0, microsecond=0)
-    return open_t <= now_et < close_t
+    et     = pytz.timezone("America/New_York")
+    now_et = now_et if now_et is not None else datetime.now(et)
+    return _classify_market_session(now_et)["open"]
 
 
 @mcp.tool()
 def is_market_open_today() -> str:
-    """Check if US regular trading session is active RIGHT NOW (9:30 AM – 4:00 PM ET, weekdays, non-holidays).
+    """Check if US regular trading session is active RIGHT NOW (9:30 AM – 4:00 PM ET,
+    or 9:30 AM – 1:00 PM ET on a known early-close day, weekdays, non-holidays).
     Uses ET time-window check directly — FMP's isTheStockMarketOpen covers pre-market and is unreliable."""
     import pytz
     ts     = _ts()
     et     = pytz.timezone("America/New_York")
     now_et = datetime.now(et)
-    open_  = _is_market_open_now_fallback()
-    if not open_:
-        if now_et.weekday() >= 5:
-            reason = "weekend"
-        elif now_et.date().isoformat() in NYSE_HOLIDAYS:
-            reason = "NYSE holiday"
-        else:
-            reason = "outside trading hours (9:30 AM – 4:00 PM ET)"
-    else:
-        reason = "regular session active (9:30 AM – 4:00 PM ET)"
-    return json.dumps({"source": "ET-time-window", "open": open_,
-                       "reason": reason, "timestamp": ts})
+    result = _classify_market_session(now_et)
+    return json.dumps({"source": "ET-time-window", "open": result["open"],
+                       "reason": result["reason"], "timestamp": ts})
 
 
 @mcp.tool()
@@ -229,13 +297,28 @@ def fetch_market_snapshot() -> str:
                 prev  = fi.previous_close
                 if price and prev:
                     pct = (price - prev) / prev * 100
-                    results.append({
+                    entry = {
                         "name":   name,
                         "symbol": sym,
                         "price":  round(price, 2),
                         "pct":    round(pct, 2),
                         "source": "yfinance",
-                    })
+                    }
+                    # Intraday OHLC — same fast_info object, no extra API call.
+                    # Feeds the close brief's PATH rule (day's trading shape).
+                    # previous_close is `prev` itself, already fetched above to
+                    # compute pct — stored too so PATH can detect a reversal
+                    # (crossed prior close intraday) or a gap-and-hold, not
+                    # just today's own open/high/low/close shape.
+                    try:
+                        o, h, l = fi.open, fi.day_high, fi.day_low
+                        if o is not None:      entry["open"] = round(float(o), 2)
+                        if h is not None:      entry["day_high"] = round(float(h), 2)
+                        if l is not None:      entry["day_low"] = round(float(l), 2)
+                        entry["previous_close"] = round(float(prev), 2)
+                    except Exception:
+                        pass
+                    results.append(entry)
             return json.dumps({"source": "yfinance", "data": results, "timestamp": ts})
         except Exception as e:
             return json.dumps({"source": "unavailable", "error": str(e), "timestamp": ts})
@@ -651,7 +734,7 @@ def save_memory(data: dict) -> str:
 @mcp.tool()
 def get_monthly_picks() -> str:
     """Read the current month's stock picks from picks_cache.json."""
-    month_key = date.today().strftime("%Y-%m")
+    month_key = _today_ct().strftime("%Y-%m")
     if os.path.exists(PICKS_FILE):
         try:
             with open(PICKS_FILE) as f:
@@ -667,7 +750,7 @@ def get_monthly_picks() -> str:
 @mcp.tool()
 def generate_monthly_picks() -> str:
     """Generate new monthly stock picks using yfinance fundamentals. Caches result."""
-    month_key = date.today().strftime("%Y-%m")
+    month_key = _today_ct().strftime("%Y-%m")
     cache = {}
     if os.path.exists(PICKS_FILE):
         try:
@@ -761,22 +844,53 @@ def fetch_commodities() -> str:
 
 @mcp.tool()
 def fetch_treasury_yield() -> str:
-    """Fetch the 10-year US Treasury yield (^TNX) via yfinance."""
+    """
+    Fetch the 10-year US Treasury yield (^TNX) via yfinance, plus its trailing
+    6-month closing high/low and the day-of-week each occurred on (when recent
+    enough to name usefully) — lets the morning summary say "off Tuesday's
+    4.80% high" instead of a bare number.
+    """
     ts = _ts()
     try:
-        fi    = yf.Ticker("^TNX").fast_info
+        tkr   = yf.Ticker("^TNX")
+        fi    = tkr.fast_info
         price = fi.last_price   # ^TNX quotes in percent (e.g. 4.32 = 4.32%)
         prev  = fi.previous_close
-        if price and prev:
-            change = round(price - prev, 3)
-            return json.dumps({
-                "source":  "yfinance",
-                "yield":   round(price, 3),
-                "change":  change,
-                "label":   "10-Year Treasury",
-                "timestamp": ts,
-            })
-        raise ValueError("no yield data")
+        if not (price and prev):
+            raise ValueError("no yield data")
+        change = round(price - prev, 3)
+
+        six_mo_high = six_mo_low = None
+        six_mo_high_day = six_mo_low_day = ""
+        try:
+            hist = tkr.history(period="6mo")
+            if not hist.empty and "Close" in hist:
+                closes = hist["Close"].dropna()
+                high_ts, low_ts = closes.idxmax(), closes.idxmin()
+                six_mo_high, six_mo_low = round(float(closes.max()), 3), round(float(closes.min()), 3)
+                # Only name a day-of-week if the extreme is recent enough for
+                # "Tuesday's high" to actually mean this past Tuesday, not one
+                # four months ago — otherwise leave it blank and let the
+                # caller fall back to a generic "6-month high/low" phrasing.
+                now_ts = hist.index[-1]
+                if (now_ts - high_ts).days <= 9:
+                    six_mo_high_day = high_ts.strftime("%A")
+                if (now_ts - low_ts).days <= 9:
+                    six_mo_low_day = low_ts.strftime("%A")
+        except Exception:
+            pass
+
+        return json.dumps({
+            "source":  "yfinance",
+            "yield":   round(price, 3),
+            "change":  change,
+            "label":   "10-Year Treasury",
+            "six_mo_high":     six_mo_high,
+            "six_mo_high_day": six_mo_high_day,
+            "six_mo_low":      six_mo_low,
+            "six_mo_low_day":  six_mo_low_day,
+            "timestamp": ts,
+        })
     except Exception as e:
         return json.dumps({"source": "unavailable", "error": str(e), "timestamp": ts})
 
@@ -815,7 +929,7 @@ def fetch_global_indices() -> str:
 @mcp.tool()
 def get_weekly_picks() -> str:
     """Return this week's stock picks from picks_cache.json. ISO week format e.g. 2026-W25."""
-    week_key = date.today().strftime("%Y-W%W")
+    week_key = _today_ct().strftime("%Y-W%W")
     if os.path.exists(PICKS_FILE):
         try:
             with open(PICKS_FILE) as f:
@@ -838,7 +952,7 @@ def generate_weekly_picks() -> str:
     keeps each one if the thesis still holds, replaces only what has genuinely shifted.
     Tracks performance history and uses it to improve future selections.
     """
-    today    = date.today()
+    today    = _today_ct()
     week_key = today.strftime("%Y-W%W")
 
     cache = {}
@@ -1166,7 +1280,7 @@ def run_daily_scan() -> str:
     morning and close both read the same scan without re-running it.
     """
     ts      = _ts()
-    today_s = date.today().isoformat()
+    today_s = _today_ct().isoformat()
 
     # Return cached results if already ran today
     if os.path.exists(SCAN_CACHE_FILE):
@@ -1339,15 +1453,17 @@ def _remaining_in_current_pass(past_entries: list, library_ids: set) -> int:
 
 
 @mcp.tool()
-def get_next_case_study(commit: bool = True) -> str:
+def get_next_case_study() -> str:
     """
-    Pick the next business-history case study from the hand-curated CASE_STUDIES
-    library, avoiding anything used in the last ~30 sends. Deterministic
-    least-recently-used rotation — no randomness, no AI.
+    PREVIEW the next business-history case study from the hand-curated
+    CASE_STUDIES library, avoiding anything used in the last ~30 sends.
+    Deterministic least-recently-used rotation — no randomness, no AI.
 
-    commit=True (default) records the pick to case_study_history.json.
-    Pass commit=False for dry runs — picks the same way but doesn't advance
-    the rotation, matching this project's rule that dry runs never persist state.
+    This is preview-only and never writes to case_study_history.json. The
+    rotation only actually advances when commit_case_study_send(id) is called
+    — which the caller should only do AFTER send_email has succeeded — so a
+    mid-run failure (including a hosted-runner failure that means nothing
+    ran at all) never burns a rotation slot for content that was never sent.
     """
     import pytz
     ts      = _ts()
@@ -1383,36 +1499,11 @@ def get_next_case_study(commit: bool = True) -> str:
     candidates.sort(key=lambda c: last_used_index.get(c["id"], -1))
     chosen = candidates[0]
 
-    library_ids = {c["id"] for c in CASE_STUDIES}
-    low_inventory_alert = False
-    remaining = None
-
-    if commit:
-        past_entries.append({"id": chosen["id"], "date": today_s})
-        history["history"] = past_entries[-120:]
-
-        remaining = _remaining_in_current_pass(past_entries, library_ids)
-        already_sent = history.get("low_inventory_alert_sent", False)
-        if remaining <= 3:
-            if not already_sent:
-                low_inventory_alert = True
-                history["low_inventory_alert_sent"] = True
-            # else: already alerted this cycle — don't re-send every day
-        else:
-            # Library's been reloaded (or a fresh cycle started) — re-arm for next time
-            history["low_inventory_alert_sent"] = False
-
-        try:
-            with open(CASE_STUDY_HISTORY_FILE, "w") as f:
-                json.dump(history, f, indent=2)
-        except Exception:
-            pass
-    else:
-        # Dry run — compute what WOULD happen for visibility, but never persist
-        # the alert flag (dry runs never persist state, matching this project's rule).
-        preview_entries = past_entries + [{"id": chosen["id"], "date": today_s}]
-        remaining = _remaining_in_current_pass(preview_entries, library_ids)
-        low_inventory_alert = remaining <= 3 and not history.get("low_inventory_alert_sent", False)
+    # Preview what committing this pick WOULD do, without writing anything.
+    library_ids     = {c["id"] for c in CASE_STUDIES}
+    preview_entries = past_entries + [{"id": chosen["id"], "date": today_s}]
+    remaining       = _remaining_in_current_pass(preview_entries, library_ids)
+    low_inventory_alert = remaining <= 3 and not history.get("low_inventory_alert_sent", False)
 
     return json.dumps({
         "id":       chosen["id"],
@@ -1421,6 +1512,61 @@ def get_next_case_study(commit: bool = True) -> str:
         "hook":     chosen["hook"],
         "story":    chosen["story"],
         "take":     chosen["take"],
+        "remaining_in_pass":   remaining,
+        "low_inventory_alert": low_inventory_alert,
+        "timestamp": ts,
+    })
+
+
+@mcp.tool()
+def commit_case_study_send(id: str) -> str:
+    """
+    Persist a case study pick to case_study_history.json — this is the ONLY
+    function that advances the rotation or updates the low-inventory alert
+    flag. Call this ONLY after send_email has already succeeded for the pick
+    previously returned by get_next_case_study(); `id` must match that pick.
+
+    Skipped entirely for dry runs (the caller shouldn't call this at all when
+    dry_run=True), matching this project's rule that dry runs never persist
+    state.
+    """
+    import pytz
+    ts      = _ts()
+    ct      = pytz.timezone("America/Chicago")
+    today_s = datetime.now(ct).date().isoformat()
+
+    history = {"history": []}
+    if os.path.exists(CASE_STUDY_HISTORY_FILE):
+        try:
+            with open(CASE_STUDY_HISTORY_FILE) as f:
+                history = json.load(f)
+        except Exception:
+            pass
+
+    past_entries = history.get("history", [])
+    past_entries.append({"id": id, "date": today_s})
+    history["history"] = past_entries[-120:]
+
+    library_ids  = {c["id"] for c in CASE_STUDIES}
+    remaining    = _remaining_in_current_pass(past_entries, library_ids)
+    already_sent = history.get("low_inventory_alert_sent", False)
+    low_inventory_alert = False
+    if remaining <= 3:
+        if not already_sent:
+            low_inventory_alert = True
+            history["low_inventory_alert_sent"] = True
+        # else: already alerted this cycle — don't re-send every day
+    else:
+        # Library's been reloaded (or a fresh cycle started) — re-arm for next time
+        history["low_inventory_alert_sent"] = False
+
+    try:
+        with open(CASE_STUDY_HISTORY_FILE, "w") as f:
+            json.dump(history, f, indent=2)
+    except Exception:
+        pass
+
+    return json.dumps({
         "remaining_in_pass":   remaining,
         "low_inventory_alert": low_inventory_alert,
         "timestamp": ts,
