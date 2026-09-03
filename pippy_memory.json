@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 144,
-  "last_session": "2026-09-03T17:00:40.275719",
+  "session_count": 145,
+  "last_session": "2026-09-03T20:01:21.146542",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 133,
-  "last_email_sent": "2026-09-03T17:00:40.273831",
-  "last_email_summary": "casestudy sent Thursday, September 03, 2026",
+  "email_count": 134,
+  "last_email_sent": "2026-09-03T20:01:21.144629",
+  "last_email_summary": "close sent Thursday, September 03, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "lower",
-      "actual_sp_pct": -0.03,
-      "best_sector": "Energy",
-      "worst_sector": "Utilities",
-      "biggest_mover": "DDOG +10.7%",
-      "date": "2026-08-10"
-    },
     {
       "type": "morning",
       "direction_called": "higher",
@@ -664,6 +655,15 @@
       "remaining_in_pass": 53,
       "low_inventory_alert": false,
       "date": "2026-09-03"
+    },
+    {
+      "type": "close",
+      "actual_direction": "higher",
+      "actual_sp_pct": 1.05,
+      "best_sector": "Financials",
+      "worst_sector": "Materials",
+      "biggest_mover": "HOOD +14.6%",
+      "date": "2026-09-03"
     }
   ],
   "lessons_learned": [
@@ -908,6 +908,12 @@
       "called": "mixed",
       "actual": "higher",
       "accurate": false
+    },
+    {
+      "date": "2026-09-03",
+      "called": "higher",
+      "actual": "higher",
+      "accurate": true
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
