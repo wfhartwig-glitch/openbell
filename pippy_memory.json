@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 147,
-  "last_session": "2026-09-04T17:00:37.071387",
+  "session_count": 148,
+  "last_session": "2026-09-04T20:01:26.127302",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 136,
-  "last_email_sent": "2026-09-04T17:00:37.069615",
-  "last_email_summary": "casestudy sent Friday, September 04, 2026",
+  "email_count": 137,
+  "last_email_sent": "2026-09-04T20:01:26.125271",
+  "last_email_summary": "close sent Friday, September 04, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "lower",
-      "actual_sp_pct": -0.32,
-      "best_sector": "Energy",
-      "worst_sector": "Real Estate",
-      "biggest_mover": "AXON +6.9%",
-      "date": "2026-08-11"
-    },
     {
       "type": "morning",
       "direction_called": "higher",
@@ -664,6 +655,15 @@
       "remaining_in_pass": 52,
       "low_inventory_alert": false,
       "date": "2026-09-04"
+    },
+    {
+      "type": "close",
+      "actual_direction": "lower",
+      "actual_sp_pct": -0.38,
+      "best_sector": "Technology",
+      "worst_sector": "Comm. Services",
+      "biggest_mover": "VRT +4.3%",
+      "date": "2026-09-04"
     }
   ],
   "lessons_learned": [
@@ -913,6 +913,12 @@
       "date": "2026-09-03",
       "called": "higher",
       "actual": "higher",
+      "accurate": true
+    },
+    {
+      "date": "2026-09-04",
+      "called": "lower",
+      "actual": "lower",
       "accurate": true
     }
   ],
