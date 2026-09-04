@@ -203,6 +203,10 @@
     {
       "id": "founder_conrad_hilton",
       "date": "2026-09-03"
+    },
+    {
+      "id": "founder_howard_hughes",
+      "date": "2026-09-04"
     }
   ],
   "low_inventory_alert_sent": false

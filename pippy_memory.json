@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 146,
-  "last_session": "2026-09-04T13:31:14.911650",
+  "session_count": 147,
+  "last_session": "2026-09-04T17:00:37.071387",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 135,
-  "last_email_sent": "2026-09-04T13:31:14.909766",
-  "last_email_summary": "morning sent Friday, September 04, 2026",
+  "email_count": 136,
+  "last_email_sent": "2026-09-04T17:00:37.069615",
+  "last_email_summary": "casestudy sent Friday, September 04, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "origin_fedex",
-      "category": "origin",
-      "topic": "FedEx and the Business Plan That (Supposedly) Got a C",
-      "remaining_in_pass": 76,
-      "low_inventory_alert": false,
-      "date": "2026-08-11"
-    },
     {
       "type": "close",
       "actual_direction": "lower",
@@ -663,6 +654,15 @@
       "headline_theme": "commodities",
       "commodity_note": "gold at $4,446 (\u25bc 1.50%) says the hedge bid hasn't gone anywhere",
       "picks_status": "holding",
+      "date": "2026-09-04"
+    },
+    {
+      "type": "case_study",
+      "id": "founder_howard_hughes",
+      "category": "investor",
+      "topic": "Howard Hughes Built an Aviation and Film Empire, Then Withdrew From the World Entirely",
+      "remaining_in_pass": 52,
+      "low_inventory_alert": false,
       "date": "2026-09-04"
     }
   ],
