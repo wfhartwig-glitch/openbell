@@ -207,6 +207,10 @@
     {
       "id": "founder_howard_hughes",
       "date": "2026-09-04"
+    },
+    {
+      "id": "founder_adam_neumann",
+      "date": "2026-09-05"
     }
   ],
   "low_inventory_alert_sent": false

@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 148,
-  "last_session": "2026-09-04T20:01:26.127302",
+  "session_count": 149,
+  "last_session": "2026-09-05T13:30:42.407715",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 137,
-  "last_email_sent": "2026-09-04T20:01:26.125271",
-  "last_email_summary": "close sent Friday, September 04, 2026",
+  "email_count": 138,
+  "last_email_sent": "2026-09-05T13:30:42.406052",
+  "last_email_summary": "casestudy sent Saturday, September 05, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "higher",
-      "leading_index": "Nasdaq",
-      "lagging_index": "",
-      "headline_theme": "inflation data",
-      "commodity_note": "WTI Crude Oil down 1.9%",
-      "picks_status": "rotated",
-      "date": "2026-08-12"
-    },
     {
       "type": "case_study",
       "id": "origin_mcdonalds_kroc",
@@ -664,6 +654,15 @@
       "worst_sector": "Comm. Services",
       "biggest_mover": "VRT +4.3%",
       "date": "2026-09-04"
+    },
+    {
+      "type": "case_study",
+      "id": "founder_adam_neumann",
+      "category": "investor",
+      "topic": "Adam Neumann Built WeWork to a $47 Billion \"Vision\" \u2014 Then Lost It Within Weeks",
+      "remaining_in_pass": 51,
+      "low_inventory_alert": false,
+      "date": "2026-09-05"
     }
   ],
   "lessons_learned": [
