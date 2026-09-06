@@ -211,6 +211,10 @@
     {
       "id": "founder_adam_neumann",
       "date": "2026-09-05"
+    },
+    {
+      "id": "founder_travis_kalanick",
+      "date": "2026-09-06"
     }
   ],
   "low_inventory_alert_sent": false

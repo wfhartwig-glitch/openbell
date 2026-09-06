@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 149,
-  "last_session": "2026-09-05T13:30:42.407715",
+  "session_count": 150,
+  "last_session": "2026-09-06T13:30:32.791226",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 138,
-  "last_email_sent": "2026-09-05T13:30:42.406052",
-  "last_email_summary": "casestudy sent Saturday, September 05, 2026",
+  "email_count": 139,
+  "last_email_sent": "2026-09-06T13:30:32.789363",
+  "last_email_summary": "casestudy sent Sunday, September 06, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "origin_mcdonalds_kroc",
-      "category": "origin",
-      "topic": "McDonald's \u2014 The Milkshake Salesman Who Took Over",
-      "remaining_in_pass": 75,
-      "low_inventory_alert": false,
-      "date": "2026-08-12"
-    },
     {
       "type": "close",
       "actual_direction": "mixed",
@@ -663,6 +654,15 @@
       "remaining_in_pass": 51,
       "low_inventory_alert": false,
       "date": "2026-09-05"
+    },
+    {
+      "type": "case_study",
+      "id": "founder_travis_kalanick",
+      "category": "investor",
+      "topic": "Travis Kalanick Built Uber Through Sheer Aggression \u2014 Then Got Forced Out by It",
+      "remaining_in_pass": 50,
+      "low_inventory_alert": false,
+      "date": "2026-09-06"
     }
   ],
   "lessons_learned": [
