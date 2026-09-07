@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 150,
-  "last_session": "2026-09-06T13:30:32.791226",
+  "session_count": 151,
+  "last_session": "2026-09-07T17:00:33.852255",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 139,
-  "last_email_sent": "2026-09-06T13:30:32.789363",
-  "last_email_summary": "casestudy sent Sunday, September 06, 2026",
+  "email_count": 140,
+  "last_email_sent": "2026-09-07T17:00:33.850465",
+  "last_email_summary": "casestudy sent Monday, September 07, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "mixed",
-      "actual_sp_pct": 0.27,
-      "best_sector": "Technology",
-      "worst_sector": "Consumer Discret.",
-      "biggest_mover": "ANET +6.2%",
-      "date": "2026-08-12"
-    },
     {
       "type": "morning",
       "direction_called": "higher",
@@ -663,6 +654,15 @@
       "remaining_in_pass": 50,
       "low_inventory_alert": false,
       "date": "2026-09-06"
+    },
+    {
+      "type": "case_study",
+      "id": "founder_aubrey_mcclendon",
+      "category": "investor",
+      "topic": "Aubrey McClendon Built an Empire on Shale Gas \u2014 and Lost It the Same Way",
+      "remaining_in_pass": 49,
+      "low_inventory_alert": false,
+      "date": "2026-09-07"
     }
   ],
   "lessons_learned": [
