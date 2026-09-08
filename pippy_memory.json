@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 152,
-  "last_session": "2026-09-08T13:31:28.347709",
+  "session_count": 153,
+  "last_session": "2026-09-08T17:00:44.803405",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 141,
-  "last_email_sent": "2026-09-08T13:31:28.345853",
-  "last_email_summary": "morning sent Tuesday, September 08, 2026",
+  "email_count": 142,
+  "last_email_sent": "2026-09-08T17:00:44.801787",
+  "last_email_summary": "casestudy sent Tuesday, September 08, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "origin_southwest_airlines",
-      "category": "origin",
-      "topic": "Southwest Airlines \u2014 Sketched on a Napkin, Nearly Grounded Before It Flew",
-      "remaining_in_pass": 74,
-      "low_inventory_alert": false,
-      "date": "2026-08-13"
-    },
     {
       "type": "close",
       "actual_direction": "higher",
@@ -662,6 +653,15 @@
       "headline_theme": "",
       "commodity_note": "",
       "picks_status": "holding",
+      "date": "2026-09-08"
+    },
+    {
+      "type": "case_study",
+      "id": "founder_elizabeth_holmes",
+      "category": "investor",
+      "topic": "Elizabeth Holmes Built a $9 Billion Company on Technology That Never Actually Worked",
+      "remaining_in_pass": 48,
+      "low_inventory_alert": false,
       "date": "2026-09-08"
     }
   ],

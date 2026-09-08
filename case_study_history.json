@@ -219,6 +219,10 @@
     {
       "id": "founder_aubrey_mcclendon",
       "date": "2026-09-07"
+    },
+    {
+      "id": "founder_elizabeth_holmes",
+      "date": "2026-09-08"
     }
   ],
   "low_inventory_alert_sent": false
