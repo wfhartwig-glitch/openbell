@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 151,
-  "last_session": "2026-09-07T17:00:33.852255",
+  "session_count": 152,
+  "last_session": "2026-09-08T13:31:28.347709",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 140,
-  "last_email_sent": "2026-09-07T17:00:33.850465",
-  "last_email_summary": "casestudy sent Monday, September 07, 2026",
+  "email_count": 141,
+  "last_email_sent": "2026-09-08T13:31:28.345853",
+  "last_email_summary": "morning sent Tuesday, September 08, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -35,8 +35,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 376.9,
-      "price_now": 509.3,
-      "pct_change_since_pick": 35.13,
+      "price_now": 492.98,
+      "pct_change_since_pick": 30.8,
       "still_held": true
     },
     {
@@ -46,8 +46,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 571.4,
-      "price_now": 575.04,
-      "pct_change_since_pick": 0.64,
+      "price_now": 622.94,
+      "pct_change_since_pick": 9.02,
       "still_held": true
     },
     {
@@ -57,8 +57,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 212.67,
-      "price_now": 218.44,
-      "pct_change_since_pick": 2.71,
+      "price_now": 232.93,
+      "pct_change_since_pick": 9.53,
       "still_held": true
     },
     {
@@ -90,8 +90,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 411.22,
-      "price_now": 595.0,
-      "pct_change_since_pick": 44.69,
+      "price_now": 508.62,
+      "pct_change_since_pick": 23.69,
       "still_held": true
     },
     {
@@ -101,22 +101,12 @@
       "week_picked": "2026-W32",
       "week_dropped": "2026-W34",
       "price_when_picked": 430.95,
-      "price_now": 371.25,
-      "pct_change_since_pick": -13.85,
+      "price_now": 365.25,
+      "pct_change_since_pick": -15.25,
       "still_held": true
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "higher",
-      "leading_index": "Dow",
-      "lagging_index": "",
-      "headline_theme": "inflation data",
-      "commodity_note": "WTI Crude Oil down 1.9%",
-      "picks_status": "rotated",
-      "date": "2026-08-13"
-    },
     {
       "type": "case_study",
       "id": "origin_southwest_airlines",
@@ -663,6 +653,16 @@
       "remaining_in_pass": 49,
       "low_inventory_alert": false,
       "date": "2026-09-07"
+    },
+    {
+      "type": "morning",
+      "direction_called": "mixed",
+      "leading_index": "",
+      "lagging_index": "Dow",
+      "headline_theme": "",
+      "commodity_note": "",
+      "picks_status": "holding",
+      "date": "2026-09-08"
     }
   ],
   "lessons_learned": [
@@ -701,6 +701,10 @@
     {
       "week": "2026-W35",
       "note": "Active picks avg +13.9% since entry; Industrials picks outperforming \u2014 leaning toward more; Communication Services picks underperforming \u2014 weighting away."
+    },
+    {
+      "week": "2026-W36",
+      "note": "Active picks avg +11.6% since entry; Industrials picks outperforming \u2014 leaning toward more."
     }
   ],
   "prediction_accuracy": [
