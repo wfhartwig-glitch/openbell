@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 155,
-  "last_session": "2026-09-09T13:31:19.842589",
+  "session_count": 156,
+  "last_session": "2026-09-09T17:00:40.486741",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 144,
-  "last_email_sent": "2026-09-09T13:31:19.840325",
-  "last_email_summary": "morning sent Wednesday, September 09, 2026",
+  "email_count": 145,
+  "last_email_sent": "2026-09-09T17:00:40.485008",
+  "last_email_summary": "casestudy sent Wednesday, September 09, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "origin_toyota_production_system",
-      "category": "origin",
-      "topic": "The Toyota System Built From Not Having Enough Money",
-      "remaining_in_pass": 73,
-      "low_inventory_alert": false,
-      "date": "2026-08-14"
-    },
     {
       "type": "close",
       "actual_direction": "lower",
@@ -662,6 +653,15 @@
       "headline_theme": "",
       "commodity_note": "",
       "picks_status": "holding",
+      "date": "2026-09-09"
+    },
+    {
+      "type": "case_study",
+      "id": "founder_coco_chanel",
+      "category": "investor",
+      "topic": "Coco Chanel Rose From an Orphanage to Fashion Royalty \u2014 Then Fled Wartime Collaboration Accusations",
+      "remaining_in_pass": 47,
+      "low_inventory_alert": false,
       "date": "2026-09-09"
     }
   ],
