@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 154,
-  "last_session": "2026-09-08T20:01:44.915293",
+  "session_count": 155,
+  "last_session": "2026-09-09T13:31:19.842589",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 143,
-  "last_email_sent": "2026-09-08T20:01:44.913344",
-  "last_email_summary": "close sent Tuesday, September 08, 2026",
+  "email_count": 144,
+  "last_email_sent": "2026-09-09T13:31:19.840325",
+  "last_email_summary": "morning sent Wednesday, September 09, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "mixed",
-      "leading_index": "",
-      "lagging_index": "Dow",
-      "headline_theme": "",
-      "commodity_note": "Gold up 1.3%",
-      "picks_status": "rotated",
-      "date": "2026-08-14"
-    },
     {
       "type": "case_study",
       "id": "origin_toyota_production_system",
@@ -663,6 +653,16 @@
       "worst_sector": "Health Care",
       "biggest_mover": "TSLA +4.3%",
       "date": "2026-09-08"
+    },
+    {
+      "type": "morning",
+      "direction_called": "lower",
+      "leading_index": "",
+      "lagging_index": "Dow",
+      "headline_theme": "",
+      "commodity_note": "",
+      "picks_status": "holding",
+      "date": "2026-09-09"
     }
   ],
   "lessons_learned": [
