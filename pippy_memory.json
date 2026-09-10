@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 158,
-  "last_session": "2026-09-10T13:31:14.871529",
+  "session_count": 159,
+  "last_session": "2026-09-10T17:00:38.541070",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 147,
-  "last_email_sent": "2026-09-10T13:31:14.869398",
-  "last_email_summary": "morning sent Thursday, September 10, 2026",
+  "email_count": 148,
+  "last_email_sent": "2026-09-10T17:00:38.539063",
+  "last_email_summary": "casestudy sent Thursday, September 10, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "rivalry_coke_pepsi",
-      "category": "rivalry",
-      "topic": "Coke vs. Pepsi \u2014 A Rivalry a Century in the Making",
-      "remaining_in_pass": 71,
-      "low_inventory_alert": false,
-      "date": "2026-08-16"
-    },
     {
       "type": "morning",
       "direction_called": "mixed",
@@ -663,6 +654,15 @@
       "headline_theme": "rate expectations",
       "commodity_note": "WTI at $99.99 (\u25b2 4.05%) keeps the inflation input hot",
       "picks_status": "holding",
+      "date": "2026-09-10"
+    },
+    {
+      "type": "case_study",
+      "id": "founder_sean_parker",
+      "category": "investor",
+      "topic": "Sean Parker Was Pushed Out of Two Companies Before Facebook Made Him a Billionaire Anyway",
+      "remaining_in_pass": 46,
+      "low_inventory_alert": false,
       "date": "2026-09-10"
     }
   ],
