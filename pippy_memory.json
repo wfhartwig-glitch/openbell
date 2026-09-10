@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 159,
-  "last_session": "2026-09-10T17:00:38.541070",
+  "session_count": 160,
+  "last_session": "2026-09-10T20:01:30.330366",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 148,
-  "last_email_sent": "2026-09-10T17:00:38.539063",
-  "last_email_summary": "casestudy sent Thursday, September 10, 2026",
+  "email_count": 149,
+  "last_email_sent": "2026-09-10T20:01:30.328089",
+  "last_email_summary": "close sent Thursday, September 10, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "mixed",
-      "leading_index": "",
-      "lagging_index": "Dow",
-      "headline_theme": "rate expectations",
-      "commodity_note": "",
-      "picks_status": "holding",
-      "date": "2026-08-17"
-    },
     {
       "type": "case_study",
       "id": "rivalry_vhs_betamax",
@@ -664,6 +654,15 @@
       "remaining_in_pass": 46,
       "low_inventory_alert": false,
       "date": "2026-09-10"
+    },
+    {
+      "type": "close",
+      "actual_direction": "lower",
+      "actual_sp_pct": -0.6,
+      "best_sector": "Comm. Services",
+      "worst_sector": "Materials",
+      "biggest_mover": "APP +3.0%",
+      "date": "2026-09-10"
     }
   ],
   "lessons_learned": [
@@ -933,6 +932,12 @@
     },
     {
       "date": "2026-09-09",
+      "called": "lower",
+      "actual": "lower",
+      "accurate": true
+    },
+    {
+      "date": "2026-09-10",
       "called": "lower",
       "actual": "lower",
       "accurate": true
