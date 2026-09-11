@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 161,
-  "last_session": "2026-09-11T13:31:27.208536",
+  "session_count": 162,
+  "last_session": "2026-09-11T17:00:43.064650",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 150,
-  "last_email_sent": "2026-09-11T13:31:27.206520",
-  "last_email_summary": "morning sent Friday, September 11, 2026",
+  "email_count": 151,
+  "last_email_sent": "2026-09-11T17:00:43.063204",
+  "last_email_summary": "casestudy sent Friday, September 11, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "lower",
-      "actual_sp_pct": -0.52,
-      "best_sector": "Energy",
-      "worst_sector": "Comm. Services",
-      "biggest_mover": "CELH +2.4%",
-      "date": "2026-08-17"
-    },
     {
       "type": "morning",
       "direction_called": "lower",
@@ -663,6 +654,15 @@
       "headline_theme": "commodities",
       "commodity_note": "Crude at $99.18 (\u25bc 3.91%) keeps inflation in the conversation",
       "picks_status": "holding",
+      "date": "2026-09-11"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_soichiro_honda",
+      "category": "investor",
+      "topic": "Soichiro Honda Lost Two Factories Before Honda Ever Built a Car",
+      "remaining_in_pass": 45,
+      "low_inventory_alert": false,
       "date": "2026-09-11"
     }
   ],
