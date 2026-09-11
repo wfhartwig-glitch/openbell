@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 162,
-  "last_session": "2026-09-11T17:00:43.064650",
+  "session_count": 163,
+  "last_session": "2026-09-11T20:01:54.617202",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 151,
-  "last_email_sent": "2026-09-11T17:00:43.063204",
-  "last_email_summary": "casestudy sent Friday, September 11, 2026",
+  "email_count": 152,
+  "last_email_sent": "2026-09-11T20:01:54.615264",
+  "last_email_summary": "close sent Friday, September 11, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "lower",
-      "leading_index": "",
-      "lagging_index": "Nasdaq",
-      "headline_theme": "",
-      "commodity_note": "",
-      "picks_status": "holding",
-      "date": "2026-08-18"
-    },
     {
       "type": "case_study",
       "id": "rivalry_uber_lyft",
@@ -664,6 +654,15 @@
       "remaining_in_pass": 45,
       "low_inventory_alert": false,
       "date": "2026-09-11"
+    },
+    {
+      "type": "close",
+      "actual_direction": "higher",
+      "actual_sp_pct": 0.86,
+      "best_sector": "Technology",
+      "worst_sector": "Utilities",
+      "biggest_mover": "ANET +5.5%",
+      "date": "2026-09-11"
     }
   ],
   "lessons_learned": [
@@ -941,6 +940,12 @@
       "date": "2026-09-10",
       "called": "lower",
       "actual": "lower",
+      "accurate": true
+    },
+    {
+      "date": "2026-09-11",
+      "called": "higher",
+      "actual": "higher",
       "accurate": true
     }
   ],
