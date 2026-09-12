@@ -235,6 +235,10 @@
     {
       "id": "investor_soichiro_honda",
       "date": "2026-09-11"
+    },
+    {
+      "id": "investor_konosuke_matsushita",
+      "date": "2026-09-12"
     }
   ],
   "low_inventory_alert_sent": false

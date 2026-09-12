@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 163,
-  "last_session": "2026-09-11T20:01:54.617202",
+  "session_count": 164,
+  "last_session": "2026-09-12T13:30:28.144397",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 152,
-  "last_email_sent": "2026-09-11T20:01:54.615264",
-  "last_email_summary": "close sent Friday, September 11, 2026",
+  "email_count": 153,
+  "last_email_sent": "2026-09-12T13:30:28.142531",
+  "last_email_summary": "casestudy sent Saturday, September 12, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "rivalry_uber_lyft",
-      "category": "rivalry",
-      "topic": "Uber vs. Lyft \u2014 A Rivalry Fought Almost Entirely With Other People's Money",
-      "remaining_in_pass": 69,
-      "low_inventory_alert": false,
-      "date": "2026-08-18"
-    },
     {
       "type": "close",
       "actual_direction": "lower",
@@ -663,6 +654,15 @@
       "worst_sector": "Utilities",
       "biggest_mover": "ANET +5.5%",
       "date": "2026-09-11"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_konosuke_matsushita",
+      "category": "investor",
+      "topic": "Konosuke Matsushita Was a Sickly, Orphaned Child Who Built One of Japan's Largest Companies",
+      "remaining_in_pass": 44,
+      "low_inventory_alert": false,
+      "date": "2026-09-12"
     }
   ],
   "lessons_learned": [
