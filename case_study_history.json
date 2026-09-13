@@ -239,6 +239,10 @@
     {
       "id": "investor_konosuke_matsushita",
       "date": "2026-09-12"
+    },
+    {
+      "id": "investor_ingvar_kamprad",
+      "date": "2026-09-13"
     }
   ],
   "low_inventory_alert_sent": false
