@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 167,
-  "last_session": "2026-09-14T17:00:45.437755",
+  "session_count": 168,
+  "last_session": "2026-09-14T20:01:45.600223",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 156,
-  "last_email_sent": "2026-09-14T17:00:45.436372",
-  "last_email_summary": "casestudy sent Monday, September 14, 2026",
+  "email_count": 157,
+  "last_email_sent": "2026-09-14T20:01:45.598290",
+  "last_email_summary": "close sent Monday, September 14, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "higher",
-      "actual_sp_pct": 0.2,
-      "best_sector": "Health Care",
-      "worst_sector": "Industrials",
-      "biggest_mover": "HIMS +13.6%",
-      "date": "2026-08-19"
-    },
     {
       "type": "morning",
       "direction_called": "lower",
@@ -663,6 +654,15 @@
       "remaining_in_pass": 42,
       "low_inventory_alert": false,
       "date": "2026-09-14"
+    },
+    {
+      "type": "close",
+      "actual_direction": "lower",
+      "actual_sp_pct": -0.46,
+      "best_sector": "Comm. Services",
+      "worst_sector": "Technology",
+      "biggest_mover": "CRWD +14.0%",
+      "date": "2026-09-14"
     }
   ],
   "lessons_learned": [
@@ -950,6 +950,12 @@
       "date": "2026-09-11",
       "called": "higher",
       "actual": "higher",
+      "accurate": true
+    },
+    {
+      "date": "2026-09-14",
+      "called": "lower",
+      "actual": "lower",
       "accurate": true
     }
   ],
