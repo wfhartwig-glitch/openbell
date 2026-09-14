@@ -243,6 +243,10 @@
     {
       "id": "investor_ingvar_kamprad",
       "date": "2026-09-13"
+    },
+    {
+      "id": "investor_aristotle_onassis",
+      "date": "2026-09-14"
     }
   ],
   "low_inventory_alert_sent": false

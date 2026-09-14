@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 166,
-  "last_session": "2026-09-14T13:31:27.497621",
+  "session_count": 167,
+  "last_session": "2026-09-14T17:00:45.437755",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 155,
-  "last_email_sent": "2026-09-14T13:31:27.495546",
-  "last_email_summary": "morning sent Monday, September 14, 2026",
+  "email_count": 156,
+  "last_email_sent": "2026-09-14T17:00:45.436372",
+  "last_email_summary": "casestudy sent Monday, September 14, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "rivalry_edison_westinghouse",
-      "category": "rivalry",
-      "topic": "The War of the Currents \u2014 Edison, Westinghouse, and the Fight Over How Electricity Would Work",
-      "remaining_in_pass": 68,
-      "low_inventory_alert": false,
-      "date": "2026-08-19"
-    },
     {
       "type": "close",
       "actual_direction": "higher",
@@ -662,6 +653,15 @@
       "headline_theme": "commodities",
       "commodity_note": "gold at $4,313 (\u25bc 1.32%) says the hedge bid hasn't gone anywhere",
       "picks_status": "holding",
+      "date": "2026-09-14"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_aristotle_onassis",
+      "category": "investor",
+      "topic": "Aristotle Onassis Fled a Massacre as a Teenager and Built the World's Largest Shipping Fleet",
+      "remaining_in_pass": 42,
+      "low_inventory_alert": false,
       "date": "2026-09-14"
     }
   ],
