@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 168,
-  "last_session": "2026-09-14T20:01:45.600223",
+  "session_count": 169,
+  "last_session": "2026-09-15T13:31:36.651737",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 157,
-  "last_email_sent": "2026-09-14T20:01:45.598290",
-  "last_email_summary": "close sent Monday, September 14, 2026",
+  "email_count": 158,
+  "last_email_sent": "2026-09-15T13:31:36.649783",
+  "last_email_summary": "morning sent Tuesday, September 15, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "lower",
-      "leading_index": "",
-      "lagging_index": "Dow",
-      "headline_theme": "inflation data",
-      "commodity_note": "WTI Crude Oil up 2.4%",
-      "picks_status": "holding",
-      "date": "2026-08-20"
-    },
     {
       "type": "case_study",
       "id": "launch_iphone",
@@ -663,6 +653,16 @@
       "worst_sector": "Technology",
       "biggest_mover": "CRWD +14.0%",
       "date": "2026-09-14"
+    },
+    {
+      "type": "morning",
+      "direction_called": "lower",
+      "leading_index": "",
+      "lagging_index": "Dow",
+      "headline_theme": "",
+      "commodity_note": "",
+      "picks_status": "holding",
+      "date": "2026-09-15"
     }
   ],
   "lessons_learned": [
