@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 169,
-  "last_session": "2026-09-15T13:31:36.651737",
+  "session_count": 170,
+  "last_session": "2026-09-15T17:00:40.155721",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 158,
-  "last_email_sent": "2026-09-15T13:31:36.649783",
-  "last_email_summary": "morning sent Tuesday, September 15, 2026",
+  "email_count": 159,
+  "last_email_sent": "2026-09-15T17:00:40.153852",
+  "last_email_summary": "casestudy sent Tuesday, September 15, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "launch_iphone",
-      "category": "product_launch",
-      "topic": "The iPhone Launch That Rewrote the Rules of an Entire Industry",
-      "remaining_in_pass": 67,
-      "low_inventory_alert": false,
-      "date": "2026-08-20"
-    },
     {
       "type": "close",
       "actual_direction": "lower",
@@ -662,6 +653,15 @@
       "headline_theme": "",
       "commodity_note": "",
       "picks_status": "holding",
+      "date": "2026-09-15"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_robert_maxwell",
+      "category": "investor",
+      "topic": "Robert Maxwell Built a Media Empire on Fraud \u2014 and It Collapsed the Moment He Died",
+      "remaining_in_pass": 41,
+      "low_inventory_alert": false,
       "date": "2026-09-15"
     }
   ],
