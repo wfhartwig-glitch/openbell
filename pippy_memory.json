@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 171,
-  "last_session": "2026-09-15T20:01:18.694870",
+  "session_count": 172,
+  "last_session": "2026-09-16T13:31:07.433152",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 160,
-  "last_email_sent": "2026-09-15T20:01:18.692918",
-  "last_email_summary": "close sent Tuesday, September 15, 2026",
+  "email_count": 161,
+  "last_email_sent": "2026-09-16T13:31:07.430994",
+  "last_email_summary": "morning sent Wednesday, September 16, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "higher",
-      "leading_index": "Dow",
-      "lagging_index": "",
-      "headline_theme": "earnings season",
-      "commodity_note": "Gold up 1.0%",
-      "picks_status": "holding",
-      "date": "2026-08-21"
-    },
     {
       "type": "case_study",
       "id": "launch_ford_model_t",
@@ -663,6 +653,16 @@
       "worst_sector": "Consumer Discret.",
       "biggest_mover": "CRWD +3.0%",
       "date": "2026-09-15"
+    },
+    {
+      "type": "morning",
+      "direction_called": "higher",
+      "leading_index": "Nasdaq",
+      "lagging_index": "",
+      "headline_theme": "",
+      "commodity_note": "",
+      "picks_status": "holding",
+      "date": "2026-09-16"
     }
   ],
   "lessons_learned": [
