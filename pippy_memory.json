@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 173,
-  "last_session": "2026-09-16T17:00:39.211172",
+  "session_count": 174,
+  "last_session": "2026-09-16T20:01:11.295195",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 162,
-  "last_email_sent": "2026-09-16T17:00:39.209772",
-  "last_email_summary": "casestudy sent Wednesday, September 16, 2026",
+  "email_count": 163,
+  "last_email_sent": "2026-09-16T20:01:11.293275",
+  "last_email_summary": "close sent Wednesday, September 16, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "higher",
-      "actual_sp_pct": 0.43,
-      "best_sector": "Materials",
-      "worst_sector": "Utilities",
-      "biggest_mover": "HOOD +13.5%",
-      "date": "2026-08-21"
-    },
     {
       "type": "case_study",
       "id": "launch_sony_walkman",
@@ -663,6 +654,15 @@
       "remaining_in_pass": 40,
       "low_inventory_alert": false,
       "date": "2026-09-16"
+    },
+    {
+      "type": "close",
+      "actual_direction": "lower",
+      "actual_sp_pct": -0.44,
+      "best_sector": "Industrials",
+      "worst_sector": "Energy",
+      "biggest_mover": "AXON +5.6%",
+      "date": "2026-09-16"
     }
   ],
   "lessons_learned": [
@@ -963,6 +963,12 @@
       "called": "lower",
       "actual": "lower",
       "accurate": true
+    },
+    {
+      "date": "2026-09-16",
+      "called": "higher",
+      "actual": "lower",
+      "accurate": false
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
