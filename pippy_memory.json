@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 172,
-  "last_session": "2026-09-16T13:31:07.433152",
+  "session_count": 173,
+  "last_session": "2026-09-16T17:00:39.211172",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 161,
-  "last_email_sent": "2026-09-16T13:31:07.430994",
-  "last_email_summary": "morning sent Wednesday, September 16, 2026",
+  "email_count": 162,
+  "last_email_sent": "2026-09-16T17:00:39.209772",
+  "last_email_summary": "casestudy sent Wednesday, September 16, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "launch_ford_model_t",
-      "category": "product_launch",
-      "topic": "The Ford Model T and the Assembly Line That Changed Manufacturing Forever",
-      "remaining_in_pass": 66,
-      "low_inventory_alert": false,
-      "date": "2026-08-21"
-    },
     {
       "type": "close",
       "actual_direction": "higher",
@@ -662,6 +653,15 @@
       "headline_theme": "",
       "commodity_note": "",
       "picks_status": "holding",
+      "date": "2026-09-16"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_jack_ma",
+      "category": "investor",
+      "topic": "Jack Ma Was Rejected From Dozens of Jobs Before Building Alibaba \u2014 Then Vanished From Public View",
+      "remaining_in_pass": 40,
+      "low_inventory_alert": false,
       "date": "2026-09-16"
     }
   ],
