@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 176,
-  "last_session": "2026-09-17T17:00:36.885600",
+  "session_count": 177,
+  "last_session": "2026-09-17T20:01:14.498593",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 165,
-  "last_email_sent": "2026-09-17T17:00:36.883795",
-  "last_email_summary": "casestudy sent Thursday, September 17, 2026",
+  "email_count": 166,
+  "last_email_sent": "2026-09-17T20:01:14.496955",
+  "last_email_summary": "close sent Thursday, September 17, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "mixed",
-      "leading_index": "",
-      "lagging_index": "Nasdaq",
-      "headline_theme": "",
-      "commodity_note": "",
-      "picks_status": "rotated",
-      "date": "2026-08-24"
-    },
     {
       "type": "case_study",
       "id": "investor_michael_milken",
@@ -664,6 +654,15 @@
       "remaining_in_pass": 39,
       "low_inventory_alert": false,
       "date": "2026-09-17"
+    },
+    {
+      "type": "close",
+      "actual_direction": "higher",
+      "actual_sp_pct": 1.12,
+      "best_sector": "Technology",
+      "worst_sector": "Comm. Services",
+      "biggest_mover": "HOOD +3.9%",
+      "date": "2026-09-17"
     }
   ],
   "lessons_learned": [
@@ -970,6 +969,12 @@
       "called": "higher",
       "actual": "lower",
       "accurate": false
+    },
+    {
+      "date": "2026-09-17",
+      "called": "higher",
+      "actual": "higher",
+      "accurate": true
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
