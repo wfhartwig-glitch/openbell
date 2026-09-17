@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 175,
-  "last_session": "2026-09-17T13:31:44.307611",
+  "session_count": 176,
+  "last_session": "2026-09-17T17:00:36.885600",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 164,
-  "last_email_sent": "2026-09-17T13:31:44.305727",
-  "last_email_summary": "morning sent Thursday, September 17, 2026",
+  "email_count": 165,
+  "last_email_sent": "2026-09-17T17:00:36.883795",
+  "last_email_summary": "casestudy sent Thursday, September 17, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "launch_amazon_kindle",
-      "category": "product_launch",
-      "topic": "The Kindle \u2014 Amazon Bet Against Its Own Best-Selling Product",
-      "remaining_in_pass": 64,
-      "low_inventory_alert": false,
-      "date": "2026-08-23"
-    },
     {
       "type": "morning",
       "direction_called": "mixed",
@@ -663,6 +654,15 @@
       "headline_theme": "rate expectations",
       "commodity_note": "gold at $4,415 (\u25b2 1.84%) says the hedge bid hasn't gone anywhere",
       "picks_status": "holding",
+      "date": "2026-09-17"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_carlos_ghosn",
+      "category": "investor",
+      "topic": "Carlos Ghosn Saved Nissan From Collapse \u2014 Then Fled Japan Hidden in a Box",
+      "remaining_in_pass": 39,
+      "low_inventory_alert": false,
       "date": "2026-09-17"
     }
   ],
