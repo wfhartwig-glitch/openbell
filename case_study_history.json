@@ -259,6 +259,10 @@
     {
       "id": "investor_carlos_ghosn",
       "date": "2026-09-17"
+    },
+    {
+      "id": "investor_chung_juyung_hyundai",
+      "date": "2026-09-18"
     }
   ],
   "low_inventory_alert_sent": false
