@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 177,
-  "last_session": "2026-09-17T20:01:14.498593",
+  "session_count": 178,
+  "last_session": "2026-09-18T13:31:01.793586",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 166,
-  "last_email_sent": "2026-09-17T20:01:14.496955",
-  "last_email_summary": "close sent Thursday, September 17, 2026",
+  "email_count": 167,
+  "last_email_sent": "2026-09-18T13:31:01.791657",
+  "last_email_summary": "morning sent Friday, September 18, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "investor_michael_milken",
-      "category": "investor",
-      "topic": "Michael Milken \u2014 From Junk Bond King to Convicted Felon to Cancer Research's Biggest Funder",
-      "remaining_in_pass": 63,
-      "low_inventory_alert": false,
-      "date": "2026-08-24"
-    },
     {
       "type": "close",
       "actual_direction": "mixed",
@@ -663,6 +654,16 @@
       "worst_sector": "Comm. Services",
       "biggest_mover": "HOOD +3.9%",
       "date": "2026-09-17"
+    },
+    {
+      "type": "morning",
+      "direction_called": "mixed",
+      "leading_index": "Nasdaq",
+      "lagging_index": "Dow",
+      "headline_theme": "commodities",
+      "commodity_note": "WTI at $97.40 (\u25bc 3.73%) keeps the inflation input hot",
+      "picks_status": "holding",
+      "date": "2026-09-18"
     }
   ],
   "lessons_learned": [
@@ -984,6 +985,6 @@
     "earnings season": 7,
     "geopolitical tensions": 3,
     "rate expectations": 3,
-    "commodities": 3
+    "commodities": 4
   }
 }
