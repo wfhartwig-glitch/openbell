@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 180,
-  "last_session": "2026-09-18T20:01:46.909124",
+  "session_count": 181,
+  "last_session": "2026-09-19T13:30:27.706847",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 169,
-  "last_email_sent": "2026-09-18T20:01:46.906958",
-  "last_email_summary": "close sent Friday, September 18, 2026",
+  "email_count": 170,
+  "last_email_sent": "2026-09-19T13:30:27.705019",
+  "last_email_summary": "casestudy sent Saturday, September 19, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "founder_palmer_luckey",
-      "category": "investor",
-      "topic": "Palmer Luckey \u2014 Fired From the Company He Built, He Rebuilt Bigger Out of Spite",
-      "remaining_in_pass": 62,
-      "low_inventory_alert": false,
-      "date": "2026-08-25"
-    },
     {
       "type": "close",
       "actual_direction": "higher",
@@ -663,6 +654,15 @@
       "worst_sector": "Utilities",
       "biggest_mover": "HOOD +9.9%",
       "date": "2026-09-18"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_dhirubhai_ambani",
+      "category": "investor",
+      "topic": "Dhirubhai Ambani Went From a Gas Station Job to Building India's Largest Company",
+      "remaining_in_pass": 37,
+      "low_inventory_alert": false,
+      "date": "2026-09-19"
     }
   ],
   "lessons_learned": [
