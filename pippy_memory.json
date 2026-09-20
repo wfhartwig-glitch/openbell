@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 181,
-  "last_session": "2026-09-19T13:30:27.706847",
+  "session_count": 182,
+  "last_session": "2026-09-20T13:30:32.066172",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 170,
-  "last_email_sent": "2026-09-19T13:30:27.705019",
-  "last_email_summary": "casestudy sent Saturday, September 19, 2026",
+  "email_count": 171,
+  "last_email_sent": "2026-09-20T13:30:32.064227",
+  "last_email_summary": "casestudy sent Sunday, September 20, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "higher",
-      "actual_sp_pct": 0.32,
-      "best_sector": "Technology",
-      "worst_sector": "Energy",
-      "biggest_mover": "HOOD +8.3%",
-      "date": "2026-08-25"
-    },
     {
       "type": "morning",
       "direction_called": "lower",
@@ -663,6 +654,15 @@
       "remaining_in_pass": 37,
       "low_inventory_alert": false,
       "date": "2026-09-19"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_king_camp_gillette",
+      "category": "investor",
+      "topic": "King Camp Gillette's Disposable Razor Nearly Failed \u2014 Until He Gave the Razors Away",
+      "remaining_in_pass": 36,
+      "low_inventory_alert": false,
+      "date": "2026-09-20"
     }
   ],
   "lessons_learned": [

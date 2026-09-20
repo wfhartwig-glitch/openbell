@@ -267,6 +267,10 @@
     {
       "id": "investor_dhirubhai_ambani",
       "date": "2026-09-19"
+    },
+    {
+      "id": "investor_king_camp_gillette",
+      "date": "2026-09-20"
     }
   ],
   "low_inventory_alert_sent": false
