@@ -271,6 +271,10 @@
     {
       "id": "investor_king_camp_gillette",
       "date": "2026-09-20"
+    },
+    {
+      "id": "investor_nikola_tesla",
+      "date": "2026-09-21"
     }
   ],
   "low_inventory_alert_sent": false

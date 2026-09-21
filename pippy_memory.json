@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 183,
-  "last_session": "2026-09-21T13:31:08.835821",
+  "session_count": 184,
+  "last_session": "2026-09-21T17:00:42.627475",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 172,
-  "last_email_sent": "2026-09-21T13:31:08.833873",
-  "last_email_summary": "morning sent Monday, September 21, 2026",
+  "email_count": 173,
+  "last_email_sent": "2026-09-21T17:00:42.625714",
+  "last_email_summary": "casestudy sent Monday, September 21, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "founder_martha_stewart",
-      "category": "investor",
-      "topic": "Martha Stewart \u2014 Convicted, Imprisoned, and Somehow Came Back Bigger",
-      "remaining_in_pass": 61,
-      "low_inventory_alert": false,
-      "date": "2026-08-26"
-    },
     {
       "type": "close",
       "actual_direction": "lower",
@@ -662,6 +653,15 @@
       "headline_theme": "",
       "commodity_note": "",
       "picks_status": "holding",
+      "date": "2026-09-21"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_nikola_tesla",
+      "category": "investor",
+      "topic": "Nikola Tesla Helped Electrify the World \u2014 and Died Alone and Broke in a Hotel Room",
+      "remaining_in_pass": 35,
+      "low_inventory_alert": false,
       "date": "2026-09-21"
     }
   ],
