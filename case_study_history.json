@@ -275,6 +275,10 @@
     {
       "id": "investor_nikola_tesla",
       "date": "2026-09-21"
+    },
+    {
+      "id": "investor_jpaul_getty",
+      "date": "2026-09-22"
     }
   ],
   "low_inventory_alert_sent": false
