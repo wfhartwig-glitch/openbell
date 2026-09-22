@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 185,
-  "last_session": "2026-09-21T20:01:18.631541",
+  "session_count": 186,
+  "last_session": "2026-09-22T13:31:20.539461",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 174,
-  "last_email_sent": "2026-09-21T20:01:18.629522",
-  "last_email_summary": "close sent Monday, September 21, 2026",
+  "email_count": 175,
+  "last_email_sent": "2026-09-22T13:31:20.537491",
+  "last_email_summary": "morning sent Tuesday, September 22, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "mixed",
-      "leading_index": "Nasdaq",
-      "lagging_index": "Dow",
-      "headline_theme": "Fed policy",
-      "commodity_note": "",
-      "picks_status": "rotated",
-      "date": "2026-08-27"
-    },
     {
       "type": "case_study",
       "id": "founder_steve_jobs_apple",
@@ -663,6 +653,16 @@
       "worst_sector": "Energy",
       "biggest_mover": "META +10.9%",
       "date": "2026-09-21"
+    },
+    {
+      "type": "morning",
+      "direction_called": "higher",
+      "leading_index": "Dow",
+      "lagging_index": "",
+      "headline_theme": "commodities",
+      "commodity_note": "WTI at $89.68 (\u25bc 3.54%) keeps the inflation input hot",
+      "picks_status": "holding",
+      "date": "2026-09-22"
     }
   ],
   "lessons_learned": [
@@ -1000,6 +1000,6 @@
     "earnings season": 7,
     "geopolitical tensions": 3,
     "rate expectations": 3,
-    "commodities": 4
+    "commodities": 5
   }
 }
