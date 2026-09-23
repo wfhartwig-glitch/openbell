@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 190,
-  "last_session": "2026-09-23T17:00:46.676797",
+  "session_count": 191,
+  "last_session": "2026-09-23T20:01:38.550001",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 179,
-  "last_email_sent": "2026-09-23T17:00:46.673677",
-  "last_email_summary": "casestudy sent Wednesday, September 23, 2026",
+  "email_count": 180,
+  "last_email_sent": "2026-09-23T20:01:38.546975",
+  "last_email_summary": "close sent Wednesday, September 23, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "lower",
-      "actual_sp_pct": -0.24,
-      "best_sector": "Comm. Services",
-      "worst_sector": "Utilities",
-      "biggest_mover": "NOW +5.3%",
-      "date": "2026-08-28"
-    },
     {
       "type": "case_study",
       "id": "founder_pt_barnum",
@@ -663,6 +654,15 @@
       "remaining_in_pass": 33,
       "low_inventory_alert": false,
       "date": "2026-09-23"
+    },
+    {
+      "type": "close",
+      "actual_direction": "lower",
+      "actual_sp_pct": -0.75,
+      "best_sector": "Energy",
+      "worst_sector": "Utilities",
+      "biggest_mover": "CRWD +5.3%",
+      "date": "2026-09-23"
     }
   ],
   "lessons_learned": [
@@ -997,6 +997,12 @@
       "called": "higher",
       "actual": "mixed",
       "accurate": false
+    },
+    {
+      "date": "2026-09-23",
+      "called": "lower",
+      "actual": "lower",
+      "accurate": true
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
