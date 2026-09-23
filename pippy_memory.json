@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 189,
-  "last_session": "2026-09-23T13:31:48.148881",
+  "session_count": 190,
+  "last_session": "2026-09-23T17:00:46.676797",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 178,
-  "last_email_sent": "2026-09-23T13:31:48.146503",
-  "last_email_summary": "morning sent Wednesday, September 23, 2026",
+  "email_count": 179,
+  "last_email_sent": "2026-09-23T17:00:46.673677",
+  "last_email_summary": "casestudy sent Wednesday, September 23, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "founder_walt_disney",
-      "category": "investor",
-      "topic": "Walt Disney Went Bankrupt, Had a Breakdown, and Bet Everything on a Theme Park No Bank Would Fund",
-      "remaining_in_pass": 59,
-      "low_inventory_alert": false,
-      "date": "2026-08-28"
-    },
     {
       "type": "close",
       "actual_direction": "lower",
@@ -662,6 +653,15 @@
       "headline_theme": "commodities",
       "commodity_note": "Crude at $90.91 (\u25b2 1.75%) keeps inflation in the conversation",
       "picks_status": "holding",
+      "date": "2026-09-23"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_cornelius_vanderbilt",
+      "category": "investor",
+      "topic": "Cornelius Vanderbilt Built a Fortune From a Ferry \u2014 His Heirs Lost Most of It Within Decades",
+      "remaining_in_pass": 33,
+      "low_inventory_alert": false,
       "date": "2026-09-23"
     }
   ],
