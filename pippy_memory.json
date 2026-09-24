@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 192,
-  "last_session": "2026-09-24T17:00:38.971425",
+  "session_count": 193,
+  "last_session": "2026-09-24T20:01:19.396313",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 181,
-  "last_email_sent": "2026-09-24T17:00:38.969416",
-  "last_email_summary": "casestudy sent Thursday, September 24, 2026",
+  "email_count": 182,
+  "last_email_sent": "2026-09-24T20:01:19.394379",
+  "last_email_summary": "close sent Thursday, September 24, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "founder_milton_hershey",
-      "category": "investor",
-      "topic": "Milton Hershey Failed at Candy Three Times Before Building an Empire on His Fourth Try",
-      "remaining_in_pass": 57,
-      "low_inventory_alert": false,
-      "date": "2026-08-30"
-    },
     {
       "type": "morning",
       "direction_called": "lower",
@@ -662,6 +653,15 @@
       "topic": "Andrew Carnegie Rose From a Bobbin Boy to Steel Magnate \u2014 Then Gave Almost All of It Away",
       "remaining_in_pass": 32,
       "low_inventory_alert": false,
+      "date": "2026-09-24"
+    },
+    {
+      "type": "close",
+      "actual_direction": "mixed",
+      "actual_sp_pct": -0.06,
+      "best_sector": "Comm. Services",
+      "worst_sector": "Materials",
+      "biggest_mover": "META +5.9%",
       "date": "2026-09-24"
     }
   ],
