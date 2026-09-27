@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 197,
-  "last_session": "2026-09-26T13:30:26.723616",
+  "session_count": 198,
+  "last_session": "2026-09-27T13:30:28.313390",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 186,
-  "last_email_sent": "2026-09-26T13:30:26.721867",
-  "last_email_summary": "casestudy sent Saturday, September 26, 2026",
+  "email_count": 187,
+  "last_email_sent": "2026-09-27T13:30:28.311139",
+  "last_email_summary": "casestudy sent Sunday, September 27, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "investor_charles_ponzi",
-      "category": "investor",
-      "topic": "The Real Charles Ponzi \u2014 The Actual Man Behind the Scheme Everyone Names but Few Know",
-      "remaining_in_pass": 55,
-      "low_inventory_alert": false,
-      "date": "2026-09-01"
-    },
     {
       "type": "close",
       "actual_direction": "lower",
@@ -662,6 +653,15 @@
       "remaining_in_pass": 30,
       "low_inventory_alert": false,
       "date": "2026-09-26"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_ferdinand_de_lesseps",
+      "category": "investor",
+      "topic": "The Man Who Built the Suez Canal Then Presided Over a Panama Disaster",
+      "remaining_in_pass": 29,
+      "low_inventory_alert": false,
+      "date": "2026-09-27"
     }
   ],
   "lessons_learned": [

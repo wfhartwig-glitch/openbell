@@ -295,6 +295,10 @@
     {
       "id": "investor_jp_morgan_1907",
       "date": "2026-09-26"
+    },
+    {
+      "id": "investor_ferdinand_de_lesseps",
+      "date": "2026-09-27"
     }
   ],
   "low_inventory_alert_sent": false
