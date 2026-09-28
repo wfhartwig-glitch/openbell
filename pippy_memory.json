@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 199,
-  "last_session": "2026-09-28T13:31:14.096633",
+  "session_count": 200,
+  "last_session": "2026-09-28T17:00:39.264524",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 188,
-  "last_email_sent": "2026-09-28T13:31:14.094555",
-  "last_email_summary": "morning sent Monday, September 28, 2026",
+  "email_count": 189,
+  "last_email_sent": "2026-09-28T17:00:39.262603",
+  "last_email_summary": "casestudy sent Monday, September 28, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "mixed",
-      "leading_index": "Dow",
-      "lagging_index": "Nasdaq",
-      "headline_theme": "geopolitical tensions",
-      "commodity_note": "WTI Crude Oil down 1.1%",
-      "picks_status": "holding",
-      "date": "2026-09-02"
-    },
     {
       "type": "case_study",
       "id": "investor_ivan_boesky",
@@ -662,6 +652,15 @@
       "headline_theme": "rate expectations",
       "commodity_note": "gold's move to $4,178 (\u25bc 1.25%) shows the hedge bid is still there",
       "picks_status": "holding",
+      "date": "2026-09-28"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_vijay_mallya",
+      "category": "investor",
+      "topic": "Vijay Mallya Called Himself the \"King of Good Times\" \u2014 Then Became a Fugitive From Indian Banks",
+      "remaining_in_pass": 28,
+      "low_inventory_alert": false,
       "date": "2026-09-28"
     }
   ],

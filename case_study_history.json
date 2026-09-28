@@ -299,6 +299,10 @@
     {
       "id": "investor_ferdinand_de_lesseps",
       "date": "2026-09-27"
+    },
+    {
+      "id": "investor_vijay_mallya",
+      "date": "2026-09-28"
     }
   ],
   "low_inventory_alert_sent": false
