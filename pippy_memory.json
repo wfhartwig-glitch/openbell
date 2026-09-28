@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 200,
-  "last_session": "2026-09-28T17:00:39.264524",
+  "session_count": 201,
+  "last_session": "2026-09-28T20:01:32.908185",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 189,
-  "last_email_sent": "2026-09-28T17:00:39.262603",
-  "last_email_summary": "casestudy sent Monday, September 28, 2026",
+  "email_count": 190,
+  "last_email_sent": "2026-09-28T20:01:32.906130",
+  "last_email_summary": "close sent Monday, September 28, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "investor_ivan_boesky",
-      "category": "investor",
-      "topic": "Ivan Boesky Said \"Greed Is Healthy\" on Stage \u2014 Then Wore a Wire to Take Down Wall Street",
-      "remaining_in_pass": 54,
-      "low_inventory_alert": false,
-      "date": "2026-09-02"
-    },
     {
       "type": "close",
       "actual_direction": "higher",
@@ -662,6 +653,15 @@
       "remaining_in_pass": 28,
       "low_inventory_alert": false,
       "date": "2026-09-28"
+    },
+    {
+      "type": "close",
+      "actual_direction": "lower",
+      "actual_sp_pct": -0.75,
+      "best_sector": "Health Care",
+      "worst_sector": "Comm. Services",
+      "biggest_mover": "CRWD +2.5%",
+      "date": "2026-09-28"
     }
   ],
   "lessons_learned": [
@@ -1011,6 +1011,12 @@
       "date": "2026-09-25",
       "called": "higher",
       "actual": "higher",
+      "accurate": true
+    },
+    {
+      "date": "2026-09-28",
+      "called": "lower",
+      "actual": "lower",
       "accurate": true
     }
   ],
