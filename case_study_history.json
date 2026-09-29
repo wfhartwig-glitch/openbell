@@ -303,6 +303,10 @@
     {
       "id": "investor_vijay_mallya",
       "date": "2026-09-28"
+    },
+    {
+      "id": "rivalry_arden_rubinstein",
+      "date": "2026-09-29"
     }
   ],
   "low_inventory_alert_sent": false

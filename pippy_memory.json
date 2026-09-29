@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 202,
-  "last_session": "2026-09-29T13:31:18.187953",
+  "session_count": 203,
+  "last_session": "2026-09-29T17:00:43.355517",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 191,
-  "last_email_sent": "2026-09-29T13:31:18.185955",
-  "last_email_summary": "morning sent Tuesday, September 29, 2026",
+  "email_count": 192,
+  "last_email_sent": "2026-09-29T17:00:43.353577",
+  "last_email_summary": "casestudy sent Tuesday, September 29, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "higher",
-      "leading_index": "Dow",
-      "lagging_index": "",
-      "headline_theme": "earnings season",
-      "commodity_note": "Gold up 1.1%",
-      "picks_status": "holding",
-      "date": "2026-09-03"
-    },
     {
       "type": "case_study",
       "id": "founder_conrad_hilton",
@@ -662,6 +652,15 @@
       "headline_theme": "commodities",
       "commodity_note": "Crude at $90.32 (\u25bc 4.04%) keeps inflation in the conversation",
       "picks_status": "holding",
+      "date": "2026-09-29"
+    },
+    {
+      "type": "case_study",
+      "id": "rivalry_arden_rubinstein",
+      "category": "rivalry",
+      "topic": "Elizabeth Arden vs. Helena Rubinstein \u2014 The Cosmetics Rivalry Between Two Self-Made Immigrant Women",
+      "remaining_in_pass": 27,
+      "low_inventory_alert": false,
       "date": "2026-09-29"
     }
   ],
