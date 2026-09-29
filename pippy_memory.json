@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 201,
-  "last_session": "2026-09-28T20:01:32.908185",
+  "session_count": 202,
+  "last_session": "2026-09-29T13:31:18.187953",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 190,
-  "last_email_sent": "2026-09-28T20:01:32.906130",
-  "last_email_summary": "close sent Monday, September 28, 2026",
+  "email_count": 191,
+  "last_email_sent": "2026-09-29T13:31:18.185955",
+  "last_email_summary": "morning sent Tuesday, September 29, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "higher",
-      "actual_sp_pct": 0.45,
-      "best_sector": "Materials",
-      "worst_sector": "Real Estate",
-      "biggest_mover": "TTD +5.5%",
-      "date": "2026-09-02"
-    },
     {
       "type": "morning",
       "direction_called": "higher",
@@ -662,6 +653,16 @@
       "worst_sector": "Comm. Services",
       "biggest_mover": "CRWD +2.5%",
       "date": "2026-09-28"
+    },
+    {
+      "type": "morning",
+      "direction_called": "mixed",
+      "leading_index": "Nasdaq",
+      "lagging_index": "Dow",
+      "headline_theme": "commodities",
+      "commodity_note": "Crude at $90.32 (\u25bc 4.04%) keeps inflation in the conversation",
+      "picks_status": "holding",
+      "date": "2026-09-29"
     }
   ],
   "lessons_learned": [
@@ -1027,6 +1028,6 @@
     "earnings season": 7,
     "geopolitical tensions": 3,
     "rate expectations": 4,
-    "commodities": 6
+    "commodities": 7
   }
 }
