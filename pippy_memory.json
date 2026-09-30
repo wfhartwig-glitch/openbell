@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 206,
-  "last_session": "2026-09-30T17:00:38.503208",
+  "session_count": 207,
+  "last_session": "2026-09-30T20:01:21.318931",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 195,
-  "last_email_sent": "2026-09-30T17:00:38.501290",
-  "last_email_summary": "casestudy sent Wednesday, September 30, 2026",
+  "email_count": 196,
+  "last_email_sent": "2026-09-30T20:01:21.316919",
+  "last_email_summary": "close sent Wednesday, September 30, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "founder_howard_hughes",
-      "category": "investor",
-      "topic": "Howard Hughes Built an Aviation and Film Empire, Then Withdrew From the World Entirely",
-      "remaining_in_pass": 52,
-      "low_inventory_alert": false,
-      "date": "2026-09-04"
-    },
     {
       "type": "close",
       "actual_direction": "lower",
@@ -662,6 +653,15 @@
       "remaining_in_pass": 26,
       "low_inventory_alert": false,
       "date": "2026-09-30"
+    },
+    {
+      "type": "close",
+      "actual_direction": "mixed",
+      "actual_sp_pct": -0.26,
+      "best_sector": "Technology",
+      "worst_sector": "Consumer Staples",
+      "biggest_mover": "NOW +3.7%",
+      "date": "2026-09-30"
     }
   ],
   "lessons_learned": [
@@ -1023,6 +1023,12 @@
       "date": "2026-09-29",
       "called": "mixed",
       "actual": "lower",
+      "accurate": false
+    },
+    {
+      "date": "2026-09-30",
+      "called": "higher",
+      "actual": "mixed",
       "accurate": false
     }
   ],
