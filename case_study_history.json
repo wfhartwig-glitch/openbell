@@ -307,6 +307,10 @@
     {
       "id": "rivalry_arden_rubinstein",
       "date": "2026-09-29"
+    },
+    {
+      "id": "investor_vera_wang",
+      "date": "2026-09-30"
     }
   ],
   "low_inventory_alert_sent": false

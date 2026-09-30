@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 205,
-  "last_session": "2026-09-30T13:31:12.749004",
+  "session_count": 206,
+  "last_session": "2026-09-30T17:00:38.503208",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 194,
-  "last_email_sent": "2026-09-30T13:31:12.746497",
-  "last_email_summary": "morning sent Wednesday, September 30, 2026",
+  "email_count": 195,
+  "last_email_sent": "2026-09-30T17:00:38.501290",
+  "last_email_summary": "casestudy sent Wednesday, September 30, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "lower",
-      "leading_index": "",
-      "lagging_index": "Dow",
-      "headline_theme": "commodities",
-      "commodity_note": "gold at $4,446 (\u25bc 1.50%) says the hedge bid hasn't gone anywhere",
-      "picks_status": "holding",
-      "date": "2026-09-04"
-    },
     {
       "type": "case_study",
       "id": "founder_howard_hughes",
@@ -662,6 +652,15 @@
       "headline_theme": "commodities",
       "commodity_note": "WTI at $91.05 (\u25b2 1.39%) keeps the inflation input hot",
       "picks_status": "holding",
+      "date": "2026-09-30"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_vera_wang",
+      "category": "investor",
+      "topic": "Vera Wang Didn't Design Her First Wedding Dress Until She Was 40",
+      "remaining_in_pass": 26,
+      "low_inventory_alert": false,
       "date": "2026-09-30"
     }
   ],
