@@ -311,6 +311,10 @@
     {
       "id": "investor_vera_wang",
       "date": "2026-09-30"
+    },
+    {
+      "id": "investor_larry_ellison_oracle",
+      "date": "2026-10-01"
     }
   ],
   "low_inventory_alert_sent": false
