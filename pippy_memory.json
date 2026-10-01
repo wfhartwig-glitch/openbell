@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 207,
-  "last_session": "2026-09-30T20:01:21.318931",
+  "session_count": 208,
+  "last_session": "2026-10-01T13:31:36.068763",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 196,
-  "last_email_sent": "2026-09-30T20:01:21.316919",
-  "last_email_summary": "close sent Wednesday, September 30, 2026",
+  "email_count": 197,
+  "last_email_sent": "2026-10-01T13:31:36.067111",
+  "last_email_summary": "morning sent Thursday, October 01, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "lower",
-      "actual_sp_pct": -0.38,
-      "best_sector": "Technology",
-      "worst_sector": "Comm. Services",
-      "biggest_mover": "VRT +4.3%",
-      "date": "2026-09-04"
-    },
     {
       "type": "case_study",
       "id": "founder_adam_neumann",
@@ -662,6 +653,16 @@
       "worst_sector": "Consumer Staples",
       "biggest_mover": "NOW +3.7%",
       "date": "2026-09-30"
+    },
+    {
+      "type": "morning",
+      "direction_called": "higher",
+      "leading_index": "Nasdaq",
+      "lagging_index": "",
+      "headline_theme": "commodities",
+      "commodity_note": "Crude at $90.80 (\u25b2 1.86%) keeps inflation in the conversation",
+      "picks_status": "holding",
+      "date": "2026-10-01"
     }
   ],
   "lessons_learned": [
@@ -1039,6 +1040,6 @@
     "earnings season": 7,
     "geopolitical tensions": 3,
     "rate expectations": 4,
-    "commodities": 8
+    "commodities": 9
   }
 }
