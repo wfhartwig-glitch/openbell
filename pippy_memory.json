@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 209,
-  "last_session": "2026-10-01T17:00:40.595252",
+  "session_count": 210,
+  "last_session": "2026-10-01T20:01:23.758150",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 198,
-  "last_email_sent": "2026-10-01T17:00:40.593158",
-  "last_email_summary": "casestudy sent Thursday, October 01, 2026",
+  "email_count": 199,
+  "last_email_sent": "2026-10-01T20:01:23.756146",
+  "last_email_summary": "close sent Thursday, October 01, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "founder_travis_kalanick",
-      "category": "investor",
-      "topic": "Travis Kalanick Built Uber Through Sheer Aggression \u2014 Then Got Forced Out by It",
-      "remaining_in_pass": 50,
-      "low_inventory_alert": false,
-      "date": "2026-09-06"
-    },
     {
       "type": "case_study",
       "id": "founder_aubrey_mcclendon",
@@ -663,6 +654,15 @@
       "remaining_in_pass": 25,
       "low_inventory_alert": false,
       "date": "2026-10-01"
+    },
+    {
+      "type": "close",
+      "actual_direction": "higher",
+      "actual_sp_pct": 0.17,
+      "best_sector": "Energy",
+      "worst_sector": "Health Care",
+      "biggest_mover": "NOW +2.8%",
+      "date": "2026-10-01"
     }
   ],
   "lessons_learned": [
@@ -1031,6 +1031,12 @@
       "called": "higher",
       "actual": "mixed",
       "accurate": false
+    },
+    {
+      "date": "2026-10-01",
+      "called": "higher",
+      "actual": "higher",
+      "accurate": true
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
