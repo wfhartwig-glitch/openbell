@@ -315,6 +315,10 @@
     {
       "id": "investor_larry_ellison_oracle",
       "date": "2026-10-01"
+    },
+    {
+      "id": "investor_muriel_siebert",
+      "date": "2026-10-02"
     }
   ],
   "low_inventory_alert_sent": false

@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 211,
-  "last_session": "2026-10-02T13:31:11.250879",
+  "session_count": 212,
+  "last_session": "2026-10-02T17:00:33.709084",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 200,
-  "last_email_sent": "2026-10-02T13:31:11.248951",
-  "last_email_summary": "morning sent Friday, October 02, 2026",
+  "email_count": 201,
+  "last_email_sent": "2026-10-02T17:00:33.707947",
+  "last_email_summary": "casestudy sent Friday, October 02, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "mixed",
-      "leading_index": "",
-      "lagging_index": "Dow",
-      "headline_theme": "",
-      "commodity_note": "",
-      "picks_status": "holding",
-      "date": "2026-09-08"
-    },
     {
       "type": "case_study",
       "id": "founder_elizabeth_holmes",
@@ -663,6 +653,15 @@
       "headline_theme": "rate expectations",
       "commodity_note": "Crude at $89.18 (\u25bc 3.72%) keeps inflation in the conversation",
       "picks_status": "holding",
+      "date": "2026-10-02"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_muriel_siebert",
+      "category": "investor",
+      "topic": "Muriel Siebert Was Rejected by Nine Firms Before Becoming the First Woman to Own a Seat on the NYSE",
+      "remaining_in_pass": 24,
+      "low_inventory_alert": false,
       "date": "2026-10-02"
     }
   ],
