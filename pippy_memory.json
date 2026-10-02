@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 212,
-  "last_session": "2026-10-02T17:00:33.709084",
+  "session_count": 213,
+  "last_session": "2026-10-02T20:01:39.029198",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 201,
-  "last_email_sent": "2026-10-02T17:00:33.707947",
-  "last_email_summary": "casestudy sent Friday, October 02, 2026",
+  "email_count": 202,
+  "last_email_sent": "2026-10-02T20:01:39.027161",
+  "last_email_summary": "close sent Friday, October 02, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "founder_elizabeth_holmes",
-      "category": "investor",
-      "topic": "Elizabeth Holmes Built a $9 Billion Company on Technology That Never Actually Worked",
-      "remaining_in_pass": 48,
-      "low_inventory_alert": false,
-      "date": "2026-09-08"
-    },
     {
       "type": "close",
       "actual_direction": "lower",
@@ -663,6 +654,15 @@
       "remaining_in_pass": 24,
       "low_inventory_alert": false,
       "date": "2026-10-02"
+    },
+    {
+      "type": "close",
+      "actual_direction": "higher",
+      "actual_sp_pct": 0.71,
+      "best_sector": "Consumer Discret.",
+      "worst_sector": "Consumer Staples",
+      "biggest_mover": "TSLA +4.2%",
+      "date": "2026-10-02"
     }
   ],
   "lessons_learned": [
@@ -1034,6 +1034,12 @@
     },
     {
       "date": "2026-10-01",
+      "called": "higher",
+      "actual": "higher",
+      "accurate": true
+    },
+    {
+      "date": "2026-10-02",
       "called": "higher",
       "actual": "higher",
       "accurate": true
