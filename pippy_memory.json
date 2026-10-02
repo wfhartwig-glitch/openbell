@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 210,
-  "last_session": "2026-10-01T20:01:23.758150",
+  "session_count": 211,
+  "last_session": "2026-10-02T13:31:11.250879",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 199,
-  "last_email_sent": "2026-10-01T20:01:23.756146",
-  "last_email_summary": "close sent Thursday, October 01, 2026",
+  "email_count": 200,
+  "last_email_sent": "2026-10-02T13:31:11.248951",
+  "last_email_summary": "morning sent Friday, October 02, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "founder_aubrey_mcclendon",
-      "category": "investor",
-      "topic": "Aubrey McClendon Built an Empire on Shale Gas \u2014 and Lost It the Same Way",
-      "remaining_in_pass": 49,
-      "low_inventory_alert": false,
-      "date": "2026-09-07"
-    },
     {
       "type": "morning",
       "direction_called": "mixed",
@@ -663,6 +654,16 @@
       "worst_sector": "Health Care",
       "biggest_mover": "NOW +2.8%",
       "date": "2026-10-01"
+    },
+    {
+      "type": "morning",
+      "direction_called": "higher",
+      "leading_index": "Nasdaq",
+      "lagging_index": "",
+      "headline_theme": "rate expectations",
+      "commodity_note": "Crude at $89.18 (\u25bc 3.72%) keeps inflation in the conversation",
+      "picks_status": "holding",
+      "date": "2026-10-02"
     }
   ],
   "lessons_learned": [
@@ -1045,7 +1046,7 @@
     "inflation data": 6,
     "earnings season": 7,
     "geopolitical tensions": 3,
-    "rate expectations": 4,
+    "rate expectations": 5,
     "commodities": 9
   }
 }
