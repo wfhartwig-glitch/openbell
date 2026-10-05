@@ -467,6 +467,53 @@ def _classify_direction(snapshot_data: list) -> str:
     return "mixed"
 
 
+def _classify_group_direction(values: list, laggard_flat: float = 0.25, majority_min: float = 0.4) -> dict:
+    """
+    Classifies a group of index/asset percentage moves as one of:
+      - "directional"              — every value shares a sign (or is zero).
+      - "directional_with_laggard" — all but one share a sign, and that one
+        dissenter sits within `laggard_flat` of flat while the majority
+        averages at least `majority_min` — a real move with one name sitting
+        it out, not a genuine split.
+      - "mixed"                    — real magnitude on both sides.
+      - "unknown"                  — no usable values at all.
+
+    Fixes a real bug: a group's own direction was never classified
+    independently — Europe was labeled "mixed" purely by copying the US
+    tape's own label, even on a day both European indices were positive.
+    Also fixes magnitude-blindness: "any sign disagreement = mixed" called a
+    rally with one index a hair negative "mixed" even when that dissenter was
+    within a quarter point of flat and the rest of the group was up close to
+    a percent.
+
+    Returns {"kind", "direction" ("higher"/"lower"/None), "laggard_idx"
+    (index into `values`, or None)}. Laggard-vs-majority thresholds are a
+    judgment call, stated here rather than buried: 0.25% is "close enough to
+    flat that it reads as sitting out, not disagreeing"; 0.4% average is
+    "the majority actually moved, not just technically shares a sign."
+    """
+    vals = [v for v in values if isinstance(v, (int, float))]
+    if not vals:
+        return {"kind": "unknown", "direction": None, "laggard_idx": None}
+
+    signs = [1 if v >= 0 else -1 for v in vals]
+    if all(s == signs[0] for s in signs):
+        return {"kind": "directional", "direction": "higher" if signs[0] >= 0 else "lower", "laggard_idx": None}
+
+    pos_idxs = [i for i, s in enumerate(signs) if s > 0]
+    neg_idxs = [i for i, s in enumerate(signs) if s < 0]
+    for majority_idxs, minority_idxs, maj_dir in (
+        (pos_idxs, neg_idxs, "higher"), (neg_idxs, pos_idxs, "lower"),
+    ):
+        if len(minority_idxs) == 1 and majority_idxs:
+            laggard_val  = vals[minority_idxs[0]]
+            majority_avg = sum(abs(vals[i]) for i in majority_idxs) / len(majority_idxs)
+            if abs(laggard_val) <= laggard_flat and majority_avg >= majority_min:
+                return {"kind": "directional_with_laggard", "direction": maj_dir, "laggard_idx": minority_idxs[0]}
+
+    return {"kind": "mixed", "direction": None, "laggard_idx": None}
+
+
 def _log_briefing_history_health(mem, today_s: str) -> None:
     """
     Prints the date of the most recent briefing_history entry on every run, so a
@@ -749,16 +796,26 @@ def _sentiment_gate_ok(headline_sentiment: str, tape_tone: str) -> bool:
 
 
 def _rate_extreme_note(current, six_mo_high, six_mo_high_day, six_mo_low, six_mo_low_day) -> str:
-    """If current 10y is within ~10bp of its trailing 6mo high/low, name that —
-    with a day-of-week ("Tuesday's high") if the extreme was recent enough for
-    that to actually mean something, else a generic "6-month" framing."""
+    """
+    If current 10y is within ~10bp of its trailing 6-month high/low, names
+    that — with a day-of-week ("Tuesday's high") if the extreme was recent
+    enough for that to actually mean something, else a generic "6-month"
+    framing. If the extreme occurred TODAY specifically, phrases it as
+    setting a new high/low right now ("its highest level in six months")
+    rather than "off Wednesday's high" — that phrasing would misleadingly
+    imply it already receded from a past peak when it's actually sitting AT
+    one right now.
+    """
     if current is None:
         return ""
+    today_name = _today_ct().strftime("%A")
     for kind, extreme_val, day_name in (("high", six_mo_high, six_mo_high_day),
                                         ("low",  six_mo_low,  six_mo_low_day)):
         if extreme_val is None:
             continue
         if abs(float(current) - float(extreme_val)) <= 0.10:
+            if day_name and day_name == today_name:
+                return f"its {'highest' if kind == 'high' else 'lowest'} level in six months"
             lead = f"{day_name}'s" if day_name else "the recent 6-month"
             return f"off {lead} {extreme_val:.2f}% {kind}"
     return ""
@@ -782,57 +839,1021 @@ def _rot_phrase(pool: list, day_hash: int, salt_key: str) -> str:
     return pool[(day_hash + salt) % len(pool)]
 
 
-_TAPE_OPEN_HIGHER = [
-    "Futures are firm and broad — S&P {sp}, Nasdaq {ndx}, Dow {dow}",
-    "The tape is broadly higher into the open — S&P {sp}, Nasdaq {ndx}, Dow {dow}",
-    "Pre-market action is solidly positive — S&P {sp}, Nasdaq {ndx}, Dow {dow}",
-]
-_TAPE_OPEN_HIGHER_MODEST = [
-    "Futures are narrowly higher — S&P {sp}, Nasdaq {ndx}, Dow {dow}",
-    "The tape is modestly higher into the open — S&P {sp}, Nasdaq {ndx}, Dow {dow}",
-    "Pre-market action is quietly positive — S&P {sp}, Nasdaq {ndx}, Dow {dow}",
-]
-_TAPE_OPEN_LOWER = [
-    "Futures are under pressure — S&P {sp}, Nasdaq {ndx}, Dow {dow}",
-    "The tape is broadly lower into the open — S&P {sp}, Nasdaq {ndx}, Dow {dow}",
-    "Pre-market action is soft — S&P {sp}, Nasdaq {ndx}, Dow {dow}",
-]
-_TAPE_OPEN_LOWER_MODEST = [
-    "Futures are narrowly lower — S&P {sp}, Nasdaq {ndx}, Dow {dow}",
-    "The tape is modestly lower into the open — S&P {sp}, Nasdaq {ndx}, Dow {dow}",
-    "Pre-market action is quietly soft — S&P {sp}, Nasdaq {ndx}, Dow {dow}",
-]
-_TAPE_OPEN_MIXED = [
-    "Futures are mixed — S&P {sp}, Nasdaq {ndx}, Dow {dow}",
-    "The tape is split into the open — S&P {sp}, Nasdaq {ndx}, Dow {dow}",
-    "Pre-market action is directionless — S&P {sp}, Nasdaq {ndx}, Dow {dow}",
+
+# ── Index-divergence explanation (Step 4a) ────────────────────────────────────
+
+
+
+def _sector_pct_map(sectors: list) -> dict:
+    out = {}
+    for s in sectors or []:
+        name = (s.get("sector") or "").strip()
+        if not name:
+            continue
+        try:
+            out[name] = float(s.get("pct") if s.get("pct") is not None else s.get("changesPercentage", 0))
+        except Exception:
+            continue
+    return out
+
+
+def _sector_lookup(pct_map: dict, *name_fragments):
+    """Case-insensitive substring lookup — sector-name spelling varies by
+    source ('Consumer Discret.' vs 'Consumer Discretionary')."""
+    for name, pct in pct_map.items():
+        nl = name.lower()
+        if any(frag in nl for frag in name_fragments):
+            return pct
+    return None
+
+
+# ── Rotation interpretation (Step 5, close mode only) ─────────────────────────
+
+# ── Outsized mover (Step 6, close mode) ────────────────────────────────────────
+
+# ── Event/catalyst extraction (Step 2) ────────────────────────────────────────
+# Mines the headline feed already fetched elsewhere — no new API, no new fetch.
+# Word-boundary matched for short/ambiguous terms, same false-substring-match
+# safety this file already applies everywhere else (see test_keyword_safety.py).
+
+_EVENT_EXCLUDE_PATTERNS = [
+    r"\bopening bell\b", r"\bclosing bell\b", r"\brings? the bell\b",
+    r"\bfloor visit\b", r"\bvisits? the (?:nyse|nasdaq|trading floor)\b",
+    r"\banniversary\b", r"\byears? ago today\b", r"\blooks? back at\b",
+    r"\bwhat (?:warren )?buffett would\b", r"\bbuffett'?s advice\b",
+    r"\bbeginner'?s guide\b", r"\bhow to invest\b", r"\bwhat is an? etf\b",
+    r"\betf explained\b", r"\bexplainer:\b",
 ]
 
-_RATES_LEAD = ["The 10-year is at", "The 10-year sits at", "The benchmark 10-year is trading at"]
-_RATES_TAILWIND = [
-    "Yields backing off that level relieves the pressure on long-duration equities.",
-    "That pullback in yields takes some pressure off long-duration names.",
-    "Easing yields give richly-valued growth stocks more room to work.",
+_EVENT_MONETARY_TERMS = [
+    "federal reserve", "fed chair", "fomc", "rate decision", "rate cut", "rate hike",
+    "cpi", "ppi", "jobs report", "payrolls", "unemployment claims", "treasury auction",
+    "european central bank", "ecb", "bank of japan", "boj", "bank of england",
+    "central bank", "fed minutes", "policy meeting", "inflation report", "core inflation",
 ]
-_RATES_HEADWIND = [
-    "Rising yields add pressure to long-duration equities.",
-    "That move up in yields is a headwind for richly-valued growth names.",
-    "Climbing yields tighten the multiple math on long-duration stocks.",
+_EVENT_MACRO_POLITICAL_TERMS = [
+    "tariff", "trade deal", "trade war", "trade policy", "summit", "state visit",
+    "election", "geopolitical", "sanctions", "government shutdown",
+    "opec", "oil supply", "supply chain", "foreign leader",
 ]
-_OIL_LEAD = [
-    "WTI at ${price:.2f} ({pct}) keeps the inflation input hot",
-    "Crude at ${price:.2f} ({pct}) keeps inflation in the conversation",
-    "Oil's move to ${price:.2f} ({pct}) keeps the inflation input live",
+_EVENT_CORPORATE_TERMS = [
+    "earnings report", "quarterly results", "keynote", "product launch", "unveils",
+    "merger", "acquisition", "regulatory approval", "antitrust", "ftc probe",
+    "sec investigation", "lawsuit",
 ]
-_GOLD_LEAD = [
-    "gold at ${price:,.0f} ({pct}) says the hedge bid hasn't gone anywhere",
-    "gold's move to ${price:,.0f} ({pct}) shows the hedge bid is still there",
-    "gold at ${price:,.0f} ({pct}) suggests risk-hedging demand is intact",
+_EVENT_FUTURE_CUES = [
+    "expected", "will ", "due ", "ahead of", "later today", "scheduled",
+    "awaits", "set to", "upcoming", "later this week", "tomorrow",
 ]
-_OIL_GOLD_CONNECTOR = [
-    "Two things cut the other way:", "Working against that:", "On the other side of the ledger:",
+_EVENT_PAST_CUES = [
+    "said", "announced", "reported", "signaled", "delivered", "held",
+    "warned", "cut rates", "raised rates", "kept rates", "released", "posted",
 ]
-_OIL_SOLO_LEAD = ["Working against that,", "Cutting the other way,", "One thing pushing back:"]
+
+
+def _event_word_boundary_hit(term: str, text_l: str) -> bool:
+    pat = r'\b' + re.escape(term) + r'\b' if len(term) <= 6 else re.escape(term)
+    return bool(re.search(pat, text_l))
+
+
+def _event_is_scheduled(text_l: str):
+    """True=forward-looking, False=already happened, None=ambiguous either way."""
+    if any(c in text_l for c in _EVENT_FUTURE_CUES):
+        return True
+    if any(c in text_l for c in _EVENT_PAST_CUES):
+        return False
+    return None
+
+
+def _extract_market_events(headlines: list, mode: str, max_events: int = 2) -> list:
+    """
+    Classifies headlines already fetched into MONETARY / MACRO_POLITICAL /
+    CORPORATE, distinguishing scheduled-today from already-happened. Applies
+    a signal test FIRST, before any category match: ceremonial and evergreen
+    content (opening-bell pieces, floor-visit photo-ops, milestone
+    anniversaries, "what Buffett would do" columns, generic ETF explainers)
+    is excluded outright, even if it happens to also contain a matching
+    keyword — a headline that can't plausibly move a price or signal a
+    forward risk doesn't qualify no matter what words it contains.
+
+    Capped at `max_events` (2, per spec), preferring whichever tense matches
+    the brief's own lean (morning = forward-looking, close = backward-looking)
+    without ever dropping a qualifying event just because its tense doesn't
+    match — the mode preference only breaks ties in ordering.
+    """
+    results = []
+    seen_titles = set()
+    for h in headlines or []:
+        title   = (h.get("title") or "").strip()
+        snippet = (h.get("snippet") or "").strip()
+        if not title or title in seen_titles:
+            continue
+        text_l = f"{title} {snippet}".lower()
+
+        if any(re.search(pat, text_l) for pat in _EVENT_EXCLUDE_PATTERNS):
+            continue
+
+        category, term = None, ""
+        for terms, cat in (
+            (_EVENT_MONETARY_TERMS, "MONETARY"),
+            (_EVENT_MACRO_POLITICAL_TERMS, "MACRO_POLITICAL"),
+            (_EVENT_CORPORATE_TERMS, "CORPORATE"),
+        ):
+            hit = next((kw for kw in terms if _event_word_boundary_hit(kw, text_l)), None)
+            if hit:
+                category, term = cat, hit
+                break
+        if not category:
+            continue
+
+        seen_titles.add(title)
+        results.append({
+            "category": category,
+            "term": term,
+            "scheduled": _event_is_scheduled(text_l),
+            "headline": h,
+        })
+
+    prefer_scheduled = mode == "morning"
+    results.sort(key=lambda e: 0 if e["scheduled"] is prefer_scheduled else 1)
+    return results[:max_events]
+
+
+_WORD_COUNT_TARGETS = {
+    ("morning", "P1"): (120, 180),
+    ("morning", "P2"): (50, 80),
+    ("close", "P1"): (150, 220),
+    ("close", "P2"): (60, 100),
+}
+
+
+def _log_word_count(mode: str, part: str, text: str, diagnostics: dict = None) -> None:
+    """
+    Step 10: word-count floors are a floor on explanation, not permission to
+    pad. Logs (never raises/blocks) when a part falls short, naming which
+    mode/part AND which specific layers did or didn't fire (`diagnostics`),
+    so a shortfall points at a concrete reason ("no qualifying event found",
+    "no divergence >= 0.3pp") instead of a generic reminder to go check.
+    """
+    lo, hi = _WORD_COUNT_TARGETS.get((mode, part), (0, 10**9))
+    count = len((text or "").split())
+    if count < lo:
+        reasons = []
+        if diagnostics:
+            for label, fired in diagnostics.items():
+                if not fired:
+                    reasons.append(f"no {label}")
+        reason_str = f" Likely reason(s): {', '.join(reasons)}." if reasons else ""
+        print(f"[LENGTH] {mode.upper()} {part} is {count} words, under the {lo}-{hi} target.{reason_str}")
+    elif count > hi:
+        print(f"[LENGTH] {mode.upper()} {part} is {count} words, over the {lo}-{hi} target.")
+
+
+
+
+def _pct_words(v) -> str:
+    """'up 0.62%' / 'down 0.15%' / 'unchanged' — plain words instead of arrow glyphs
+    for prose (the data tables keep the glyphs)."""
+    try:
+        v = float(v)
+    except Exception:
+        return "unchanged"
+    if abs(v) < 0.005:
+        return "unchanged"
+    return f"{'up' if v >= 0 else 'down'} {abs(v):.2f}%"
+
+
+def _pct_signed(v) -> str:
+    try:
+        return f"{float(v):+.2f}%"
+    except Exception:
+        return "n/a"
+
+
+def _index_trio_words(sp: float, ndx: float, dow: float, verb: str = "") -> str:
+    v = f"{verb} " if verb else ""
+    return (f"the S&P 500 {v}{_pct_words(sp)}, the Nasdaq {v}{_pct_words(ndx)} "
+            f"and the Dow {v}{_pct_words(dow)}")
+
+
+# An index within this many percent of unchanged counts as "flat". 0.25 is a
+# judgment call: small enough that a session inside it genuinely reads as a
+# non-event, large enough that ordinary noise around zero doesn't register as a
+# "move" for a reader with no market background.
+_FLAT_BAND = 0.25
+
+# Mega-cap names large enough to move the S&P 500 / Nasdaq / Dow on their own
+# (approximate list by index weight — used only to decide whether a big single-
+# stock move can plausibly explain an index move, never to claim that it did).
+_INDEX_HEAVY = {
+    "AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "GOOG", "META", "AVGO", "TSLA",
+    "BRK-B", "BRK.B", "LLY", "JPM", "V", "WMT", "UNH", "XOM", "ORCL", "NFLX",
+}
+
+_FUT = "Stock futures (early trading before the market opens)"
+_OPEN_STRONG_HIGHER = ["{fut} are pointing clearly higher — {trio}.",
+                       "{fut} are firm — {trio}.",
+                       "{fut} show a solid advance — {trio}."]
+_OPEN_MODEST_HIGHER = ["{fut} are edging higher — {trio}.",
+                       "{fut} are modestly higher — {trio}.",
+                       "{fut} lean higher — {trio}."]
+_OPEN_STRONG_LOWER = ["{fut} are pointing clearly lower — {trio}.",
+                      "{fut} are under pressure — {trio}.",
+                      "{fut} show a notable decline — {trio}."]
+_OPEN_MODEST_LOWER = ["{fut} are edging lower — {trio}.",
+                      "{fut} are modestly lower — {trio}.",
+                      "{fut} lean lower — {trio}."]
+_OPEN_SPLIT = ["{fut} are split — {trio}.",
+               "{fut} are pointing in different directions — {trio}.",
+               "{fut} are mixed — {trio}."]
+
+
+def _morning_opener(sp: float, ndx: float, dow: float, group: dict, day_hash: int) -> str:
+    """Tape sentence for the morning brief. A flat tape is described as flat (not
+    "directionless... with tech leading", which contradicts itself); a rally with
+    one index barely negative names it as the laggard instead of calling the
+    whole tape mixed."""
+    vals = (sp, ndx, dow)
+    trio = _index_trio_words(sp, ndx, dow, "is")
+    if all(abs(v) <= _FLAT_BAND for v in vals):
+        trio = _index_trio_words(sp, ndx, dow)
+        return (f"{_FUT} are close to flat — {trio}. A day like this usually means "
+                f"opposing forces are cancelling out, or traders are waiting for news.")
+    if group["kind"] == "directional_with_laggard":
+        lag = ["S&P 500", "Nasdaq", "Dow"][group["laggard_idx"]]
+        word = "higher" if group["direction"] == "higher" else "lower"
+        return f"{_FUT} are pointing {word}, though not evenly — {trio}. The {lag} is the one holding back."
+    max_move = max(abs(v) for v in vals)
+    if group["kind"] == "directional":
+        up = group["direction"] == "higher"
+        strong = max_move > 0.5
+        pool = (_OPEN_STRONG_HIGHER if strong else _OPEN_MODEST_HIGHER) if up else \
+               (_OPEN_STRONG_LOWER if strong else _OPEN_MODEST_LOWER)
+        return _rot_phrase(pool, day_hash, "tape_open").format(fut=_FUT, trio=trio)
+    return _rot_phrase(_OPEN_SPLIT, day_hash, "tape_open").format(fut=_FUT, trio=trio)
+
+
+def _rates_sentence(treasury: dict, mode: str, rotation_context: dict = None,
+                    skip_growth_link: bool = False, tape_dir: str = None) -> dict:
+    """
+    ALWAYS names the 10-year yield's level plus trailing context (inclusion is
+    unconditional, Step 4b), and defines the term for a reader with no market
+    background. The >=4 basis point trip only gates the "what it means for
+    stocks" clause.
+
+    Hedging rule: the pipeline sees co-movement, not causes, so the yield-to-
+    stocks link is always stated as a general tendency ("can pressure") plus how
+    today's tape lines up with it — never as "because yields rose, stocks fell".
+    When yields and stocks moved the "wrong" way for the usual link, it says so
+    and says which side the tape sided with (conflicting drivers).
+
+    `rotation_context` (close mode): a rotation note already made a yields claim —
+    this sentence confirms or complicates it. `skip_growth_link`: the divergence
+    note already addressed yields, so this sentence doesn't repeat it.
+    Returns {"text", "has_chain"}.
+    """
+    empty = {"text": "", "has_chain": False}
+    if not treasury or treasury.get("yield") is None:
+        return empty
+    try:
+        yld = float(treasury.get("yield"))
+    except Exception:
+        return empty
+    try:
+        chg = float(treasury.get("change", 0) or 0)
+    except Exception:
+        chg = 0.0
+    bp = abs(chg) * 100
+    extreme = _rate_extreme_note(
+        yld, treasury.get("six_mo_high"), treasury.get("six_mo_high_day"),
+        treasury.get("six_mo_low"), treasury.get("six_mo_low_day"),
+    )
+    meaningful = bp >= 4
+
+    if bp < 1:
+        move_clause = "little changed on the session"
+    else:
+        unit = "basis point" if round(bp) == 1 else "basis points"
+        move_clause = (f"{'down' if chg < 0 else 'up'} {bp:.0f} {unit} "
+                       f"({abs(chg):.2f} percentage points)")
+    extreme_clause = f", {extreme}" if extreme else ""
+    sentence = (f"The 10-year Treasury yield — what the U.S. government pays to borrow for ten "
+                f"years, a benchmark for loans everywhere — is {yld:.2f}%, {move_clause}{extreme_clause}.")
+    has_chain = False
+
+    if rotation_context and rotation_context.get("wants_rates_crosscheck"):
+        implies_falling = rotation_context.get("implies_falling_yields", False)
+        has_chain = True
+        if implies_falling and chg < -0.005:
+            sentence += (" That fall fits the pattern: lower yields tend to favor growth "
+                         "companies over income-paying sectors.")
+        elif implies_falling and chg > 0.005:
+            sentence += (" That complicates the picture: yields rose today, which doesn't fit "
+                         "a simple falling-rates story, so this is an unusual pairing we can't "
+                         "fully explain from the data.")
+        elif implies_falling:
+            sentence += (" Yields barely moved, so this looks more like money shifting between "
+                         "sectors than a story about interest rates.")
+    elif meaningful and not skip_growth_link:
+        up = chg > 0
+        mech = ("Higher yields can pressure stocks, especially fast-growing technology companies, "
+                "because their profits are expected years from now and are worth less when "
+                "interest rates are higher."
+                if up else
+                "Lower yields can help stocks, especially fast-growing technology companies, "
+                "because their profits are expected years from now and are worth more when "
+                "interest rates are lower.")
+        what = "futures" if mode == "morning" else "stocks"
+        link = ""
+        if tape_dir == "lower" and up:
+            link = f" That lines up with {what} falling."
+        elif tape_dir == "higher" and up:
+            link = f" {what.capitalize()} rose anyway, so buyers outweighed that pressure."
+        elif tape_dir == "higher" and not up:
+            link = f" That lines up with {what} rising."
+        elif tape_dir == "lower" and not up:
+            link = f" {what.capitalize()} fell anyway, so other worries outweighed that help."
+        sentence += f" {mech}{link}"
+        has_chain = True
+    elif not meaningful and not skip_growth_link:
+        sentence += " Yields barely moved, so interest rates aren't pushing stocks either way."
+    return {"text": sentence, "has_chain": has_chain}
+
+
+def _commodity_sentence(commodities: list, tape_dir: str = None, energy_pct=None) -> dict:
+    """
+    AT LEAST ONE commodity (oil or gold), always (Step 4c) — whichever moved more,
+    ties to oil. A meaningful move (>=1%) gets what it implies for stocks and the
+    economy; a tiny one is just described as little changed — it doesn't get an
+    inflation story it hasn't earned. Implications are general tendencies ("can
+    feed inflation"), never claims about today's tape except via "consistent with".
+    Returns {"text", "has_chain"}.
+    """
+    def _num(c, key):
+        try:
+            return float(c.get(key, 0) or 0)
+        except Exception:
+            return 0.0
+
+    oil  = next((c for c in commodities if "crude" in c.get("name", "").lower()
+                or "oil" in c.get("name", "").lower()), None)
+    gold = next((c for c in commodities if "gold" in c.get("name", "").lower()), None)
+    if oil is None and gold is None:
+        return {"text": "", "has_chain": False}
+
+    oil_pct  = _num(oil, "pct") if oil else 0.0
+    gold_pct = _num(gold, "pct") if gold else 0.0
+    pick_oil = oil is not None and (gold is None or abs(oil_pct) >= abs(gold_pct))
+
+    if pick_oil:
+        price = _num(oil, "price")
+        if abs(oil_pct) < 1.0:
+            return {"text": (f"Crude oil was little changed at ${price:,.2f} a barrel, so energy "
+                             f"costs aren't adding pressure either way."), "has_chain": False}
+        if oil_pct > 0:
+            text = (f"Crude oil rose {oil_pct:.2f}% to ${price:,.2f} a barrel. Pricier energy raises "
+                    f"costs for airlines and shippers and can feed inflation (rising prices overall), "
+                    f"while helping oil producers.")
+            if energy_pct is not None:
+                text += (" Energy stocks rising is consistent with that." if energy_pct > 0 else
+                         " Energy stocks fell anyway, a disconnect we can't explain from the data.")
+        else:
+            text = (f"Crude oil fell {abs(oil_pct):.2f}% to ${price:,.2f} a barrel. Cheaper energy "
+                    f"lowers costs for airlines and shippers and can ease inflation, while squeezing "
+                    f"oil producers.")
+            if energy_pct is not None:
+                text += (" Energy stocks falling is consistent with that." if energy_pct < 0 else
+                         " Energy stocks rose anyway, a disconnect we can't explain from the data.")
+        return {"text": text, "has_chain": True}
+
+    price = _num(gold, "price")
+    if abs(gold_pct) < 1.0:
+        return {"text": f"Gold was little changed at ${price:,.0f} an ounce.", "has_chain": False}
+    if gold_pct > 0:
+        tail = (" — consistent with stocks falling as investors moved toward safer holdings."
+                if tape_dir == "lower" else ".")
+        text = (f"Gold rose {gold_pct:.2f}% to ${price:,.0f} an ounce. Investors often buy gold as "
+                f"a safe place to park money, so a rise can signal caution{tail}")
+    else:
+        tail = (", consistent with investors feeling comfortable taking more risk in stocks."
+                if tape_dir == "higher" else ".")
+        text = (f"Gold fell {abs(gold_pct):.2f}% to ${price:,.0f} an ounce. A drop can mean less "
+                f"demand for safe places to park money{tail}")
+    return {"text": text, "has_chain": True}
+
+
+# ── Index-divergence explanation (Step 4a) ────────────────────────────────────
+
+_DOW_30_COMPONENTS = {
+    "AAPL", "AMGN", "AMZN", "AXP", "BA", "CAT", "CRM", "CSCO", "CVX", "DIS",
+    "GS", "HD", "HON", "IBM", "JNJ", "JPM", "KO", "MCD", "MMM", "MRK",
+    "MSFT", "NKE", "NVDA", "PG", "SHW", "TRV", "UNH", "V", "VZ", "WMT",
+}
+
+
+def _divergence_note(sp: float, ndx: float, dow: float, treasury_chg, sectors: list = None,
+                     movers: dict = None, flat: bool = False, rotation_covered: bool = False,
+                     skip_yields: bool = False) -> dict:
+    """
+    Whenever the best-to-worst spread of S&P/Nasdaq/Dow is >=0.3 percentage
+    points, explain it — hedged. Mapped only from numbers already in the data
+    (yield move, sector map, a Dow member's move); if nothing maps, it says the
+    data points to no clear cause instead of inventing one.
+
+    `flat`: on a flat tape a 0.3pp gap is a "slight tilt", not a headline.
+    `skip_yields`: a rotation note already made the yields-vs-growth point, so
+    this note states only the gap itself instead of repeating it a third time.
+    Returns {"text", "addressed_yields", "has_chain"} — addressed_yields tells the
+    rates sentence not to repeat the yields point; has_chain marks a real
+    observation -> driver -> meaning chain (vs. an honest "no clear cause").
+    """
+    named = {"S&P 500": sp, "Nasdaq": ndx, "Dow": dow}
+    best_name  = max(named, key=lambda k: named[k])
+    worst_name = min(named, key=lambda k: named[k])
+    spread = named[best_name] - named[worst_name]
+    empty = {"text": "", "addressed_yields": False, "has_chain": False}
+    if spread < 0.3:
+        return empty
+
+    chg = treasury_chg if isinstance(treasury_chg, (int, float)) else 0.0
+    yields_up   = chg >= 0.04
+    yields_down = chg <= -0.04
+    gap = "more than a full percentage point" if spread >= 1.0 else f"{spread:.2f} percentage points"
+
+    def out(text, addressed=False, chain=False):
+        return {"text": text, "addressed_yields": addressed, "has_chain": chain}
+
+    growth_down = ("lower rates tend to help fast-growing tech companies most, because their profits "
+                   "lie years away and are worth more when rates fall")
+    growth_up   = ("higher rates tend to hit fast-growing tech companies hardest, because their profits "
+                   "lie years away and are worth less when rates rise")
+
+    # A named Dow member falling sharply is the one concrete, checkable explanation.
+    if worst_name == "Dow" and movers:
+        for m in (movers.get("losers", []) or []):
+            sym = m.get("symbol", "")
+            if sym in _DOW_30_COMPONENTS:
+                try:
+                    mpct = float(m.get("pct") or m.get("changesPercentage") or 0)
+                except Exception:
+                    continue
+                if mpct <= -3.0:
+                    return out(f"The Dow trailed by {gap}; {sym}, a Dow member, fell {abs(mpct):.2f}%, "
+                               f"which may account for part of that.", chain=True)
+
+    if skip_yields and best_name == "Nasdaq" and worst_name == "Dow" and not flat:
+        return out(f"The Nasdaq beat the Dow by {gap}, which suggests the gains were concentrated in "
+                   f"large technology companies rather than spread across the whole market.", True, True)
+    if skip_yields and worst_name == "Nasdaq" and not flat:
+        return out(f"The Nasdaq trailed by {gap}.", True, False)
+
+    # Dow lagging, Nasdaq/S&P ahead — the most common shape.
+    if worst_name == "Dow" and best_name in ("Nasdaq", "S&P 500"):
+        if best_name == "Nasdaq":
+            if flat:
+                lead = "The small tilt toward technology — the Nasdaq is slightly ahead of the Dow —"
+                if yields_down:
+                    return out(f"{lead} is consistent with falling yields: {growth_down}.", True, True)
+                if yields_up:
+                    return out(f"{lead} came even though yields rose, which usually pressures tech, "
+                               f"so buyers had a slight edge on balance.", True, True)
+                return out(f"{lead} isn't explained by interest rates, which were little changed.", True, False)
+            base = (f"The Nasdaq beat the Dow by {gap}, which suggests the gains were concentrated in "
+                    f"large technology companies rather than spread across the whole market.")
+            if yields_down:
+                return out(f"{base} That is consistent with the fall in yields: {growth_down}.", True, True)
+            if yields_up:
+                return out(f"{base} That happened even though yields rose, which usually pressures tech, "
+                           f"so buyers sided with technology despite the headwind.", True, True)
+            return out(f"{base} Yields were little changed, so interest rates don't explain the gap.", True, True)
+        return out(f"The S&P 500 {'was slightly ahead of' if flat else 'beat'} the Dow by {gap}, "
+                   f"though nothing in today's data points to a clear reason.")
+
+    # Nasdaq lagging, yields rising — the direct, checkable mapping.
+    if worst_name == "Nasdaq" and yields_up:
+        lead = ("The small tilt away from technology — the Nasdaq is slightly behind —" if flat
+                else f"The Nasdaq trailed by {gap}.")
+        joiner = " lines up with the rise in yields:" if flat else " That lines up with the rise in yields:"
+        return out(f"{lead}{joiner} {growth_up}.", True, True)
+
+    # Dow ahead alongside cyclical sector leadership (close mode only).
+    if best_name == "Dow" and sectors and not rotation_covered:
+        pct_map = _sector_pct_map(sectors)
+        cyc = [v for v in (_sector_lookup(pct_map, "energy"), _sector_lookup(pct_map, "financial"),
+                           _sector_lookup(pct_map, "industrial")) if v is not None]
+        if cyc and sum(cyc) / len(cyc) > 0:
+            return out("The pattern suggests money moved toward older, cheaper, economically sensitive "
+                       "companies — energy, financials, industrials — and away from the richly priced "
+                       "technology names that dominate the Nasdaq.", chain=True)
+
+    if worst_name == "Nasdaq":
+        lead = ("The small tilt away from technology — the Nasdaq is slightly behind —" if flat
+                else f"The Nasdaq trailed by {gap}.")
+        if yields_down:
+            return out(f"{lead} Falling yields usually help tech, so rates don't explain it, and "
+                       f"nothing else in today's data points to a clear cause." if not flat else
+                       f"{lead} comes even though falling yields usually help tech, so rates don't explain it.",
+                       True, False)
+        return out(f"{lead} With yields little changed, nothing in today's data points to a clear cause."
+                   if not flat else f"{lead} isn't explained by interest rates, which were little changed.",
+                   True, False)
+
+    return out(f"The {best_name} and {worst_name} split by {gap} today, though nothing in today's "
+               f"data points to a clear single cause.")
+
+
+def _flat_day_why(treasury_chg, oil_pct, gold_pct, events: list, yields_addressed: bool,
+                  used_headlines: set, other_chain: bool = False) -> dict:
+    """
+    A flat or directionless tape still needs a WHY: flat days happen because
+    forces offset or because traders are waiting. Names the offsetting forces
+    from the data (yields vs oil vs gold), or a qualifying scheduled event they
+    may be waiting on. If neither exists it says plainly that this was a quiet,
+    low-conviction session — it never invents a driver.
+    `other_chain`: the day is already explained by another sentence (a tilt tied
+    to yields, a commodity implication), so a one-sided "could have helped but
+    wasn't enough" would only repeat it; only a genuinely OFFSETTING pair, a
+    waiting-for event, or the plain quiet-session statement is added.
+    Returns {"text", "has_chain", "event_used"}.
+    """
+    chg = treasury_chg if isinstance(treasury_chg, (int, float)) else 0.0
+    down, up = [], []   # forces that normally push stocks down / up
+    if not yields_addressed:
+        if chg >= 0.04:
+            down.append("rising yields")
+        elif chg <= -0.04:
+            up.append("falling yields")
+    if isinstance(oil_pct, (int, float)):
+        if oil_pct >= 1.5:
+            down.append("pricier oil")
+        elif oil_pct <= -1.5:
+            up.append("cheaper oil")
+    if isinstance(gold_pct, (int, float)) and gold_pct >= 1.0:
+        down.append("a bid for safe-haven gold")
+
+    parts = []
+    if down and up:
+        parts.append(f"{' and '.join(down).capitalize()} could weigh on stocks while "
+                     f"{' and '.join(up)} could support them, which may help explain why the tape "
+                     f"stayed close to flat.")
+    elif down and not other_chain:
+        parts.append(f"{' and '.join(down).capitalize()} could have weighed on stocks, but it "
+                     f"wasn't enough to move the tape.")
+    elif up and not other_chain:
+        parts.append(f"{' and '.join(up).capitalize()} could have helped stocks, but it wasn't "
+                     f"enough to move the tape.")
+
+    event_used = None
+    for ev in events or []:
+        if ev["scheduled"] is True and ev["headline"].get("title", "") not in used_headlines:
+            event_used = ev
+            parts.append(f"Traders may be waiting for {_event_phrase(ev)}, flagged in today's headlines.")
+            used_headlines.add(ev["headline"].get("title", ""))
+            break
+
+    if not parts:
+        if other_chain:
+            return {"text": "", "has_chain": True, "event_used": None}
+        return {"text": ("Nothing in today's data points to a clear driver, so this looks like a "
+                         "quiet, low-conviction session."), "has_chain": False, "event_used": None}
+    return {"text": " ".join(parts), "has_chain": True, "event_used": event_used}
+
+
+def _overseas_sentence(global_indices: list, tape_dir: str) -> str:
+    """Europe AND Asia both get real numbers, each classified from its own data
+    (never by copying the US tape's label), with no "too"/"also" wording that
+    assumes an earlier classification."""
+    gl = global_indices if isinstance(global_indices, list) else []
+    regions = (("Europe", [g for g in gl if g.get("session") == "Europe"]),
+               ("Asia", [g for g in gl if g.get("session") == "Asia (overnight)"]))
+    parts, dirs, mags = [], [], []
+    for name, lst in regions:
+        if not lst:
+            continue
+        try:
+            vals = [float(g.get("pct", 0) or 0) for g in lst]
+        except Exception:
+            continue
+        desc = ", ".join(f"{g.get('name', '')} {_pct_words(g.get('pct', 0))}" for g in lst[:2])
+        mags.extend(abs(v) for v in vals)
+        if all(abs(v) < 0.15 for v in vals):
+            parts.append(f"{name} was flat ({desc})"); dirs.append("flat")
+            continue
+        grp = _classify_group_direction(vals)
+        if grp["kind"] in ("directional", "directional_with_laggard"):
+            if name == "Europe":
+                parts.append(f"Europe is {grp['direction']} ({desc})")
+            else:
+                parts.append(f"Asia finished {grp['direction']} overnight ({desc})")
+            dirs.append(grp["direction"])
+        else:
+            parts.append(f"{name} was split ({desc})"); dirs.append("split")
+    if not parts:
+        return ""
+    avg = sum(mags) / len(mags) if mags else 0.0
+    if all(d == "higher" for d in dirs):
+        lead, overseas = ("Overseas was mildly positive" if avg < 0.75 else "Overseas was positive"), "higher"
+    elif all(d == "lower" for d in dirs):
+        lead, overseas = ("Overseas was mildly negative" if avg < 0.75 else "Overseas was weak"), "lower"
+    elif all(d == "flat" for d in dirs):
+        lead, overseas = "Overseas was quiet", "flat"
+    else:
+        lead, overseas = "Overseas was split", "split"
+    tail = ""
+    if overseas in ("higher", "lower") and tape_dir == overseas:
+        tail = ", which lines up with the US open"
+    elif overseas in ("higher", "lower") and tape_dir in ("higher", "lower"):
+        tail = ", pulling the other way from US futures"
+    elif overseas in ("higher", "lower") and tape_dir == "flat" and avg < 0.75:
+        tail = ", which is consistent with a calm open"
+    return f"{lead} — {' and '.join(parts)}{tail}."
+
+def _rotation_interpretation_note(sector_pct: dict, treasury_chg, oil_pct, oil_price) -> dict:
+    """
+    Names what a sector pairing MEANS, hedged ("consistent with", "the pattern
+    suggests") because sector moves show co-movement, not intent. Checked in
+    priority order (most specific pattern first):
+      1. Utilities + Real Estate down, Technology up -> rate-sensitive rotation
+         into growth (cross-checked against the actual yield move by the rates
+         sentence, so a day that contradicts the story says so).
+      2. Financials + Industrials + Energy up, Technology down -> cyclical rotation.
+      3. Defensives up, everything else down -> investors turning cautious.
+      4. Energy alone, tied to (or flagged against) crude.
+    Returns {"text", "mentions_rates", "implies_falling_yields", "mentions_commodity"}.
+    """
+    util   = _sector_lookup(sector_pct, "utilities")
+    re_    = _sector_lookup(sector_pct, "real estate")
+    tech   = _sector_lookup(sector_pct, "technology")
+    fin    = _sector_lookup(sector_pct, "financial")
+    ind    = _sector_lookup(sector_pct, "industrial")
+    nrg    = _sector_lookup(sector_pct, "energy")
+    stap   = _sector_lookup(sector_pct, "staples")
+    health = _sector_lookup(sector_pct, "health")
+
+    empty = {"text": "", "mentions_rates": False, "implies_falling_yields": False, "mentions_commodity": False}
+
+    # A rotation claim needs a real gap (>=1 percentage point): a broad rally in which
+    # two sectors merely lag is not "money moving out of" them.
+    if None not in (util, re_, tech) and util < -_FLAT_BAND and re_ < -_FLAT_BAND and tech > 0 \
+       and tech - (util + re_) / 2 >= 1.0:
+        text = (f"Utilities ({_pct_words(util)}) and real estate ({_pct_words(re_)}) lagged while "
+                f"technology rose {tech:.2f}% — a pairing consistent with investors moving out of "
+                f"income-paying, interest-rate-sensitive sectors and into growth. Utilities and real "
+                f"estate typically carry heavy debt and pay steady income, which makes them among the "
+                f"first things investors sell when the outlook for interest rates shifts.")
+        return {"text": text, "mentions_rates": True, "implies_falling_yields": True, "mentions_commodity": False}
+
+    if None not in (fin, ind, nrg, tech) and fin > 0 and ind > 0 and nrg > 0 and tech < 0 \
+       and (fin + ind + nrg) / 3 - tech >= 1.0:
+        text = (f"Financials ({_pct_words(fin)}), industrials ({_pct_words(ind)}) and energy "
+                f"({_pct_words(nrg)}) rose while technology was {_pct_words(tech)} — a combination "
+                f"consistent with money moving toward cheaper, older, economically sensitive companies "
+                f"and away from richly priced technology names.")
+        mentions_commodity = False
+        if isinstance(oil_pct, (int, float)) and isinstance(oil_price, (int, float)):
+            if oil_pct >= 0:
+                text += f" Energy's gain fits crude oil's rise to ${oil_price:,.2f} a barrel ({_pct_words(oil_pct)})."
+            else:
+                text += (f" Energy rose even though crude oil fell to ${oil_price:,.2f} a barrel "
+                         f"({_pct_words(oil_pct)}), a disconnect we can't explain from the data.")
+            mentions_commodity = True
+        return {"text": text, "mentions_rates": False, "implies_falling_yields": False,
+                "mentions_commodity": mentions_commodity}
+
+    defensive_vals = [v for v in (stap, util, health) if v is not None]
+    non_defensive_vals = [v for n, v in sector_pct.items()
+                          if not any(f in n.lower() for f in ("staples", "utilities", "health"))]
+    if defensive_vals and non_defensive_vals and all(v > 0 for v in defensive_vals) \
+       and all(v < 0 for v in non_defensive_vals):
+        text = ("With defensive sectors — staples, utilities, health care — the only ones higher, "
+                "the pattern suggests investors turning cautious rather than chasing risk.")
+        return {"text": text, "mentions_rates": False, "implies_falling_yields": False, "mentions_commodity": False}
+
+    if nrg is not None and isinstance(oil_pct, (int, float)) and isinstance(oil_price, (int, float)):
+        same = (nrg < 0 and oil_pct < 0) or (nrg > 0 and oil_pct > 0)
+        opposite = (nrg < 0 and oil_pct > 0) or (nrg > 0 and oil_pct < 0)
+        if same:
+            text = (f"Energy stocks {'rose' if nrg > 0 else 'fell'} {abs(nrg):.2f}%, in step with crude oil, "
+                    f"which {'rose' if oil_pct > 0 else 'fell'} {abs(oil_pct):.2f}% to ${oil_price:,.2f} a barrel.")
+            return {"text": text, "mentions_rates": False, "implies_falling_yields": False, "mentions_commodity": True}
+        if opposite:
+            text = (f"Energy stocks {'rose' if nrg > 0 else 'fell'} {abs(nrg):.2f}% even though crude oil "
+                    f"moved the other way ({_pct_words(oil_pct)} to ${oil_price:,.2f} a barrel), a "
+                    f"disconnect we can't explain from the data.")
+            return {"text": text, "mentions_rates": False, "implies_falling_yields": False, "mentions_commodity": True}
+
+    return empty
+
+
+# Headlines are never pasted or quoted. Zero-AI means we can't paraphrase freely, so a
+# headline is reduced to the TOPIC it covers, in the brief's own words — what it is
+# about ("an analyst price-target change"), never what it concludes or why a stock moved.
+# First matching pattern wins; word-boundary matched like every other keyword list here.
+_TICKER_HEADLINE_TOPICS = [
+    (r"\b(earnings|quarterly results|revenue|profit|eps)\b", "its latest earnings or results"),
+    (r"\bupgrade[sd]?\b", "an analyst upgrade"),
+    (r"\bdowngrade[sd]?\b", "an analyst downgrade"),
+    (r"\bprice targets?\b", "an analyst price-target change"),
+    (r"\b(guidance|outlook|forecast)\b", "its financial outlook"),
+    (r"\b(acquir\w+|acquisition|merger|takeover|buyout)\b", "an acquisition or merger"),
+    (r"\b(lawsuit|sues?|sued|settlement|probe|investigation|antitrust)\b", "legal or regulatory action"),
+    (r"\b(fda|approval|approved|recall)\b", "a regulatory decision"),
+    (r"\b(launch\w*|unveil\w*|introduc\w+|new product)\b", "a product announcement"),
+    (r"\b(layoffs?|job cuts|restructuring)\b", "job cuts or restructuring"),
+    (r"\b(buybacks?|dividends?|stock split)\b", "a buyback, dividend or stock split"),
+    (r"\b(ceo|cfo|steps? down|resigns?|appoint\w*)\b", "a leadership change"),
+    (r"\b(contracts?|partnerships?|deals?|agreements?)\b", "a business deal"),
+    (r"\b(slips?|slid\w*|falls?|fell|drops?|dropp\w+|plunge\w*|surges?|surged|jumps?|jumped|soars?|soared|rall\w+)\b",
+     "the stock's recent move"),
+]
+
+_EVENT_PHRASES = {
+    "federal reserve": "a Federal Reserve decision or comment", "fed chair": "a Federal Reserve decision or comment",
+    "fomc": "a Fed policy meeting", "rate decision": "an interest-rate decision",
+    "rate cut": "a possible interest-rate cut", "rate hike": "a possible interest-rate hike",
+    "cpi": "an inflation report", "ppi": "a wholesale-inflation report", "core inflation": "an inflation report",
+    "inflation report": "an inflation report", "jobs report": "the jobs report", "payrolls": "the jobs report",
+    "unemployment claims": "weekly jobless claims", "treasury auction": "a Treasury bond auction",
+    "european central bank": "a European Central Bank decision", "ecb": "a European Central Bank decision",
+    "bank of japan": "a Bank of Japan decision", "boj": "a Bank of Japan decision",
+    "bank of england": "a Bank of England decision", "central bank": "a central bank decision",
+    "fed minutes": "minutes from the last Fed meeting", "policy meeting": "a central bank policy meeting",
+    "tariff": "a tariff announcement", "trade deal": "trade-deal news", "trade war": "trade-policy news",
+    "trade policy": "trade-policy news", "summit": "a leaders' summit", "state visit": "a foreign leader's visit",
+    "foreign leader": "a foreign leader's visit", "election": "an election", "geopolitical": "geopolitical tension",
+    "sanctions": "new sanctions", "government shutdown": "a possible government shutdown",
+    "opec": "an OPEC decision on oil supply", "oil supply": "oil-supply news", "supply chain": "supply-chain disruption",
+    "earnings report": "a major company's earnings report", "quarterly results": "a major company's results",
+    "keynote": "a company keynote", "product launch": "a product launch", "unveils": "a product announcement",
+    "merger": "a major merger", "acquisition": "a major acquisition", "regulatory approval": "a regulatory decision",
+    "antitrust": "an antitrust action", "ftc probe": "a regulatory probe", "sec investigation": "a regulatory probe",
+    "lawsuit": "a lawsuit",
+}
+_EVENT_CATEGORY_FALLBACK = {"MONETARY": "central-bank or economic-data news",
+                            "MACRO_POLITICAL": "a policy or geopolitical development",
+                            "CORPORATE": "a major company announcement"}
+
+
+def _headline_topic(h: dict, field: str = None) -> str:
+    """The topic a ticker-specific headline covers, in the brief's own words, or ""
+    if no pattern matches (the caller then says it can't tell what it covers)."""
+    parts = [h.get("title", "") or "", h.get("snippet", "") or ""]
+    if field == "snippet":
+        parts.reverse()
+    for text in parts:
+        tl = text.lower()
+        for pat, phrase in _TICKER_HEADLINE_TOPICS:
+            if re.search(pat, tl):
+                return phrase
+    return ""
+
+
+def _event_phrase(event: dict) -> str:
+    return _EVENT_PHRASES.get(event.get("term", ""), _EVENT_CATEGORY_FALLBACK.get(event.get("category", ""), "a market-moving development"))
+
+
+def _outsized_mover_note(movers: dict, headlines: list, used_headlines: set,
+                         earnings_today: set = None, tape_dir: str = None) -> tuple:
+    """
+    Any mover beyond +/-8% is the most interesting thing in the brief and gets its
+    own sentence, ranked by ABSOLUTE magnitude (a +14.56% gainer outranks a -3.26%
+    loser). A matching headline is summarized by topic in the brief's own words
+    (never quoted, never asserted as the cause); with no ticker-specific headline
+    it says the move happened without news we could find. It also says whether the stock is big enough to move an
+    index or too small to explain the index move.
+    Returns (sentence, symbol_or_None).
+    """
+    earnings_today = earnings_today or set()
+    candidates = []
+    for lst in (movers.get("gainers", []) or [], movers.get("losers", []) or []):
+        for m in lst:
+            try:
+                pct = float(m.get("pct") or m.get("changesPercentage") or 0)
+            except Exception:
+                continue
+            if abs(pct) >= 8.0:
+                candidates.append((abs(pct), pct, m))
+    if not candidates:
+        return "", None
+
+    candidates.sort(key=lambda t: t[0], reverse=True)
+    _, pct, m = candidates[0]
+    sym   = m.get("symbol", "")
+    name  = _company_short_name(m.get("name", "")) or sym
+    label = f"{name} ({sym})" if name != sym else sym
+
+    if sym in _INDEX_HEAVY:
+        move = {"higher": "gain", "lower": "decline"}.get(tape_dir, "move")
+        scale = f" It is large enough to move the major indexes, so it may explain part of the market's {move}."
+    else:
+        scale = " It is one smaller company, so it doesn't explain the index move."
+
+    if sym in earnings_today:
+        return (f"{label} was the day's biggest mover, {_pct_words(pct)}, after reporting earnings "
+                f"today.{scale}"), sym
+
+    if not headlines:
+        return (f"{label} was the day's biggest mover, {_pct_words(pct)}; today's headline feed was "
+                f"empty, so we can't say whether there was company news.{scale}"), sym
+
+    h, is_specific, field = _find_headline_for_symbol(headlines, sym, m.get("name", ""), sector="",
+                                                      exclude=used_headlines)
+    if h and is_specific:
+        used_headlines.add(h.get("title", ""))
+        topic = _headline_topic(h, field)
+        what = (f"a same-day headline covers {topic}" if topic else
+                "a same-day headline mentions it, though we can't tell what it covers")
+        return f"{label} was the day's biggest mover, {_pct_words(pct)}; {what}.{scale}", sym
+    return (f"{label} was the day's biggest mover, {_pct_words(pct)}, with no company news we could "
+            f"find, which can mean positioning or an analyst call we can't see.{scale}"), sym
+
+
+def _event_clause(event: dict, mode: str, used_headlines: set) -> str:
+    """
+    One hedged sentence per qualifying event, naming what the headline is ABOUT in the
+    brief's own words (never the headline itself). Positioning is stated as a
+    possibility ("may be holding back"), never as a fact — the pipeline can see that
+    an event is in the news, not what traders were thinking.
+    """
+    used_headlines.add(event["headline"].get("title", ""))
+    phrase, category = _event_phrase(event), event["category"]
+    if event["scheduled"] is True:
+        if category == "MONETARY":
+            return f"Traders may be holding back ahead of {phrase}, which headlines flag for today."
+        if category == "MACRO_POLITICAL":
+            return f"Markets may be watching {phrase}, flagged in today's headlines."
+        return f"On the calendar today, per the headlines: {phrase}."
+    return f"Headlines today point to {phrase}."
+
+
+def _candidate_cross_reference_note(movers: dict, scan_candidates: list, exclude_syms: set = None) -> str:
+    """A big mover that is also on today's fundamentals-scan candidate list.
+    Direction-aware: a gainer "ranks #N among today's candidates"; a decliner
+    "fell... but still scored N" — the old single template ("...and still scored
+    into the candidate list") only made sense for a decliner."""
+    exclude_syms = exclude_syms or set()
+    ranks = {c.get("ticker"): (i + 1, c.get("score"))
+             for i, c in enumerate(scan_candidates or []) if c.get("ticker")}
+    for m in (movers.get("gainers", []) or []) + (movers.get("losers", []) or []):
+        sym = m.get("symbol", "")
+        if not sym or sym in exclude_syms or sym not in ranks:
+            continue
+        try:
+            pct = float(m.get("pct") or m.get("changesPercentage") or 0)
+        except Exception:
+            continue
+        if abs(pct) < 2.0:
+            continue
+        rank, score = ranks[sym]
+        try:
+            score_str = f"{float(score):.0f}"
+        except Exception:
+            score_str = str(score)
+        name = _company_short_name(m.get("name", "")) or sym
+        label = f"{name} ({sym})" if name != sym else sym
+        if pct >= 0:
+            return (f"{label} gained {abs(pct):.2f}% and ranks #{rank} among today's "
+                    f"candidates (score {score_str}).")
+        return (f"{label} fell {abs(pct):.2f}% but still scored {score_str} (ranked #{rank}) among "
+                f"today's candidates.")
+    return ""
+
+
+def _day_verb(p: float) -> str:
+    if p >= 0:
+        return "rose"
+    return "slipped" if p > -1 else "fell"
+
+
+def _holdings_close_sentences(valid_day: list, perf_since: dict, sector_by_ticker: dict,
+                              sp: float, ndx: float, headlines: list, used_headlines: set) -> list:
+    """Close-mode portfolio: day performance and since-entry performance both
+    stated explicitly, plus one hedged chain tying the biggest-moving holding to
+    the market (or flagging that it moved against it)."""
+    if not valid_day:
+        return []
+    best_t, best_p   = max(valid_day, key=lambda x: x[1])
+    worst_t, worst_p = min(valid_day, key=lambda x: x[1])
+    out = []
+    if best_t == worst_t:
+        since = perf_since.get(best_t)
+        tail = f"; since entry it stands at {_pct_signed(since)}" if isinstance(since, (int, float)) else ""
+        out.append(f"Your one holding, {best_t}, {_day_verb(best_p)} {abs(best_p):.2f}% on the day{tail}.")
+    else:
+        bits = [perf_since.get(t) for t in (best_t, worst_t)]
+        tail = (f"; since entry they stand at {_pct_signed(bits[0])} and {_pct_signed(bits[1])}"
+                if all(isinstance(b, (int, float)) for b in bits) else "")
+        out.append(f"Among your holdings, {best_t} {_day_verb(best_p)} {abs(best_p):.2f}% on the day and "
+                   f"{worst_t} {_day_verb(worst_p)} {abs(worst_p):.2f}%{tail}.")
+
+    sym, p = max(valid_day, key=lambda x: abs(x[1]))
+    if abs(p) >= 0.3:
+        h, is_specific, _ = _find_headline_for_symbol(headlines, sym, "", sector="", exclude=used_headlines)
+        if not (h and is_specific):
+            no_news = "we found no headline explaining it" if headlines else "today's headline feed was empty"
+            sector = (sector_by_ticker.get(sym) or "").lower()
+            tech = "tech" in sector
+            bench_name, bench = ("Nasdaq", ndx) if tech else ("S&P 500", sp)
+            kind = "a technology stock" if tech else "a stock"
+            if (p >= 0) == (bench >= 0):
+                out.append(f"{sym} is {kind}, so its move is consistent with the {bench_name}'s "
+                           f"{'rise' if bench >= 0 else 'drop'} of {abs(bench):.2f}%.")
+            else:
+                out.append(f"{sym} moved against the {bench_name} ({_pct_words(bench)}), which points to "
+                           f"something specific to the company; {no_news}.")
+    return out
+
+
+def _loop_close_note(snapshot_data: list, mem: dict, divergence_spread: float = None,
+                     best_index_name: str = None, worst_index_name: str = None) -> str:
+    """
+    Closes the loop against this morning's call, graded against the S&P 500 only.
+      - A FLAT call (S&P within +/-0.15% at the morning call) followed by an S&P
+        move beyond +/-0.5% is a miss, reported plainly ("We expected a quiet
+        open; stocks rallied instead"), not softened. Within +/-0.5% the quiet
+        call held.
+      - A directional call is "wrong" only when the S&P closed the opposite way
+        by more than 0.15%; a flat finish is "didn't pan out", a same-direction
+        finish is held / mostly held / partly held (breadth + conviction).
+    Older morning entries without `sp_pct_called` are mapped from the composite
+    label (mixed -> a flat call) rather than skipped. Thresholds (0.15 flat call,
+    0.5 miss) are the stated spec; the 0.15% "thin move" cutoff for partly held is
+    a judgment call.
+    A missing morning record is logged loudly, not silently skipped.
+    """
+    today_iso = _today_ct_iso()
+    history = (mem or {}).get("briefing_history", [])
+    morning_entry = next(
+        (e for e in reversed(history) if e.get("date") == today_iso and e.get("type") == "morning"),
+        None,
+    )
+    if not morning_entry:
+        print(f"[LOOP-CLOSE] Skipped — no morning record found for {today_iso}; "
+              f"cannot close the loop on this morning's call. If this persists, "
+              f"check whether the morning workflow's memory commit is silently failing.")
+        return ""
+
+    sp_called = morning_entry.get("sp_pct_called")
+    if not isinstance(sp_called, (int, float)):
+        sp_called = {"higher": 1.0, "lower": -1.0, "mixed": 0.0}.get(morning_entry.get("direction_called"))
+        if sp_called is None:
+            return ""
+
+    sp_close = None
+    for item in snapshot_data:
+        if item.get("name") == "S&P 500":
+            try:
+                sp_close = float(item.get("pct") or item.get("changesPercentage") or 0)
+            except Exception:
+                sp_close = None
+            break
+    if sp_close is None:
+        return ""
+
+    breadth_differed = isinstance(divergence_spread, (int, float)) and divergence_spread >= 0.3
+    has_names = best_index_name and worst_index_name and best_index_name != worst_index_name
+
+    if abs(sp_called) <= 0.15:
+        if abs(sp_close) > 0.5:
+            rally = sp_close > 0
+            tail = ""
+            if breadth_differed and has_names:
+                if rally and best_index_name == "Nasdaq":
+                    tail = ", led by tech"
+                elif rally:
+                    tail = f", led by the {best_index_name}"
+                elif worst_index_name == "Nasdaq":
+                    tail = ", with tech falling hardest"
+                else:
+                    tail = f", with the {worst_index_name} falling hardest"
+            return (f"We expected a quiet open; stocks {'rallied' if rally else 'fell'} instead{tail} — "
+                    f"a miss on this morning's call.")
+        return (f"We expected a quiet open, and the session stayed fairly calm (the S&P 500 "
+                f"{_pct_words(sp_close)}), so that call held.")
+
+    called_sign = "higher" if sp_called >= 0 else "lower"
+    actual_sign = "higher" if sp_close >= 0 else "lower"
+
+    if called_sign != actual_sign:
+        if abs(sp_close) <= 0.15:
+            return (f"We called it {called_sign} this morning, but the S&P 500 finished essentially "
+                    f"unchanged, so the call didn't pan out.")
+        return (f"We called the tape {called_sign} this morning; the S&P closed "
+                f"{actual_sign} instead — that one didn't hold.")
+
+    if not breadth_differed:
+        return f"We called the tape {called_sign} this morning, and the S&P held that call through the close."
+
+    if has_names:
+        led_name = "tech" if best_index_name == "Nasdaq" else best_index_name
+        lag_clause = f", though the gains stayed concentrated in {led_name} while the {worst_index_name} slipped"
+    else:
+        lag_clause = ", though the move stayed uneven across the market"
+
+    if abs(sp_close) >= 0.15:
+        return f"We called it {called_sign} this morning and the S&P delivered{lag_clause}."
+    return (f"We called it {called_sign} this morning, and the S&P technically agreed{lag_clause} — "
+            f"the move itself was thin enough that this is a partial hold more than a clean one.")
 
 
 def _build_market_narrative(
@@ -854,48 +1875,40 @@ def _build_market_narrative(
     scan_candidates: list = None,
 ) -> tuple:
     """
-    ONE shared priority ladder for both briefs (mode="morning" / "close") —
-    RATES, OIL/GOLD, and BREADTH all live here once, not forked into two
-    copies that can (and did) drift apart. Mode-specific rules layer on top
-    of the shared ladder rather than reimplementing it:
+    ONE shared narrative engine for both briefs (mode="morning" / "close").
 
-      - morning: HANDOFF (Europe confirm/contradict, Asia flat-or-not) after
-        the shared ladder, plus a SENTIMENT-GATE headline fallback if the
-        entire ladder stays silent (a genuinely quiet premarket). P2 is
-        forward-looking earnings + a portfolio/headline intersection line.
-      - close: RATE-SENSITIVE COMPOSITE is checked BEFORE the shared RATES
-        step (both would otherwise redundantly cite the same yield move) and
-        PATH (intraday shape) is appended after the ladder. P2 is movers +
-        candidate cross-reference + portfolio day-performance + LOOP-CLOSE.
+    The standard it is written to: every paragraph carries at least one cause
+    chain (observation -> candidate driver from the data -> what that means for
+    stocks), written for a reader with no market background (yield, basis point
+    and rotation are all defined where they first appear) — and the pipeline only
+    sees co-movement, not causes, so a cause is never stated as fact. Every causal
+    sentence is hedged ("consistent with", "lines up with", "may", "can") and
+    traceable to a number or headline already in the data; when nothing supports
+    a cause the output says so plainly instead of inventing one. A flat tape gets
+    a WHY too (offsetting forces, a waiting-for event, or "quiet, low-conviction
+    session"). Where two drivers conflict, it says which one the tape sided with.
 
-    Two rules within the "shared" ladder still branch on mode, deliberately:
+    P1 layers, in order (mode-specific steps noted):
+      1. OPENER — morning: tape from the three indices (flat / directional /
+         directional-with-laggard / split); close: sector-breadth classification
+         (rotation / broad rally / broad selloff / mixed / flat).
+      2. ROTATION INTERPRETATION (close) — what the sector pairing is consistent with.
+      3. RATES — always, defined, with trailing context; sits BEFORE the
+         divergence note so that note can refer back to it.
+      4. INDEX-DIVERGENCE EXPLANATION (>=0.3pp spread; a "slight tilt" on a flat tape).
+      5. FLAT-DAY WHY (flat tape) — offsetting forces / waiting-for event / quiet session.
+      6. COMMODITY — always at least one; EVENT — at most two, signal-tested.
+      7. HANDOFF (morning) — Europe and Asia both with numbers; PATH (close).
+    If P1 exceeds its word ceiling, the lowest-priority optional sentences are
+    dropped (events first); chain-bearing sentences are never dropped.
 
-      - BREADTH: premarket has no sector-level data at all (sectors isn't
-        even fetched pre-open), so morning's breadth read is a same-tape
-        Dow-vs-Nasdaq gap qualifier clause tacked onto the opening sentence,
-        while close's is a full sector-breadth classification (rotation /
-        broad rally / broad selloff / mixed) via _classify_close_tape. Same
-        question ("what's actually moving under the index-level number"),
-        answered with whatever breadth data that time of day actually has.
-      - RATES: the number/threshold/extreme-vs-6mo-range logic is identical
-        for both, but the framing differs — morning is forward-looking
-        ("could be a headwind/tailwind" for a session that hasn't happened
-        yet); close is a past-tense recap (the session's already over, so
-        there's nothing left to be a headwind FOR). Same trigger, same
-        numbers, different tense.
+    P2 is mode-specific: morning = earnings + holdings (best/worst, since-entry,
+    headline intersection or an honest "none in the news"); close = outsized
+    mover (own sentence, >=8%), ordinary movers, holdings (day vs since-entry,
+    explicitly), candidate cross-reference (direction-aware), LOOP-CLOSE.
 
-    One real behavior change from this consolidation: the close brief now
-    gets the same standalone OIL/GOLD sentence morning always had (previously
-    close only ever mentioned gold as one of two possible RATE-SENSITIVE
-    COMPOSITE corroborators, and never mentioned oil at all). Gold is skipped
-    here if the composite note already cited it, so it's never named twice
-    in the same brief.
-
-    Returns (text, log_data). text is "P1\\n\\nP2" (caller splits on the blank
-    line for two <p> tags). For mode=="close", log_data is always {} — close's
-    own learning-loop log entry is built independently in close() from raw
-    snapshot/sector/mover data (a different shape than morning's log_data),
-    unchanged by this consolidation.
+    Returns (text, log_data). text is "P1\\n\\nP2". For mode=="close", log_data is
+    always {} — close's own learning-loop entry is built in close().
     """
     import hashlib
     from datetime import date as _date
@@ -904,6 +1917,7 @@ def _build_market_narrative(
     commodities = commodities if isinstance(commodities, list) else []
     sectors     = sectors if isinstance(sectors, list) else []
     mem         = mem if isinstance(mem, dict) else {}
+    used_headlines = set()  # nothing gets quoted twice in one summary
 
     idx = {}
     for item in snapshot_data:
@@ -914,38 +1928,76 @@ def _build_market_narrative(
             idx[name] = 0.0
 
     sp, ndx, dow = idx.get("S&P 500", 0.0), idx.get("Nasdaq", 0.0), idx.get("Dow", 0.0)
-    tape_tone = _classify_direction(snapshot_data)  # 'higher' / 'lower' / 'mixed' / 'unknown'
-    all_vals  = [v for v in (sp, ndx, dow) if v != 0.0]
-    max_move  = max((abs(v) for v in all_vals), default=0.0)
+    tape_tone = _classify_direction(snapshot_data)  # legacy composite label, kept for the stored log field
+    named = {"S&P 500": sp, "Nasdaq": ndx, "Dow": dow}
+    best_index_name  = max(named, key=lambda k: named[k])
+    worst_index_name = min(named, key=lambda k: named[k])
+    divergence_spread = named[best_index_name] - named[worst_index_name]
+
+    flat  = all(abs(v) <= _FLAT_BAND for v in (sp, ndx, dow))
+    group = _classify_group_direction([sp, ndx, dow])
+    if flat:
+        tape_dir = "flat"
+    elif group["kind"] in ("directional", "directional_with_laggard"):
+        tape_dir = group["direction"]
+    else:
+        tape_dir = "mixed"
 
     day_hash = int(hashlib.md5(_date.today().isoformat().encode()).hexdigest(), 16)
 
-    p1_sentences = []
+    treasury_chg = None
+    if treasury and treasury.get("yield") is not None:
+        try:
+            treasury_chg = float(treasury.get("change", 0) or 0)
+        except Exception:
+            treasury_chg = None
 
-    # ── BREADTH-inflected opener ───────────────────────────────────────────
-    # mode-conditional by data availability, not a duplicate implementation —
-    # see docstring.
-    close_tape = None
+    def _cnum(c, key):
+        try:
+            return float(c.get(key, 0) or 0)
+        except Exception:
+            return 0.0
+
+    oil_c  = next((c for c in commodities if "crude" in c.get("name", "").lower()
+                  or "oil" in c.get("name", "").lower()), None)
+    gold_c = next((c for c in commodities if "gold" in c.get("name", "").lower()), None)
+    oil_pct   = _cnum(oil_c, "pct") if oil_c else None
+    oil_price = _cnum(oil_c, "price") if oil_c else None
+    gold_pct  = _cnum(gold_c, "pct") if gold_c else None
+
+    items = []          # (priority, text) — priority 1 = chain/core (never trimmed), 2-3 = optional
+    chain_found = False
+
+    def add(text, pri):
+        if text:
+            items.append((pri, text))
+
+    # ── 1. OPENER ──────────────────────────────────────────────────────────
     if mode == "close":
         close_tape = _classify_close_tape(sp, ndx, dow, sectors)
+        trio = _index_trio_words(sp, ndx, dow)
         if close_tape["kind"] == "rotation":
             dow_word = "closed flat" if abs(dow) < 0.10 else f"closed {'up' if dow >= 0 else 'down'} ({_fmt(dow)})"
             ndx_verb = "gave up" if ndx < 0 else "gained"
-            opener = (f"Not a sell-off — a rotation. The Dow {dow_word} while the Nasdaq {ndx_verb} "
-                     f"{abs(ndx):.2f}%, and {close_tape['up_count']} of {close_tape['total']} sectors finished green.")
+            opener = (f"Not a sell-off — a rotation, meaning money moved between parts of the market "
+                      f"rather than leaving it. The Dow {dow_word} while the Nasdaq {ndx_verb} "
+                      f"{abs(ndx):.2f}%, and {close_tape['up_count']} of {close_tape['total']} sectors "
+                      f"finished higher.")
             out_txt = _join_sector_moves(close_tape["down_sectors"][:3])
             in_txt  = _join_sector_moves(close_tape["up_sectors"][:2])
             if out_txt and in_txt:
                 opener += f" Money left {out_txt} for {in_txt}."
-            p1_sentences.append(opener)
         elif close_tape["kind"] in ("broad_rally", "broad_selloff"):
-            verb      = "rallied" if close_tape["kind"] == "broad_rally" else "sold off"
-            dir_count = close_tape["up_count"] if close_tape["kind"] == "broad_rally" else close_tape["down_count"]
-            color     = "green" if close_tape["kind"] == "broad_rally" else "red"
-            p1_sentences.append(
-                f"Markets {verb} today — {dir_count} of {close_tape['total']} sectors {color}. "
-                f"S&P {_fmt(sp)}, Nasdaq {_fmt(ndx)}, Dow {_fmt(dow)}."
-            )
+            rally = close_tape["kind"] == "broad_rally"
+            n = close_tape["up_count"] if rally else close_tape["down_count"]
+            opener = (f"Stocks {'rallied' if rally else 'sold off'} broadly today — {n} of "
+                      f"{close_tape['total']} sectors {'rose' if rally else 'fell'}, with {trio}. "
+                      f"With so many sectors moving together, this was a wide "
+                      f"{'rise' if rally else 'decline'} rather than a few big companies "
+                      f"{'carrying' if rally else 'dragging'} the index.")
+        elif flat:
+            opener = (f"Stocks ended close to unchanged today — {trio} — with {close_tape['up_count']} "
+                      f"of {close_tape['total']} sectors higher.")
         else:
             best_n, best_p   = close_tape["best_sector"]
             worst_n, worst_p = close_tape["worst_sector"]
@@ -955,225 +2007,137 @@ def _build_market_narrative(
                 driver = f", dragged by {worst_n} ({_fmt(worst_p)})"
             else:
                 driver = ""
-            p1_sentences.append(f"The tape was mixed today — S&P {_fmt(sp)}, Nasdaq {_fmt(ndx)}, Dow {_fmt(dow)}{driver}.")
+            opener = f"The tape was mixed today — {trio}{driver}."
+        add(opener, 0)
     else:
-        # Magnitude-sensitive: a +0.03% tape is technically "higher" per
-        # _classify_direction but calling it "solidly positive" overstates a
-        # session that's essentially flat.
-        if tape_tone == "higher":
-            tape_pool = _TAPE_OPEN_HIGHER if max_move > 0.5 else _TAPE_OPEN_HIGHER_MODEST
-        elif tape_tone == "lower":
-            tape_pool = _TAPE_OPEN_LOWER if max_move > 0.5 else _TAPE_OPEN_LOWER_MODEST
-        else:
-            tape_pool = _TAPE_OPEN_MIXED
-        tape_open = _rot_phrase(tape_pool, day_hash, "tape_open").format(
-            sp=_fmt(sp), ndx=_fmt(ndx), dow=_fmt(dow),
-        )
-        breadth_gap = dow - ndx
-        if breadth_gap >= 0.30:
-            tape_open += ", with cyclicals edging out tech — a rotation cue, not a megacap one"
-        elif breadth_gap <= -0.30:
-            tape_open += ", with megacap tech leading the tape"
-        p1_sentences.append(tape_open + ".")
+        add(_morning_opener(sp, ndx, dow, group, day_hash), 0)
 
-    # ── RATES / RATE-SENSITIVE COMPOSITE — |Δ10y| >= 4bp ──────────────────────
-    rates_fired  = False
-    gold_cited   = False  # tracks whether gold was already named by the composite, for OIL/GOLD below
-    used_headlines = set()  # dedup — nothing gets quoted twice in one summary
-
-    treasury_chg = None
-    if treasury and treasury.get("yield") is not None:
-        try:
-            treasury_chg = float(treasury.get("change", 0) or 0)
-        except Exception:
-            treasury_chg = None
-
-    gold_pct_for_composite = None
-    for c in commodities:
-        if "gold" in c.get("name", "").lower():
-            try:
-                gold_pct_for_composite = float(c.get("pct", 0) or 0)
-            except Exception:
-                pass
-            break
-
+    # ── 2. ROTATION INTERPRETATION (close) ─────────────────────────────────
+    rotation = {"text": "", "mentions_rates": False, "implies_falling_yields": False, "mentions_commodity": False}
     if mode == "close":
-        composite_note = _rate_sensitive_composite_note(sp, sectors, gold_pct_for_composite, treasury_chg,
-                                                        headlines, used_headlines)
-        if composite_note:
-            p1_sentences.append(composite_note)
-            rates_fired = True
-            if isinstance(gold_pct_for_composite, (int, float)) and abs(gold_pct_for_composite) >= 1.5:
-                gold_cited = True
+        rotation = _rotation_interpretation_note(_sector_pct_map(sectors), treasury_chg, oil_pct, oil_price)
+        if rotation["text"]:
+            add(rotation["text"], 1)
+            chain_found = True
 
-    if not rates_fired and treasury_chg is not None and abs(treasury_chg) >= 0.04:  # 4bp, in percentage-point units
-        rates_fired = True
-        yld = treasury.get("yield", 0)
-        bp  = abs(treasury_chg) * 100
-        dir_word = "down" if treasury_chg < 0 else "up"
-        extreme = _rate_extreme_note(
-            yld, treasury.get("six_mo_high"), treasury.get("six_mo_high_day"),
-            treasury.get("six_mo_low"), treasury.get("six_mo_low_day"),
-        )
-        extreme_clause = f", {extreme}" if extreme else ""
-        if mode == "morning":
-            # Forward-looking framing — the session hasn't happened yet.
-            lead = _rot_phrase(_RATES_LEAD, day_hash, "rates_lead")
-            tail = _rot_phrase(_RATES_TAILWIND if treasury_chg < 0 else _RATES_HEADWIND, day_hash, "rates_tail")
-            p1_sentences.append(f"{lead} {yld:.2f}%, {dir_word} ~{bp:.0f}bp{extreme_clause}.")
-            p1_sentences.append(tail)
-        else:
-            # Past-tense recap — nothing left to be a headwind/tailwind FOR.
-            p1_sentences.append(f"The 10-year closed at {yld:.2f}%, {dir_word} "
-                                f"~{bp:.0f}bp{extreme_clause} on the session.")
+    # ── 3/4. RATES (before) + DIVERGENCE (after, can refer back) ────────────
+    divergence = _divergence_note(sp, ndx, dow, treasury_chg,
+                                  sectors=sectors if mode == "close" else None,
+                                  movers=movers if mode == "close" else None,
+                                  flat=flat, rotation_covered=bool(rotation["text"]),
+                                  skip_yields=rotation["mentions_rates"])
+    rotation_context = ({"wants_rates_crosscheck": True,
+                         "implies_falling_yields": rotation["implies_falling_yields"]}
+                        if rotation["mentions_rates"] else None)
+    rates = _rates_sentence(treasury, mode, rotation_context=rotation_context,
+                            skip_growth_link=divergence["addressed_yields"], tape_dir=tape_dir)
+    add(rates["text"], 1)
+    chain_found = chain_found or rates["has_chain"]
+    add(divergence["text"], 1)
+    chain_found = chain_found or divergence["has_chain"]
 
-    # ── OIL + GOLD — combined into one sentence when both trip ────────────────
-    # Shared by both modes (see docstring for the close-mode behavior change).
-    oil_txt = gold_txt = ""
-    oil = next((c for c in commodities if "crude" in c.get("name", "").lower()
-                or "oil" in c.get("name", "").lower()), None)
-    if oil:
-        try:
-            opct, oprice, ochange = (float(oil.get("pct", 0) or 0),
-                                     float(oil.get("price", 0) or 0),
-                                     float(oil.get("change", 0) or 0))
-        except Exception:
-            opct = oprice = ochange = 0.0
-        if abs(opct) >= 2.0 or _crossed_round_10(oprice, ochange):
-            oil_txt = _rot_phrase(_OIL_LEAD, day_hash, "oil_lead").format(price=oprice, pct=_fmt(opct))
+    # ── events (mined once; flat-day WHY may consume a scheduled one) ───────
+    events = _extract_market_events(headlines, mode, max_events=2)
 
-    if not gold_cited:
-        gold = next((c for c in commodities if "gold" in c.get("name", "").lower()), None)
-        if gold:
-            try:
-                gpct, gprice = float(gold.get("pct", 0) or 0), float(gold.get("price", 0) or 0)
-            except Exception:
-                gpct = gprice = 0.0
-            if abs(gpct) >= 1.0:
-                gold_txt = _rot_phrase(_GOLD_LEAD, day_hash, "gold_lead").format(price=gprice, pct=_fmt(gpct))
+    # ── 5. COMMODITY (>=1) ──────────────────────────────────────────────────
+    commodity = {"text": "", "has_chain": False}
+    if not rotation["mentions_commodity"]:
+        energy_pct = _sector_lookup(_sector_pct_map(sectors), "energy") if mode == "close" else None
+        commodity = _commodity_sentence(commodities, tape_dir=tape_dir, energy_pct=energy_pct)
+        add(commodity["text"], 1)
+        chain_found = chain_found or commodity["has_chain"]
 
-    if oil_txt and gold_txt:
-        connector = _rot_phrase(_OIL_GOLD_CONNECTOR, day_hash, "og_connector")
-        p1_sentences.append(f"{connector} {oil_txt}, and {gold_txt}.")
-    elif oil_txt:
-        p1_sentences.append(f"{_rot_phrase(_OIL_SOLO_LEAD, day_hash, 'oil_solo')} {oil_txt}.")
-    elif gold_txt:
-        p1_sentences.append(f"{_rot_phrase(_OIL_SOLO_LEAD, day_hash, 'gold_solo')} {gold_txt}.")
+    # Gold moving against stocks (up while stocks fall, down while they rise) is its
+    # own signal; mention it even when oil already filled the commodity slot.
+    if gold_c is not None and tape_dir in ("lower", "higher") and not commodity["text"].startswith("Gold") \
+       and ((gold_pct >= 1.0 and tape_dir == "lower") or (gold_pct <= -1.0 and tape_dir == "higher")):
+        gold_extra = _commodity_sentence([gold_c], tape_dir=tape_dir)
+        add(gold_extra["text"], 2)
+        chain_found = chain_found or gold_extra["has_chain"]
 
-    ladder_fired = rates_fired or bool(oil_txt) or bool(gold_txt)
+    # ── 6. FLAT-DAY WHY + EVENTS (<=2) ──────────────────────────────────────
+    if flat:
+        why = _flat_day_why(treasury_chg, oil_pct, gold_pct, events,
+                            divergence["addressed_yields"], used_headlines,
+                            other_chain=divergence["has_chain"] or commodity["has_chain"] or rotation["mentions_commodity"])
+        add(why["text"], 1)
+        chain_found = chain_found or why["has_chain"]
+    for ev in events:
+        if ev["headline"].get("title", "") in used_headlines:
+            continue
+        add(_event_clause(ev, mode, used_headlines), 3)
+        if ev["scheduled"] is True:
+            chain_found = True
 
-    # ── HANDOFF (morning-only) — Europe confirm/contradict; Asia flat-or-not ──
-    handoff_fired = False
+    # ── 7. HANDOFF (morning) / PATH (close) ─────────────────────────────────
     if mode == "morning":
-        global_list = global_indices if isinstance(global_indices, list) else []
-        europe_list = [g for g in global_list if g.get("session") == "Europe"]
-        asia_list   = [g for g in global_list if g.get("session") == "Asia (overnight)"]
+        add(_overseas_sentence(global_indices, tape_dir), 2)
+    else:
+        add(_path_note(snapshot_data), 2)
 
-        handoff_clause_parts = []
-        if europe_list:
-            try:
-                europe_vals = [float(g.get("pct", 0) or 0) for g in europe_list]
-            except Exception:
-                europe_vals = []
-            if europe_vals:
-                europe_avg  = sum(europe_vals) / len(europe_vals)
-                europe_desc = ", ".join(f"{g.get('name','')} {_fmt(g.get('pct', 0))}" for g in europe_list[:2])
-                if tape_tone in ("higher", "lower"):
-                    confirms = (tape_tone == "higher" and europe_avg > 0) or (tape_tone == "lower" and europe_avg < 0)
-                    handoff_clause_parts.append(
-                        f"Europe confirms the tone ({europe_desc})" if confirms
-                        else f"Europe is pulling the other way ({europe_desc})"
-                    )
-                else:
-                    handoff_clause_parts.append(f"Europe is mixed too ({europe_desc})")
-                handoff_fired = True
+    # A directional day with no supported driver says so instead of guessing.
+    if not chain_found and not flat and not divergence["text"]:
+        add("Nothing in today's data stands out as a clear driver of the move, so we won't guess at one.", 1)
 
-        if asia_list:
-            try:
-                asia_vals = [float(g.get("pct", 0) or 0) for g in asia_list]
-            except Exception:
-                asia_vals = []
-            if asia_vals:
-                if all(abs(v) < 0.15 for v in asia_vals):
-                    handoff_clause_parts.append("Asia was flat overnight and gave no handoff")
-                else:
-                    asia_avg = sum(asia_vals) / len(asia_vals)
-                    handoff_clause_parts.append(f"Asia leaned {'higher' if asia_avg > 0 else 'lower'} overnight")
-                handoff_fired = True
-
-        if handoff_clause_parts:
-            p1_sentences.append("; ".join(handoff_clause_parts) + ".")
-        ladder_fired = ladder_fired or handoff_fired
-
-    # ── PATH (close-only) ─────────────────────────────────────────────────────
-    if mode == "close":
-        path_txt = _path_note(snapshot_data)
-        if path_txt:
-            p1_sentences.append(path_txt)
-
-    # ── Fallback (morning-only): nothing on the ladder tripped — SENTIMENT
-    # GATE applies. Close never needs this — its breadth-classification opener
-    # always fires unconditionally, so P1 is never silent to begin with.
-    macro_theme_for_log = "rate expectations" if rates_fired else ("commodities" if (oil_txt or gold_txt) else "")
-    if mode == "morning" and not ladder_fired:
-        fallback_used = False
-        for h in headlines[:5]:
-            title = h.get("title", "") if isinstance(h, dict) else str(h)
-            if not title or len(title) <= 15 or not _headline_is_market_relevant(title):
-                continue
-            sentiment = _classify_headline_sentiment(title)
-            if not _sentiment_gate_ok(sentiment, tape_tone):
-                continue  # contradicts (or reads uncertain under) a confident tape — skip
-            p1_sentences.append(f"On the tape: {title.rstrip('.')}.")
-            fallback_used = True
+    # ── P1 assembly with a word ceiling ─────────────────────────────────────
+    _, hi = _WORD_COUNT_TARGETS[(mode, "P1")]
+    trimmed = []
+    while sum(len(t.split()) for _, t in items) > hi:
+        droppable = [i for i, (p, _) in enumerate(items) if p >= 2]
+        if not droppable:
             break
-        if not fallback_used:
-            p1_sentences.append("No single catalyst stands out in early trading.")
+        worst = max(droppable, key=lambda i: (items[i][0], i))
+        items.pop(worst); trimmed.append(1)
+    p1_text = " ".join(t for _, t in items)
+    if trimmed:
+        print(f"[LENGTH] {mode.upper()} P1 exceeded {hi} words; dropped {len(trimmed)} optional sentence(s).")
 
-    p1_text = " ".join(p1_sentences)
-
+    macro_theme_for_log = "rate expectations" if rates["text"] else ("commodities" if commodity["text"] else "")
     if mode == "morning":
         recurring = _get_recurring_theme(mem, window=5, threshold=3)
         if recurring and recurring != macro_theme_for_log:
             p1_text += f" (Note: {recurring} has been a persistent theme over the past week.)"
 
-    # ── P2 — mode-specific; inherently different content, not a shared rule ──
+    _log_word_count(mode, "P1", p1_text, diagnostics={
+        "divergence >= 0.3pp": bool(divergence["text"]),
+        "rotation pattern matched": bool(rotation["text"]),
+        "qualifying event found": bool(events),
+    })
+
+    # Holdings' sectors (from the performance history) feed the P2 chains.
+    perf_since = {ph.get("ticker"): ph.get("pct_change_since_pick")
+                  for ph in mem.get("pick_performance_history", [])}
+    sector_by_ticker = {ph.get("ticker"): ph.get("sector", "") for ph in mem.get("pick_performance_history", [])}
+
     p2_sentences = []
 
+    # ── P2 morning ──────────────────────────────────────────────────────────
     if mode == "morning":
         today_iso       = _today_ct_iso()
         earnings_list   = earnings if isinstance(earnings, list) else []
-        todays_earnings = [e for e in earnings_list if e.get("date", "") == today_iso]
+        todays_earnings = [e for e in earnings_list if e.get("date", "") == today_iso and e.get("symbol")]
         if todays_earnings:
             parts = []
             for e in todays_earnings[:3]:
-                sym = e.get("symbol", "")
-                if not sym:
-                    continue
                 eps = e.get("eps_estimated")
                 try:
-                    parts.append(f"{sym} reports, EPS est. ${float(eps):.2f}" if eps is not None else f"{sym} reports")
+                    parts.append(f"{e['symbol']} (analysts expect ${float(eps):.2f} per share)")
                 except Exception:
-                    parts.append(f"{sym} reports")
-            if parts:
-                p2_sentences.append("Today: " + "; ".join(parts) + ".")
+                    parts.append(e["symbol"])
+            verb = "reports" if len(parts) == 1 else "report"
+            p2_sentences.append(f"{', '.join(parts)} {verb} earnings today. Results can move a stock "
+                                f"sharply because they show how profitable a company really is.")
 
         picks    = picks_data.get("picks", []) if isinstance(picks_data, dict) else []
         changes  = picks_data.get("changes_from_last_week", []) if isinstance(picks_data, dict) else []
         enriched = _enrich_picks_with_perf(picks, mem) if picks else []
 
-        # PORTFOLIO INTERSECTION — does any held ticker/company name appear in
-        # today's headlines? Match on ticker AND full company name via
-        # _find_headline_for_symbol, which already guards against substring
-        # collisions (case-sensitive ticker match, corporate-suffix-stripped
-        # company name) — the exact class of bug flagged before.
         featured = None  # (pick, headline, field)
         for p in enriched:
-            sym  = p.get("ticker", "")
-            name = p.get("company", "")
+            sym, name = p.get("ticker", ""), p.get("company", "")
             if not sym:
                 continue
-            h, is_specific, field = _find_headline_for_symbol(headlines, sym, name, sector="")
+            h, is_specific, field = _find_headline_for_symbol(headlines, sym, name, sector="", exclude=used_headlines)
             if h and is_specific:
                 pct = p.get("pct_change_since_pick")
                 pct_val = pct if isinstance(pct, (int, float)) else 0.0
@@ -1182,46 +2146,75 @@ def _build_market_narrative(
 
         if picks:
             n = len(picks)
+            valid = [(p.get("ticker", ""), p.get("pct_change_since_pick")) for p in enriched
+                     if isinstance(p.get("pct_change_since_pick"), (int, float))]
             if changes:
-                picks_sentence = f"{len(changes)} of your {n} picks rotated this week — details below."
-            else:
-                picks_sentence = f"Your {n} picks are unchanged"
+                p2_sentences.append(f"{len(changes)} of your {n} picks rotated this week — details below.")
+            elif valid:
+                best  = max(valid, key=lambda t: t[1])
+                worst = min(valid, key=lambda t: t[1])
+                lead = (f"Your {n} holdings are unchanged this week" if n != 1
+                        else "Your one holding is unchanged this week")
+                if best[0] == worst[0]:
+                    sentence = f"{lead}: {best[0]} is {'up' if best[1] >= 0 else 'down'} {abs(best[1]):.1f}% since entry."
+                else:
+                    sentence = (f"{lead}: {best[0]} is {'up' if best[1] >= 0 else 'down'} {abs(best[1]):.1f}% "
+                                f"since entry and {worst[0]} is {'up' if worst[1] >= 0 else 'down'} "
+                                f"{abs(worst[1]):.1f}%.")
                 if featured:
                     fp, fh, ffield = featured
-                    fsym  = fp.get("ticker", "")
-                    fpct  = fp.get("pct_change_since_pick")
-                    pct_str = _fmt(fpct) if isinstance(fpct, (int, float)) else "—"
-                    picks_sentence += (f", but {fsym} is the one to watch — worst holding at {pct_str} "
-                                      f"and in today's headlines over {_cite_headline(fh, ffield)}.")
+                    topic = _headline_topic(fh, ffield)
+                    sentence += (f" {fp.get('ticker', '')} is in today's headlines, which cover {topic}." if topic else
+                                 f" {fp.get('ticker', '')} is mentioned in today's headlines, though we can't tell what they cover.")
+                elif not headlines:
+                    sentence += " Today's headline feed was empty, so we can't check for company news."
                 else:
-                    picks_sentence += "."
-            p2_sentences.append(picks_sentence)
+                    sentence += (" None of your holdings is in today's headlines, so any move today likely "
+                                 "tracks the broader market rather than company news.")
+                p2_sentences.append(sentence)
+            else:
+                p2_sentences.append(f"Your {n} holdings are unchanged this week.")
 
         text = p1_text + ("\n\n" + " ".join(p2_sentences) if p2_sentences else "")
+        _log_word_count(mode, "P2", " ".join(p2_sentences), diagnostics={
+            "earnings scheduled today": bool(todays_earnings),
+            "headline intersection found": bool(featured),
+        })
 
-        named    = {"S&P 500": sp, "Nasdaq": ndx, "Dow": dow}
         ldr_name = max(named, key=lambda k: abs(named[k]))
-        ldr_val  = named[ldr_name]
         lag_name = min(named, key=lambda k: named[k])
         log_data = {
             "type":             "morning",
             "direction_called": tape_tone,
-            "leading_index":    ldr_name if ldr_val >= 0 else "",
+            "sp_pct_called":    sp,
+            "leading_index":    ldr_name if named[ldr_name] >= 0 else "",
             "lagging_index":    lag_name if named.get(lag_name, 0) < 0 else "",
             "headline_theme":   macro_theme_for_log,
-            "commodity_note":   oil_txt or gold_txt,
+            "commodity_note":   commodity["text"],
             "picks_status":     "rotated" if changes else "holding",
         }
         return text, log_data
 
-    # ── close-only P2: movers + candidate cross-ref + portfolio day-perf + LOOP-CLOSE
+    # ── P2 close ────────────────────────────────────────────────────────────
     today_iso      = _today_ct_iso()
     earnings_list  = earnings if isinstance(earnings, list) else []
     earnings_today = {e.get("symbol", "") for e in earnings_list if e.get("date", "") == today_iso}
     movers = movers if isinstance(movers, dict) else {}
+    gainers, losers = movers.get("gainers", []), movers.get("losers", [])
 
-    def _mover_clause(m: dict, label: str) -> str:
-        if not m:
+    outsized_sentence, outsized_sym = _outsized_mover_note(movers, headlines, used_headlines,
+                                                           earnings_today, tape_dir=tape_dir)
+    p2_items = []   # (priority, text): 1 = core, 2-4 = optional, trimmed highest-number first
+
+    def add_p2(text, pri):
+        if text:
+            p2_items.append((pri, text))
+
+    if outsized_sentence:
+        add_p2(outsized_sentence, 1)
+
+    def _mover_clause(m: dict, kind: str) -> str:
+        if not m or m.get("symbol", "") == outsized_sym:
             return ""
         try:
             pct = float(m.get("pct") or m.get("changesPercentage") or 0)
@@ -1230,44 +2223,57 @@ def _build_market_narrative(
         if abs(pct) < 2.0:
             return ""
         sym = m.get("symbol", "")
-        verb = "led at" if label == "best" else "was the day's worst at"
+        word = "led" if kind == "best" else "was the day's weakest"
+        lead = f"{sym} {word}, {_pct_words(pct)}"
         if sym in earnings_today:
-            return f"{sym} {verb} {_fmt(pct)}, following this morning's earnings report"
-        # either the headline is specifically about this name, or it's omitted —
-        # no sector-category or generic-macro "backdrop" attachment for a named mover.
+            return f"{lead}, after reporting earnings today"
         h, is_specific, field = _find_headline_for_symbol(
             headlines, sym, m.get("name", ""), sector="", exclude=used_headlines,
         )
         if h and is_specific:
             used_headlines.add(h.get("title", ""))
-            return f"{sym} {verb} {_fmt(pct)} — {_cite_headline(h, field)}"
-        return f"{sym} {verb} {_fmt(pct)}"
+            topic = _headline_topic(h, field)
+            return f"{lead} (a same-day headline covers {topic})" if topic else lead
+        return lead
 
-    gainers, losers = movers.get("gainers", []), movers.get("losers", [])
     mover_bits = [c for c in [
         _mover_clause(losers[0] if losers else None, "worst"),
         _mover_clause(gainers[0] if gainers else None, "best"),
     ] if c]
     if mover_bits:
-        # Single terminator at the join site — _mover_clause never adds its own,
-        # so this is the one place a period gets added, regardless of whether
-        # the citation-bearing clause is first, last, or the only one.
-        p2_sentences.append("; ".join(mover_bits) + ".")
+        add_p2("; ".join(mover_bits) + ".", 3)
+
+    valid_day = [(p.get("ticker", ""), p.get("pct")) for p in (picks_day_performance or [])
+                 if p.get("ticker") and isinstance(p.get("pct"), (int, float))]
+    for k, hs in enumerate(_holdings_close_sentences(valid_day, perf_since, sector_by_ticker, sp, ndx,
+                                                     headlines, used_headlines)):
+        add_p2(hs, 1 if k == 0 else 4)
 
     mover_syms = {m.get("symbol", "") for m in (gainers[:1] + losers[:1])}
     candidate_note = _candidate_cross_reference_note(movers, scan_candidates, exclude_syms=mover_syms)
     if candidate_note:
-        p2_sentences.append(candidate_note)
+        add_p2(candidate_note, 2)
 
-    portfolio_note = _portfolio_day_performance_note(picks_day_performance)
-    if portfolio_note:
-        p2_sentences.append(portfolio_note)
-
-    loop_close_note = _loop_close_note(snapshot_data, mem)
+    loop_close_note = _loop_close_note(snapshot_data, mem, divergence_spread=divergence_spread,
+                                       best_index_name=best_index_name, worst_index_name=worst_index_name)
     if loop_close_note:
-        p2_sentences.append(loop_close_note)
+        add_p2(loop_close_note, 1)
+
+    _, hi2 = _WORD_COUNT_TARGETS[(mode, "P2")]
+    while sum(len(t.split()) for _, t in p2_items) > hi2:
+        droppable = [i for i, (p, _) in enumerate(p2_items) if p >= 2]
+        if not droppable:
+            break
+        p2_items.pop(max(droppable, key=lambda i: (p2_items[i][0], i)))
+    p2_sentences = [t for _, t in p2_items]
 
     text = p1_text + ("\n\n" + " ".join(p2_sentences) if p2_sentences else "")
+    _log_word_count(mode, "P2", " ".join(p2_sentences), diagnostics={
+        "outsized mover (>=8%)": bool(outsized_sentence),
+        "candidate cross-reference": bool(candidate_note),
+        "portfolio day-performance data": bool(valid_day),
+        "LOOP-CLOSE note": bool(loop_close_note),
+    })
     return text, {}
 
 
@@ -1412,32 +2418,6 @@ def _find_headline_for_symbol(headlines: list, symbol: str, company_name: str = 
     return None, False, None
 
 
-def _cite_headline(h: dict, field: str = None) -> str:
-    """
-    Quote if <=15 words (copyright-safe), else paraphrase/truncate. If field
-    ("title" or "snippet") is given, cite that part specifically — it's the
-    part that actually matched, so this avoids quoting an unrelated portion of
-    the same headline object.
-
-    Contract: the returned fragment NEVER carries its own trailing period —
-    every call site supplies exactly one closing period itself, always. An
-    earlier version self-terminated short quotes with "." before the closing
-    quote mark, which produced a double period at any call site that also
-    closed its own sentence after it. That recurred at three separate call
-    sites (each patched individually) before being fixed here, at the source,
-    instead of patched per-caller yet again.
-    """
-    if field == "title":
-        text = h.get("title", "") or h.get("snippet", "")
-    else:
-        text = h.get("snippet", "") or h.get("title", "")
-    text = (text or "").strip().rstrip(".")
-    words = text.split()
-    if len(words) <= 15:
-        return f'"{text}"'
-    return text[:140].rstrip(".") + "…"
-
-
 def _classify_close_tape(sp: float, ndx: float, dow: float, sectors: list) -> dict:
     """
     Classifies today's close by SECTOR BREADTH, not bare index sign — three
@@ -1487,58 +2467,6 @@ def _join_sector_moves(pairs: list) -> str:
     if len(parts) == 1:
         return parts[0]
     return ", ".join(parts[:-1]) + " and " + parts[-1]
-
-
-def _rate_sensitive_composite_note(sp_pct: float, sectors: list, gold_pct, treasury_chg,
-                                   headlines: list = None, used_headlines: set = None) -> str:
-    """
-    Fires on a rate-driven READ of the sector map even when no single number
-    trips its own threshold: Utilities AND Real Estate both lagging the S&P by
-    >=0.5pp, plus gold or the 10-year corroborating. Phrased as a reading of
-    the data ("the shape of..."), never as an asserted cause. If a Fed/macro
-    headline exists for the same day, it's named alongside as correlation,
-    not claimed as the cause — placed side by side, per the rule's own
-    instruction, and the correlation is left to stand on its own.
-    """
-    util_pct = re_pct = None
-    for s in sectors or []:
-        n = (s.get("sector") or "").lower()
-        try:
-            pct = float(s.get("pct") if s.get("pct") is not None else s.get("changesPercentage", 0))
-        except Exception:
-            continue
-        if "utilities" in n:
-            util_pct = pct
-        elif "real estate" in n:
-            re_pct = pct
-    if util_pct is None or re_pct is None:
-        return ""
-    if (sp_pct - util_pct) < 0.5 or (sp_pct - re_pct) < 0.5:
-        return ""
-
-    gold_ok  = isinstance(gold_pct, (int, float)) and abs(gold_pct) >= 1.5
-    bp       = abs(treasury_chg) * 100 if isinstance(treasury_chg, (int, float)) else 0
-    yield_ok = bp >= 4
-    if not (gold_ok or yield_ok):
-        return ""
-
-    bits = []
-    if gold_ok:
-        bits.append(f"gold {'sold off' if gold_pct < 0 else 'jumped'} {abs(gold_pct):.2f}%")
-    if yield_ok:
-        bits.append(f"the 10-year moved ~{bp:.0f}bp")
-    driver_txt = " and ".join(bits)
-    driver_txt = driver_txt[0].upper() + driver_txt[1:]
-    note = (f"{driver_txt} while Utilities and Real Estate both lagged the S&P — "
-           f"the shape of a hawkish rate repricing, not broad risk-off")
-
-    # Name a same-day Fed/macro headline as correlation, never as asserted cause.
-    used_headlines = used_headlines if used_headlines is not None else set()
-    h, field = _find_headline_for_keywords(headlines or [], list(_MACRO_KEYWORDS.keys()), exclude=used_headlines)
-    if h:
-        used_headlines.add(h.get("title", ""))
-        return note + f", on a day when {_cite_headline(h, field)}."
-    return note + "."
 
 
 def _path_note(snapshot_data: list) -> str:
@@ -1618,78 +2546,6 @@ def _path_note(snapshot_data: list) -> str:
         return f"It was a choppy session — the S&P swung a {day_range_pct:.1f}% range before settling."
     return ""
 
-
-def _candidate_cross_reference_note(movers: dict, scan_candidates: list, exclude_syms: set = None) -> str:
-    """"Worth flagging" — a stock that moved sharply today also scored into
-    today's daily fundamentals scan, an independent signal worth naming."""
-    exclude_syms = exclude_syms or set()
-    candidate_map = {c.get("ticker"): c.get("score") for c in (scan_candidates or []) if c.get("ticker")}
-    for m in (movers.get("gainers", []) or []) + (movers.get("losers", []) or []):
-        sym = m.get("symbol", "")
-        if not sym or sym in exclude_syms or sym not in candidate_map:
-            continue
-        try:
-            pct = float(m.get("pct") or m.get("changesPercentage") or 0)
-        except Exception:
-            continue
-        if abs(pct) < 2.0:
-            continue
-        score = candidate_map[sym]
-        verb = "fell" if pct < 0 else "gained"
-        try:
-            score_str = f"{float(score):.0f}"
-        except Exception:
-            score_str = str(score)
-        return f"Worth flagging: {sym} {verb} {abs(pct):.2f}% today and still scored into the candidate list at {score_str}."
-    return ""
-
-
-def _portfolio_day_performance_note(picks_day_performance: list) -> str:
-    """How the user's OWN held picks did today (day-over-day), not their
-    since-entry P&L (that's the Stock Picks section) — a distinct question."""
-    valid = [(p.get("ticker", ""), p.get("pct")) for p in (picks_day_performance or [])
-            if p.get("ticker") and isinstance(p.get("pct"), (int, float))]
-    if not valid:
-        return ""
-    best, worst = max(valid, key=lambda x: x[1]), min(valid, key=lambda x: x[1])
-    up_count = sum(1 for _, p in valid if p >= 0)
-    if up_count == len(valid):
-        tone = "were higher"
-    elif up_count == 0:
-        tone = "were lower"
-    else:
-        tone = "were mixed"
-    if best[0] == worst[0]:
-        return f"Your one held pick was {'higher' if best[1] >= 0 else 'lower'} today: {best[0]} {_fmt(best[1])}."
-    return f"Your picks {tone} today: {best[0]} led at {_fmt(best[1])}, {worst[0]} lagged at {_fmt(worst[1])}."
-
-
-def _loop_close_note(snapshot_data: list, mem: dict) -> str:
-    """
-    Closes the loop against this morning's call. If today's morning record is
-    missing from briefing_history (a silent persistence failure — the exact
-    class this project has hit before when a git commit step failed after a
-    successful send), that's logged explicitly here rather than just silently
-    producing no sentence, so the gap is visible in the run's own log output.
-    """
-    today_iso = _today_ct_iso()
-    history = (mem or {}).get("briefing_history", [])
-    morning_entry = next(
-        (e for e in reversed(history) if e.get("date") == today_iso and e.get("type") == "morning"),
-        None,
-    )
-    if not morning_entry:
-        print(f"[LOOP-CLOSE] Skipped — no morning record found for {today_iso}; "
-              f"cannot close the loop on this morning's call. If this persists, "
-              f"check whether the morning workflow's memory commit is silently failing.")
-        return ""
-    called = morning_entry.get("direction_called", "unknown")
-    actual = _classify_direction(snapshot_data)
-    if called == "unknown" or actual == "unknown":
-        return ""
-    if called == actual:
-        return f"This morning's {called} call held through the close."
-    return f"This morning we called the tape {called}; it closed {actual} instead."
 
 def _close_summary_html(
     snapshot_data: list,
