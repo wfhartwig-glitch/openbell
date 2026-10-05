@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 216,
-  "last_session": "2026-10-05T13:31:17.146681",
+  "session_count": 217,
+  "last_session": "2026-10-05T17:00:39.784975",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 205,
-  "last_email_sent": "2026-10-05T13:31:17.145357",
-  "last_email_summary": "morning sent Monday, October 05, 2026",
+  "email_count": 206,
+  "last_email_sent": "2026-10-05T17:00:39.783085",
+  "last_email_summary": "casestudy sent Monday, October 05, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "lower",
-      "actual_sp_pct": -0.48,
-      "best_sector": "Energy",
-      "worst_sector": "Industrials",
-      "biggest_mover": "DDOG +7.8%",
-      "date": "2026-09-09"
-    },
     {
       "type": "morning",
       "direction_called": "lower",
@@ -662,6 +653,15 @@
       "headline_theme": "",
       "commodity_note": "",
       "picks_status": "holding",
+      "date": "2026-10-05"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_berry_gordy_motown",
+      "category": "investor",
+      "topic": "Berry Gordy Borrowed $800 From His Family and Built Motown Records",
+      "remaining_in_pass": 21,
+      "low_inventory_alert": false,
       "date": "2026-10-05"
     }
   ],

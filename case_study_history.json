@@ -327,6 +327,10 @@
     {
       "id": "investor_reginald_lewis",
       "date": "2026-10-04"
+    },
+    {
+      "id": "investor_berry_gordy_motown",
+      "date": "2026-10-05"
     }
   ],
   "low_inventory_alert_sent": false
