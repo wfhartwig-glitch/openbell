@@ -74,17 +74,55 @@ def _fmt(pct) -> str:
         return str(pct) if pct else "—"
 
 
+# Reused across every section's <td> (via _section()) and by the two secondary
+# table columns hidden on very narrow screens (watchlist headline snippet,
+# movers' company-name column) — progressive disclosure instead of letting a
+# 4-column row squeeze its percentage value off the edge at 320px.
+_RESPONSIVE_STYLE_BLOCK = """<style>
+  @media screen and (max-width: 480px) {
+    .pippy-section-pad { padding: 20px 16px !important; }
+    .pippy-header-pad  { padding: 22px 16px !important; }
+    .pippy-footer-pad  { padding: 16px 16px !important; }
+    .pippy-hide-narrow { display: none !important; mso-hide: all; }
+  }
+  /* UNVERIFIED — this dark-mode rule has never been checked in a real dark
+     inbox on a real phone, only in the browser pane's prefers-color-scheme
+     emulation. That emulation can only prove the CSS itself does what it
+     says; it can't prove a light card reads as intentional (vs. broken)
+     inside an actual dark Gmail/Mail app on a device. Do not treat this as
+     confirmed until that check happens.
+     Explicit light-mode opt-in for the card itself (color-scheme meta tells
+     well-behaved clients we handle both modes; this pins the white card so
+     its existing text-color contrast, and the red/green arrows, hold up
+     even when the surrounding client chrome is dark). Gmail's app-level
+     dark mode uses its own image/color heuristic rather than
+     prefers-color-scheme, so this belt-and-suspenders rule is aimed at
+     Apple Mail / Outlook.com / other standards-following dark modes —
+     it will not reliably reach Gmail's own inversion. */
+  @media (prefers-color-scheme: dark) {
+    .pippy-outer-bg  { background: #0b0f19 !important; }
+    .pippy-card      { background: #ffffff !important; }
+  }
+</style>"""
+
+
 def _wrap(body: str, title: str, subtitle: str) -> str:
     return f"""<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="supports-color-scheme" content="light dark">
+{_RESPONSIVE_STYLE_BLOCK}
+</head>
 <body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:24px 0">
+<table class="pippy-outer-bg" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:24px 0">
 <tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1)">
+<table class="pippy-card" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1)">
 
   <!-- HEADER -->
-  <tr><td style="background:#111827;padding:28px 32px">
+  <tr><td class="pippy-header-pad" style="background:#111827;padding:28px 32px">
     <p style="margin:0 0 4px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#9ca3af">{subtitle}</p>
     <h1 style="margin:0;font-size:22px;font-weight:700;color:#ffffff;line-height:1.2">{title}</h1>
   </td></tr>
@@ -93,7 +131,7 @@ def _wrap(body: str, title: str, subtitle: str) -> str:
   {body}
 
   <!-- FOOTER -->
-  <tr><td style="padding:20px 32px;border-top:1px solid #e5e7eb;background:#f9fafb">
+  <tr><td class="pippy-footer-pad" style="padding:20px 32px;border-top:1px solid #e5e7eb;background:#f9fafb">
     <p style="margin:0;font-size:11px;color:#9ca3af">Pippy's Brief &mdash; automated daily market briefing. Not financial advice.</p>
   </td></tr>
 
@@ -103,8 +141,9 @@ def _wrap(body: str, title: str, subtitle: str) -> str:
 </body></html>"""
 
 
-def _section(label: str, inner: str) -> str:
-    return f"""<tr><td style="padding:24px 32px;border-bottom:1px solid #e5e7eb">
+def _section(label: str, inner: str, bg: str = "") -> str:
+    bg_style = f"background:{bg};" if bg else ""
+    return f"""<tr><td class="pippy-section-pad" style="{bg_style}padding:24px 32px;border-bottom:1px solid #e5e7eb">
   <p style="margin:0 0 14px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9ca3af">{label}</p>
   {inner}
 </td></tr>"""
@@ -122,9 +161,9 @@ def _indices(data: list) -> str:
         color = _pct_color(pct)
         rows += f"""
         <tr>
-          <td style="padding:8px 0;font-size:15px;font-weight:600;color:#111827;width:100px">{name}</td>
-          <td style="padding:8px 0;font-size:15px;color:#374151">{p_str}</td>
-          <td style="padding:8px 0;font-size:15px;font-weight:700;color:{color};text-align:right">{_fmt(pct)}</td>
+          <td style="padding:8px 0;font-size:16px;font-weight:600;color:#111827;width:100px">{name}</td>
+          <td style="padding:8px 12px 8px 0;font-size:16px;color:#374151;white-space:nowrap">{p_str}</td>
+          <td style="padding:8px 0;font-size:16px;font-weight:700;color:{color};text-align:right;white-space:nowrap">{_fmt(pct)}</td>
         </tr>"""
     return _section("Market Snapshot", f'<table width="100%" cellpadding="0" cellspacing="0">{rows}</table>')
 
@@ -138,8 +177,8 @@ def _headlines(headlines: list) -> str:
         border  = "border-top:1px solid #f3f4f6;" if i > 0 else ""
         items += f"""
         <div style="{border}padding:10px 0">
-          <p style="margin:0 0 3px;font-size:14px;font-weight:500;color:#111827;line-height:1.4">{title}</p>
-          {"" if not snippet else f'<p style="margin:0 0 2px;font-size:12px;color:#6b7280;line-height:1.4">{snippet}</p>'}
+          <p style="margin:0 0 3px;font-size:16px;font-weight:500;color:#111827;line-height:1.4">{title}</p>
+          {"" if not snippet else f'<p style="margin:0 0 2px;font-size:16px;color:#6b7280;line-height:1.4">{snippet}</p>'}
           {"" if not site    else f'<p style="margin:0;font-size:11px;color:#9ca3af">{site}</p>'}
         </div>"""
     return _section("Top Headlines", items)
@@ -156,7 +195,7 @@ def _calendar(events: list, earnings: list, econ_failed: bool = False) -> str:
         rows += f"""
         <tr>
           <td style="padding:7px 12px 7px 0;font-size:12px;color:#6b7280;white-space:nowrap;width:50px">{dt}</td>
-          <td style="padding:7px 12px 7px 0;font-size:13px;color:#374151">{evt}</td>
+          <td style="padding:7px 12px 7px 0;font-size:16px;color:#374151">{evt}</td>
           <td style="padding:7px 0;text-align:right">{badge}</td>
         </tr>"""
     for e in earnings[:6]:
@@ -167,14 +206,14 @@ def _calendar(events: list, earnings: list, econ_failed: bool = False) -> str:
         rows += f"""
         <tr>
           <td style="padding:7px 12px 7px 0;font-size:12px;color:#6b7280;white-space:nowrap;width:50px">{dt}</td>
-          <td style="padding:7px 12px 7px 0;font-size:13px;color:#374151"><strong style="color:#111827">{sym}</strong> — {note}</td>
+          <td style="padding:7px 12px 7px 0;font-size:16px;color:#374151"><strong style="color:#111827">{sym}</strong> — {note}</td>
           <td style="padding:7px 0;text-align:right"><span style="font-size:10px;font-weight:700;color:#7c3aed;text-transform:uppercase">Earnings</span></td>
         </tr>"""
     if not rows:
         if econ_failed:
-            msg = '<p style="margin:0;font-size:13px;color:#9ca3af">Macro event data unavailable (source error). No tracked earnings in the next two weeks.</p>'
+            msg = '<p style="margin:0;font-size:16px;color:#9ca3af">Macro event data unavailable (source error). No tracked earnings in the next two weeks.</p>'
         else:
-            msg = '<p style="margin:0;font-size:13px;color:#9ca3af">No major events or tracked earnings in the next two weeks.</p>'
+            msg = '<p style="margin:0;font-size:16px;color:#9ca3af">No major events or tracked earnings in the next two weeks.</p>'
         return _section("This Week's Calendar", msg)
     return _section("This Week's Calendar", f'<table width="100%" cellpadding="0" cellspacing="0">{rows}</table>')
 
@@ -182,7 +221,7 @@ def _calendar(events: list, earnings: list, econ_failed: bool = False) -> str:
 def _daily_scan(candidates: list, scanned: int = 0, elapsed: float = 0) -> str:
     if not candidates:
         return _section("Today's Top Scored Candidates",
-                        '<p style="margin:0;font-size:13px;color:#9ca3af">Scan unavailable — no data returned.</p>')
+                        '<p style="margin:0;font-size:16px;color:#9ca3af">Scan unavailable — no data returned.</p>')
     # Stacked cards, not a wide multi-column table — long rationale text wraps
     # naturally at any screen width instead of forcing a cramped/overflowing table.
     cards = ""
@@ -200,17 +239,17 @@ def _daily_scan(candidates: list, scanned: int = 0, elapsed: float = 0) -> str:
         border = "" if i == 1 else "border-top:1px solid #f3f4f6;"
         cards += f"""
         <div style="{border}padding:12px 0">
-          <p style="margin:0 0 3px;font-size:14px;line-height:1.4">
+          <p style="margin:0 0 3px;font-size:16px;line-height:1.4">
             <span style="font-weight:700;color:#9ca3af">{i}.</span>
             <span style="font-weight:700;color:#111827">{ticker}</span>
-            <span style="color:#6b7280;font-size:12px">{company}</span>
+            <span style="color:#6b7280;font-size:13px">{company}</span>
           </p>
           <p style="margin:0 0 6px;font-size:11px;color:#6b7280;line-height:1.5">
             {sector}{" · " + risk if risk else ""} ·
             <span style="font-weight:700;color:{score_color}">Score {score:.0f}</span> ·
             <span style="font-weight:700;color:{mom_color}">{mom_str}</span>
           </p>
-          <p style="margin:0;font-size:12px;color:#374151;line-height:1.5">{rationale}</p>
+          <p style="margin:0;font-size:16px;color:#374151;line-height:1.5">{rationale}</p>
         </div>"""
     footer = ""
     if scanned:
@@ -226,8 +265,8 @@ def _sectors(sectors: list) -> str:
         color = _pct_color(pct)
         rows += f"""
         <tr>
-          <td style="padding:6px 0;font-size:13px;color:#374151">{name}</td>
-          <td style="padding:6px 0;font-size:13px;font-weight:700;color:{color};text-align:right">{_fmt(pct)}</td>
+          <td style="padding:6px 0;font-size:16px;color:#374151">{name}</td>
+          <td style="padding:6px 0;font-size:16px;font-weight:700;color:{color};text-align:right;white-space:nowrap">{_fmt(pct)}</td>
         </tr>"""
     return _section("Sector Performance", f'<table width="100%" cellpadding="0" cellspacing="0">{rows}</table>')
 
@@ -243,10 +282,10 @@ def _movers(gainers: list, losers: list) -> str:
             p_str = f"${float(price):,.2f}" if price else "—"
             rows += f"""
             <tr>
-              <td style="padding:7px 12px 7px 0;font-size:13px;font-weight:700;color:#111827;width:60px">{sym}</td>
-              <td style="padding:7px 12px 7px 0;font-size:12px;color:#6b7280">{name}</td>
-              <td style="padding:7px 12px 7px 0;font-size:13px;color:#374151">{p_str}</td>
-              <td style="padding:7px 0;font-size:13px;font-weight:700;color:{color};text-align:right">{_fmt(pct)}</td>
+              <td style="padding:7px 12px 7px 0;font-size:16px;font-weight:700;color:#111827;width:60px;white-space:nowrap">{sym}</td>
+              <td style="padding:7px 12px 7px 0;font-size:13px;color:#6b7280">{name}</td>
+              <td style="padding:7px 12px 7px 0;font-size:16px;color:#374151;white-space:nowrap">{p_str}</td>
+              <td style="padding:7px 0;font-size:16px;font-weight:700;color:{color};text-align:right;white-space:nowrap">{_fmt(pct)}</td>
             </tr>"""
         return f"""
         <div style="margin-bottom:16px">
@@ -269,10 +308,10 @@ def _watchlist(tickers_data: list, label: str) -> str:
         color = _pct_color(pct)
         rows += f"""
         <tr>
-          <td style="padding:8px 12px 8px 0;font-size:13px;font-weight:700;color:#111827;width:65px">{sym}</td>
-          <td style="padding:8px 12px 8px 0;font-size:13px;color:#374151">{p_str}</td>
-          <td style="padding:8px 12px 8px 0;font-size:13px;font-weight:700;color:{color};width:85px">{_fmt(pct)}</td>
-          <td style="padding:8px 0;font-size:12px;color:#6b7280">{"" if not head else head[:60] + "…"}</td>
+          <td style="padding:8px 12px 8px 0;font-size:16px;font-weight:700;color:#111827;width:65px;white-space:nowrap">{sym}</td>
+          <td style="padding:8px 12px 8px 0;font-size:16px;color:#374151;white-space:nowrap">{p_str}</td>
+          <td style="padding:8px 12px 8px 0;font-size:16px;font-weight:700;color:{color};width:85px;white-space:nowrap">{_fmt(pct)}</td>
+          <td class="pippy-hide-narrow" style="padding:8px 0;font-size:13px;color:#6b7280">{"" if not head else head[:60] + "…"}</td>
         </tr>"""
     return _section(label, f'<table width="100%" cellpadding="0" cellspacing="0">{rows}</table>')
 
@@ -333,13 +372,13 @@ def _unified_picks(picks: list, scan_candidates: list, week: str = "", changes: 
 
         cards += f"""
         <div style="{_border()}padding:12px 0">
-          <p style="margin:0 0 3px;font-size:14px;font-weight:700;color:#111827">
-            {ticker} <span style="font-weight:500;color:#6b7280;font-size:12px">{p.get("company","")}</span>
+          <p style="margin:0 0 3px;font-size:16px;font-weight:700;color:#111827">
+            {ticker} <span style="font-weight:500;color:#6b7280;font-size:13px">{p.get("company","")}</span>
           </p>
           <p style="margin:0 0 6px;font-size:11px;color:#6b7280">
             {p.get("sector","")} · <span style="font-weight:700;color:{GREEN}">Holding · {weeks_held}w</span>
           </p>
-          <p style="margin:0;font-size:12px;color:#374151;line-height:1.5">{pct_str}{note}{flag}</p>
+          <p style="margin:0;font-size:16px;color:#374151;line-height:1.5">{pct_str}{note}{flag}</p>
         </div>"""
 
     new_candidates = [c for c in top_scan if c.get("ticker", "") not in held_tickers][:4]
@@ -350,21 +389,21 @@ def _unified_picks(picks: list, scan_candidates: list, week: str = "", changes: 
         detail   = f"Score {score:.0f} — {c.get('rationale','')} — {mom_str}"
         cards += f"""
         <div style="{_border()}padding:12px 0">
-          <p style="margin:0 0 3px;font-size:14px;font-weight:700;color:#111827">
-            {c.get("ticker","")} <span style="font-weight:500;color:#6b7280;font-size:12px">{c.get("company","")}</span>
+          <p style="margin:0 0 3px;font-size:16px;font-weight:700;color:#111827">
+            {c.get("ticker","")} <span style="font-weight:500;color:#6b7280;font-size:13px">{c.get("company","")}</span>
           </p>
           <p style="margin:0 0 6px;font-size:11px;color:#6b7280">
             {c.get("sector","")} · <span style="font-weight:700;color:#7c3aed">New candidate</span>
           </p>
-          <p style="margin:0;font-size:12px;color:#374151;line-height:1.5">{detail}</p>
+          <p style="margin:0;font-size:16px;color:#374151;line-height:1.5">{detail}</p>
         </div>"""
 
     changes_html = ""
     if changes:
-        items = "".join(f'<li style="margin:3px 0;font-size:12px;color:#6b7280">{c}</li>' for c in changes)
+        items = "".join(f'<li style="margin:3px 0;font-size:16px;color:#6b7280">{c}</li>' for c in changes)
         changes_html = f'<p style="margin:12px 0 4px;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em">Changes This Week</p><ul style="margin:0;padding-left:18px">{items}</ul>'
 
-    explainer = ('<p style="margin:0 0 12px;font-size:12px;color:#6b7280">'
+    explainer = ('<p style="margin:0 0 12px;font-size:16px;color:#6b7280">'
                  'Holding = current positions, updated weekly. '
                  'New candidate = fresh signal from today\'s scan.</p>')
 
@@ -553,8 +592,8 @@ def _global_indices(indices: list) -> str:
             color = _pct_color(pct)
             out += f"""
             <tr>
-              <td style="padding:6px 0;font-size:13px;color:#374151;width:130px">{i.get("name","")}</td>
-              <td style="padding:6px 0;font-size:13px;font-weight:700;color:{color};text-align:right">{_fmt(pct)}</td>
+              <td style="padding:6px 0;font-size:16px;color:#374151;width:130px">{i.get("name","")}</td>
+              <td style="padding:6px 0;font-size:16px;font-weight:700;color:{color};text-align:right;white-space:nowrap">{_fmt(pct)}</td>
             </tr>"""
         return out
 
@@ -578,9 +617,9 @@ def _commodities_and_yields(commodities: list, treasury: dict) -> str:
         color = _pct_color(pct)
         rows += f"""
         <tr>
-          <td style="padding:7px 0;font-size:13px;color:#374151;width:130px">{c.get("name","")}</td>
-          <td style="padding:7px 0;font-size:13px;color:#374151">{p_str}</td>
-          <td style="padding:7px 0;font-size:13px;font-weight:700;color:{color};text-align:right">{_fmt(pct)}</td>
+          <td style="padding:7px 0;font-size:16px;color:#374151;width:130px">{c.get("name","")}</td>
+          <td style="padding:7px 12px 7px 0;font-size:16px;color:#374151;white-space:nowrap">{p_str}</td>
+          <td style="padding:7px 0;font-size:16px;font-weight:700;color:{color};text-align:right;white-space:nowrap">{_fmt(pct)}</td>
         </tr>"""
     if treasury and treasury.get("yield"):
         yld    = treasury.get("yield", 0)
@@ -589,9 +628,9 @@ def _commodities_and_yields(commodities: list, treasury: dict) -> str:
         sign   = "+" if change >= 0 else ""
         rows += f"""
         <tr>
-          <td style="padding:7px 0;font-size:13px;color:#374151;width:130px">10-Yr Treasury</td>
-          <td style="padding:7px 0;font-size:13px;color:#374151">{yld:.2f}%</td>
-          <td style="padding:7px 0;font-size:13px;font-weight:700;color:{color};text-align:right">{sign}{change:.3f}</td>
+          <td style="padding:7px 0;font-size:16px;color:#374151;width:130px">10-Yr Treasury</td>
+          <td style="padding:7px 12px 7px 0;font-size:16px;color:#374151;white-space:nowrap">{yld:.2f}%</td>
+          <td style="padding:7px 0;font-size:16px;font-weight:700;color:{color};text-align:right;white-space:nowrap">{sign}{change:.3f}</td>
         </tr>"""
     if not rows:
         return ""
@@ -1252,12 +1291,15 @@ def _morning_summary_html(
     )
     paragraphs = text.split("\n\n")
     inner = "".join(
-        f'<p style="margin:0 0 10px;font-size:14px;color:#374151;line-height:1.6">{p}</p>'
+        f'<p style="margin:0 0 12px;font-size:16px;color:#1f2937;line-height:1.6">{p}</p>'
         if i < len(paragraphs) - 1 else
-        f'<p style="margin:0;font-size:14px;color:#374151;line-height:1.6">{p}</p>'
+        f'<p style="margin:0;font-size:16px;color:#1f2937;line-height:1.6">{p}</p>'
         for i, p in enumerate(paragraphs)
     )
-    html = _section("What's Going On", inner)
+    # Tinted background — this is the point of the email, so it reads as
+    # visually distinct from the plain-white data sections beneath it, not
+    # just another entry in the list.
+    html = _section("What's Going On", inner, bg="#f8fafc")
     return html, log_data
 
 
@@ -1668,12 +1710,12 @@ def _close_summary_html(
     )
     paragraphs = text.split("\n\n")
     inner = "".join(
-        f'<p style="margin:0 0 10px;font-size:14px;color:#374151;line-height:1.6">{p}</p>'
+        f'<p style="margin:0 0 12px;font-size:16px;color:#1f2937;line-height:1.6">{p}</p>'
         if i < len(paragraphs) - 1 else
-        f'<p style="margin:0;font-size:14px;color:#374151;line-height:1.6">{p}</p>'
+        f'<p style="margin:0;font-size:16px;color:#1f2937;line-height:1.6">{p}</p>'
         for i, p in enumerate(paragraphs)
     )
-    return _section("What Happened Today", inner)
+    return _section("What Happened Today", inner, bg="#f8fafc")
 
 
 # ── Email assemblers ──────────────────────────────────────────────────────────
@@ -1872,17 +1914,17 @@ def _case_study_html(fields: dict, today: str) -> tuple[str, str]:
     print(f"    word count: {word_count}")
 
     body = f"""
-    <tr><td style="padding:28px 32px;border-bottom:1px solid #e5e7eb">
+    <tr><td class="pippy-section-pad" style="padding:28px 32px;border-bottom:1px solid #e5e7eb">
 
       <p style="margin:0 0 6px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9ca3af">The Hook</p>
-      <p style="margin:0 0 20px;font-size:15px;color:#111827;line-height:1.6">{hook}</p>
+      <p style="margin:0 0 20px;font-size:16px;color:#111827;line-height:1.6">{hook}</p>
 
       <p style="margin:0 0 6px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9ca3af">The Story</p>
-      <p style="margin:0 0 20px;font-size:14px;color:#374151;line-height:1.7">{story}</p>
+      <p style="margin:0 0 20px;font-size:16px;color:#374151;line-height:1.7">{story}</p>
 
       <div style="border-left:3px solid #111827;padding:10px 0 10px 14px;margin:0">
         <p style="margin:0 0 3px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9ca3af">Pippy's Take</p>
-        <p style="margin:0;font-size:14px;font-weight:600;color:#111827;line-height:1.5">{take}</p>
+        <p style="margin:0;font-size:16px;font-weight:600;color:#111827;line-height:1.5">{take}</p>
       </div>
 
     </td></tr>"""
