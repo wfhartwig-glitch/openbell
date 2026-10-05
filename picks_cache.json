@@ -1247,5 +1247,77 @@
       }
     ],
     "changes_from_last_week": []
+  },
+  "2026-W40": {
+    "generated": "2026-10-05T13:31:15.871387",
+    "picks": [
+      {
+        "ticker": "MSFT",
+        "company": "Microsoft Corporation",
+        "sector": "Technology",
+        "risk": "Medium",
+        "rationale": "analyst target implies 48% upside ($379 \u2192 $561). rated strong buy by analysts. earnings up 23% YoY.",
+        "price_now": 528.49,
+        "pct_change_this_week": 40.22,
+        "weeks_held": 17,
+        "status": "holding",
+        "note": "Holding \u2014 thesis intact, analyst target implies 10% upside. rated strong buy by analysts. earnings up 32% YoY.",
+        "price_when_picked": 376.9
+      },
+      {
+        "ticker": "META",
+        "company": "Meta Platforms, Inc.",
+        "sector": "Communication Services",
+        "risk": "Medium",
+        "rationale": "analyst target implies 43% upside ($577 \u2192 $827). rated strong buy by analysts. earnings up 62% YoY.",
+        "price_now": 736.39,
+        "pct_change_this_week": 28.87,
+        "weeks_held": 17,
+        "status": "holding",
+        "note": "Holding \u2014 thesis intact, analyst target implies 8% upside. rated strong buy by analysts. revenue growing 28% YoY.",
+        "price_when_picked": 571.4
+      },
+      {
+        "ticker": "NVDA",
+        "company": "NVIDIA Corporation",
+        "sector": "Technology",
+        "risk": "Speculative",
+        "rationale": "analyst target implies 42% upside ($211 \u2192 $299). rated strong buy by analysts. earnings up 214% YoY.",
+        "price_now": 235.81,
+        "pct_change_this_week": 10.88,
+        "weeks_held": 17,
+        "status": "holding",
+        "note": "Holding \u2014 thesis intact, analyst target implies 39% upside. rated strong buy by analysts. earnings up 128% YoY.",
+        "price_when_picked": 212.67
+      },
+      {
+        "ticker": "AXON",
+        "company": "Axon Enterprise, Inc.",
+        "sector": "Industrials",
+        "risk": "High",
+        "rationale": "analyst target implies 58% upside ($419 \u2192 $662). rated buy by analysts. earnings up 90% YoY.",
+        "price_now": 411.1,
+        "pct_change_this_week": -0.03,
+        "weeks_held": 17,
+        "status": "holding",
+        "note": "Holding \u2014 thesis intact, analyst target implies 71% upside. rated buy by analysts. revenue growing 35% YoY.",
+        "price_when_picked": 411.22
+      },
+      {
+        "ticker": "AVGO",
+        "company": "Broadcom Inc.",
+        "sector": "Technology",
+        "risk_level": "High",
+        "rationale": "analyst target implies 44% upside. rated strong buy by analysts. earnings up 85% YoY.",
+        "status": "holding",
+        "note": "Holding \u2014 thesis intact, analyst target implies 49% upside. rated strong buy by analysts. earnings up 215% YoY.",
+        "weeks_held": 7,
+        "is_known": true,
+        "price_now": 357.61,
+        "pct_change_this_week": -1.9,
+        "price_when_picked": 364.55
+      }
+    ],
+    "changes_from_last_week": []
   }
 }
