@@ -331,6 +331,10 @@
     {
       "id": "investor_berry_gordy_motown",
       "date": "2026-10-05"
+    },
+    {
+      "id": "investor_oprah_winfrey",
+      "date": "2026-10-06"
     }
   ],
   "low_inventory_alert_sent": false
