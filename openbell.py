@@ -106,7 +106,14 @@ _RESPONSIVE_STYLE_BLOCK = """<style>
 </style>"""
 
 
-def _wrap(body: str, title: str, subtitle: str) -> str:
+_PRIVATE_FOOTER = """<tr><td class="pippy-footer-pad" style="padding:20px 32px;border-top:1px solid #e5e7eb;background:#f9fafb">
+    <p style="margin:0;font-size:11px;color:#9ca3af">Pippy's Brief &mdash; automated daily market briefing. Not financial advice.</p>
+  </td></tr>"""
+
+
+def _wrap(body: str, title: str, subtitle: str, footer_html: str = None) -> str:
+    # footer_html is for the public edition only; the default is the private footer, unchanged.
+    footer = _PRIVATE_FOOTER if footer_html is None else footer_html
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -131,9 +138,7 @@ def _wrap(body: str, title: str, subtitle: str) -> str:
   {body}
 
   <!-- FOOTER -->
-  <tr><td class="pippy-footer-pad" style="padding:20px 32px;border-top:1px solid #e5e7eb;background:#f9fafb">
-    <p style="margin:0;font-size:11px;color:#9ca3af">Pippy's Brief &mdash; automated daily market briefing. Not financial advice.</p>
-  </td></tr>
+  {footer}
 
 </table>
 </td></tr>
