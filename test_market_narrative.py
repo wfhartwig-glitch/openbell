@@ -84,6 +84,13 @@ def _silent(fn, *a, **kw):
     return result, buf.getvalue()
 
 
+# Whole-suite clock: every test runs as Monday 2026-10-05 unless it pins its own date with
+# _frozen_today. Several tests build fixtures with openbell._today_ct_iso() or depend on today's
+# weekday, and passed only on the day they were written; the suite must never read the live clock.
+SUITE_TODAY = datetime.date(2026, 10, 5)
+openbell._today_ct = lambda now=None: SUITE_TODAY
+
+
 @contextlib.contextmanager
 def _frozen_today(d):
     """Freeze openbell._today_ct() — the rates sentence decides "its highest level
@@ -1402,7 +1409,10 @@ def test_all_down_tape():
 
 
 def test_rates_driver_fires_and_mentions_extreme():
-    text, log = morning(SNAPSHOT_UP, treasury=TREASURY_FALLING)
+    # The fixture's 6-month high is "Tuesday"; whether the text says "off Tuesday's high" or "its highest
+    # level in six months" depends on today's weekday, so today is pinned to a Wednesday.
+    with _frozen_today(datetime.date(2026, 9, 2)):
+        text, log = morning(SNAPSHOT_UP, treasury=TREASURY_FALLING)
     check("RATES fires on a >=4bp move", "10-year" in text)
     check("RATES mentions the 6-month extreme context by day name", "Tuesday" in text, f"got: {text!r}")
     check("headline_theme logged for RATES", log["headline_theme"] == "rate expectations")

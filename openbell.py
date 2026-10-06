@@ -1732,6 +1732,32 @@ def _outsized_mover_note(movers: dict, headlines: list, used_headlines: set,
             f"find, which can mean positioning or an analyst call we can't see.{scale}"), sym
 
 
+_RUNNER_UP_MOVER_MIN_PCT = 2.0   # same "notable" bar the narrative's best/worst mover clauses use
+
+
+def _runner_up_mover_sentence(movers: dict, already_named: set, earnings_today: set = None) -> str:
+    """Public edition: the next-largest mover (by absolute move) not already named in the
+    narrative, if it clears the same 2% bar. States the move only — no cause is asserted."""
+    earnings_today = earnings_today or set()
+    best = None
+    for lst in ((movers or {}).get("gainers", []) or [], (movers or {}).get("losers", []) or []):
+        for m in lst:
+            sym = m.get("symbol", "")
+            if not sym or sym in already_named:
+                continue
+            try:
+                pct = float(m.get("pct") or m.get("changesPercentage") or 0)
+            except Exception:
+                continue
+            if abs(pct) >= _RUNNER_UP_MOVER_MIN_PCT and (best is None or abs(pct) > abs(best[1])):
+                best = (sym, pct)
+    if not best:
+        return ""
+    sym, pct = best
+    tail = ", after reporting earnings today" if sym in earnings_today else ""
+    return f"{sym} also stood out, {_pct_words(pct)}{tail}."
+
+
 def _event_clause(event: dict, mode: str, used_headlines: set) -> str:
     """
     One hedged sentence per qualifying event, naming what the headline is ABOUT in the
@@ -1937,6 +1963,7 @@ def _build_market_narrative(
     sectors: list = None,
     picks_day_performance: list = None,
     scan_candidates: list = None,
+    second_mover: bool = False,   # public edition: also name a runner-up notable mover
 ) -> tuple:
     """
     ONE shared narrative engine for both briefs (mode="morning" / "close").
@@ -2306,6 +2333,12 @@ def _build_market_narrative(
     ] if c]
     if mover_bits:
         add_p2("; ".join(mover_bits) + ".", 3)
+    if second_mover:
+        named = {outsized_sym}
+        for m in (losers[:1] + gainers[:1]):
+            if m and any(b.startswith(f"{m.get('symbol', '')} ") for b in mover_bits):
+                named.add(m.get("symbol", ""))
+        add_p2(_runner_up_mover_sentence(movers, named, earnings_today), 3)
 
     valid_day = [(p.get("ticker", ""), p.get("pct")) for p in (picks_day_performance or [])
                  if p.get("ticker") and isinstance(p.get("pct"), (int, float))]
@@ -2631,11 +2664,13 @@ def _close_summary_html(
     picks_day_performance: list = None,
     scan_candidates: list = None,
     mem: dict = None,
+    second_mover: bool = False,
 ) -> str:
     text, _ = _build_market_narrative(
         "close", snapshot_data, headlines=headlines, commodities=commodities,
         treasury=treasury, mem=mem, earnings=earnings, movers=movers, sectors=sectors,
         picks_day_performance=picks_day_performance, scan_candidates=scan_candidates,
+        second_mover=second_mover,
     )
     paragraphs = text.split("\n\n")
     inner = "".join(

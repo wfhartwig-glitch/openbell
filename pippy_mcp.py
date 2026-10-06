@@ -622,6 +622,7 @@ def fetch_top_movers() -> str:
                     m["name"]   = ""
                     m["sector"] = ""
             return json.dumps({"source": "fallback",
+                               "universe_size": len(scan),   # lets a reader label this honestly: top of N tracked names, not the whole market
                                "gainers": gainers,
                                "losers":  losers,
                                "timestamp": ts})

@@ -1,0 +1,5 @@
+{
+  "_comment": "Copy to public_edition.config.json (gitignored) and fill in. Values are used exactly as written, so an ESP merge tag works. Flags and the PUBLIC_UNSUBSCRIBE_URL / PUBLIC_MAILING_ADDRESS environment variables override this file.",
+  "unsubscribe_url": "",
+  "mailing_address": ""
+}

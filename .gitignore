@@ -7,3 +7,5 @@ daily_scan_cache.json
 .DS_Store
 .claude/
 *.log
+public_out/
+public_edition.config.json
