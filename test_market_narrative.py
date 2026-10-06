@@ -1376,6 +1376,109 @@ def test_unclassifiable_specific_headline_says_it_cannot_tell_what_it_covers():
     check("and it does not paste the headline", "sao paulo" not in s.lower() and "conference" not in s.lower(), f"got: {s!r}")
 
 
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 15 — Restored verbatim from a33eec2 (still pass against current code)
+# ═══════════════════════════════════════════════════════════════════════════
+
+SNAPSHOT_DOWN   = [{"name": "S&P 500", "pct": -0.9}, {"name": "Nasdaq", "pct": -1.1}, {"name": "Dow", "pct": -0.6}]
+TREASURY_FALLING = {
+    "yield": 4.74, "change": -0.058,
+    "six_mo_high": 4.80, "six_mo_high_day": "Tuesday",
+    "six_mo_low": 4.05, "six_mo_low_day": "",
+}
+
+
+def test_all_up_tape():
+    text, log = morning(SNAPSHOT_UP)
+    check("all-up tape classified as 'higher'", log["direction_called"] == "higher")
+    check("all-up tape has no negative arrow on any index", "▼" not in text.split("\n\n")[0], f"got: {text!r}")
+
+
+def test_all_down_tape():
+    text, log = morning(SNAPSHOT_DOWN)
+    check("all-down tape classified as 'lower'", log["direction_called"] == "lower")
+    check("all-down tape has no positive arrow on any index", "▲" not in text.split("\n\n")[0], f"got: {text!r}")
+
+
+def test_rates_driver_fires_and_mentions_extreme():
+    text, log = morning(SNAPSHOT_UP, treasury=TREASURY_FALLING)
+    check("RATES fires on a >=4bp move", "10-year" in text)
+    check("RATES mentions the 6-month extreme context by day name", "Tuesday" in text, f"got: {text!r}")
+    check("headline_theme logged for RATES", log["headline_theme"] == "rate expectations")
+
+
+def test_ten_year_present_in_close_output():
+    treasury = {"yield": 4.50, "change": -0.06}
+    # No sector data at all -> composite can't fire -> falls through to standalone RATES
+    text = close(
+        [{"name": "S&P 500", "pct": 0.1}, {"name": "Nasdaq", "pct": 0.1}, {"name": "Dow", "pct": 0.1}],
+        treasury=treasury,
+    )
+    check("10-year yield appears in close output when treasury data is present",
+         "10-year" in text, f"got: {text!r}")
+
+
+def test_portfolio_day_performance_appears():
+    picks_perf = [{"ticker": "MSFT", "pct": 0.5}, {"ticker": "AVGO", "pct": -1.2}]
+    text = close(AUG28_SNAPSHOT, picks_day_performance=picks_perf)
+    check("portfolio day-performance line appears with both tickers named",
+         "MSFT" in text and "AVGO" in text, f"got: {text!r}")
+
+
+def test_portfolio_day_performance_omitted_when_empty():
+    text = close(AUG28_SNAPSHOT, picks_day_performance=[])
+    check("no portfolio line when there's no picks-day-performance data",
+         "Your picks" not in text and "Your one held pick" not in text, f"got: {text!r}")
+
+
+def test_no_double_period_anywhere_across_every_citation_call_site():
+    # Exercises all three call sites that cite a headline in one pass: the
+    # portfolio-intersection line (morning), the rate-sensitive composite
+    # (close), and a named mover (close).
+    picks_data = {
+        "picks": [{"ticker": "AVGO", "company": "Broadcom Inc."}],
+        "changes_from_last_week": [],
+    }
+    mem = {"pick_performance_history": [{"ticker": "AVGO", "pct_change_since_pick": -13.8}]}
+    headlines = [{"title": "AVGO shares slip on AI revenue doubts", "snippet": "s", "site": "Reuters"}]
+    text, _ = morning(SNAPSHOT_UP, headlines=headlines, picks_data=picks_data, mem=mem)
+    check("morning portfolio-intersection citation has no double period",
+         '".."' not in text and '.".' not in text, f"got: {text!r}")
+
+    sectors = [{"sector": "Utilities", "pct": -1.0}, {"sector": "Real Estate", "pct": -0.9}]
+    close_headlines = [{"title": "Fed Chair Warsh Delivers First Jackson Hole Keynote", "snippet": "s", "site": "Wire"}]
+    close_text = close(AUG28_SNAPSHOT, sectors=sectors, commodities=[{"name": "Gold", "pct": -2.0, "price": 4500}],
+                       headlines=close_headlines)
+    check("close rate-sensitive-composite citation has no double period",
+         '".."' not in close_text and '.".' not in close_text, f"got: {close_text!r}")
+
+    mover_movers = {"gainers": [{"symbol": "NOW", "name": "ServiceNow, Inc.", "pct": 5.31}], "losers": []}
+    mover_headlines = [{"title": "ServiceNow shares jump on strong cloud demand", "snippet": "s", "site": "Wire"}]
+    mover_text = close(AUG28_SNAPSHOT, movers=mover_movers, headlines=mover_headlines)
+    check("close named-mover citation has no double period",
+         '".."' not in mover_text and '.".' not in mover_text, f"got: {mover_text!r}")
+
+
+def test_close_now_gets_standalone_oil_gold_sentence():
+    # Previously close-mode never mentioned oil at all, and only mentioned
+    # gold as a composite corroborator. With the shared ladder, a plain oil
+    # move now shows up in the close brief the same way it does in morning.
+    snapshot = [{"name": "S&P 500", "pct": 0.2}, {"name": "Nasdaq", "pct": 0.2}, {"name": "Dow", "pct": 0.2}]
+    commodities = [{"name": "WTI Crude Oil", "price": 91.94, "change": 2.20, "pct": 2.45}]
+    text = close(snapshot, commodities=commodities)
+    check("close brief now names an oil move >=2%% (previously morning-only)",
+         "91.94" in text, f"got: {text!r}")
+
+
+def test_close_does_not_double_cite_gold_when_composite_already_used_it():
+    sectors = [{"sector": "Utilities", "pct": -1.0}, {"sector": "Real Estate", "pct": -0.9}]
+    commodities = [{"name": "Gold", "price": 4506, "change": -124.8, "pct": -2.69}]
+    text = close(AUG28_SNAPSHOT, sectors=sectors, commodities=commodities)
+    check("gold's move is named exactly once (by the composite), not a second time by the OIL/GOLD step",
+         text.count("4,506") <= 1 and text.count("2.69") <= 1, f"got: {text!r}")
+
+
 if __name__ == "__main__":
     tests = [
         test_sept3_fixture_runs_end_to_end,
@@ -1491,6 +1594,15 @@ if __name__ == "__main__":
         test_ambiguous_event_word_needs_supporting_context,
         test_ticker_that_is_an_english_word_does_not_match_by_ticker_alone,
         test_unclassifiable_specific_headline_says_it_cannot_tell_what_it_covers,
+        test_all_up_tape,
+        test_all_down_tape,
+        test_rates_driver_fires_and_mentions_extreme,
+        test_ten_year_present_in_close_output,
+        test_portfolio_day_performance_appears,
+        test_portfolio_day_performance_omitted_when_empty,
+        test_no_double_period_anywhere_across_every_citation_call_site,
+        test_close_now_gets_standalone_oil_gold_sentence,
+        test_close_does_not_double_cite_gold_when_composite_already_used_it,
     ]
     print(f"Running {len(tests)} test groups...\n")
     for t in tests:
