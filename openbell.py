@@ -1264,6 +1264,11 @@ _DOW_30_COMPONENTS = {
 }
 
 
+def _dow_beat_nasdaq_base(gap: str) -> str:
+    return (f"The Dow beat the Nasdaq by {gap}, which suggests the gains were in more traditional, "
+            f"economically sensitive companies rather than in technology.")
+
+
 def _divergence_note(sp: float, ndx: float, dow: float, treasury_chg, sectors: list = None,
                      movers: dict = None, flat: bool = False, rotation_covered: bool = False,
                      skip_yields: bool = False) -> dict:
@@ -1317,6 +1322,8 @@ def _divergence_note(sp: float, ndx: float, dow: float, treasury_chg, sectors: l
     if skip_yields and best_name == "Nasdaq" and worst_name == "Dow" and not flat:
         return out(f"The Nasdaq beat the Dow by {gap}, which suggests the gains were concentrated in "
                    f"large technology companies rather than spread across the whole market.", True, True)
+    if skip_yields and best_name == "Dow" and worst_name == "Nasdaq" and not flat:
+        return out(_dow_beat_nasdaq_base(gap), True, True)
     if skip_yields and worst_name == "Nasdaq" and not flat:
         return out(f"The Nasdaq trailed by {gap}.", True, False)
 
@@ -1358,6 +1365,13 @@ def _divergence_note(sp: float, ndx: float, dow: float, treasury_chg, sectors: l
             return out("The pattern suggests money moved toward older, cheaper, economically sensitive "
                        "companies — energy, financials, industrials — and away from the richly priced "
                        "technology names that dominate the Nasdaq.", chain=True)
+
+    # Mirror of the Nasdaq-beats-Dow reading above (yields rising is handled earlier).
+    if best_name == "Dow" and worst_name == "Nasdaq" and not flat:
+        base = _dow_beat_nasdaq_base(gap)
+        if yields_down:
+            return out(f"{base} Falling yields usually help tech, so rates don't explain it.", True, True)
+        return out(f"{base} Yields were little changed, so interest rates don't explain the gap.", True, True)
 
     if worst_name == "Nasdaq":
         lead = ("The small tilt away from technology — the Nasdaq is slightly behind —" if flat

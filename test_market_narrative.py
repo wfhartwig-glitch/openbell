@@ -1479,6 +1479,25 @@ def test_close_does_not_double_cite_gold_when_composite_already_used_it():
          text.count("4,506") <= 1 and text.count("2.69") <= 1, f"got: {text!r}")
 
 
+
+def test_dow_beating_nasdaq_gets_a_hedged_reading_mirroring_the_reverse():
+    breadth = [{"name": "S&P 500", "pct": 0.4}, {"name": "Nasdaq", "pct": 0.1}, {"name": "Dow", "pct": 0.6}]
+    text, _ = morning(breadth)
+    check("Dow beats Nasdaq: states the gap", "The Dow beat the Nasdaq by 0.50 percentage points" in text, f"got: {text!r}")
+    check("Dow beats Nasdaq: interprets it, hedged ('suggests'), as traditional companies not tech",
+          "which suggests the gains were in more traditional, economically sensitive companies rather than in technology" in text, f"got: {text!r}")
+    check("Dow beats Nasdaq with flat yields: says rates don't explain it", "Yields were little changed, so interest rates don't explain the gap" in text, f"got: {text!r}")
+    check("no unhedged 'because' in the mirrored sentence", "because" not in text.split("The Dow beat")[1].split(". ")[0].lower(), f"got: {text!r}")
+    up = morning(breadth, treasury={"yield": 4.3, "change": 0.06})[0]
+    check("rising yields keep the existing direct mapping (Nasdaq lagging, higher yields)", "lines up with the rise in yields" in up, f"got: {up!r}")
+    down = morning(breadth, treasury={"yield": 4.3, "change": -0.06})[0]
+    check("falling yields: says rates don't explain a Dow lead", "Falling yields usually help tech, so rates don't explain it" in down and "The Dow beat the Nasdaq" in down, f"got: {down!r}")
+    flat = morning([{"name": "S&P 500", "pct": 0.02}, {"name": "Nasdaq", "pct": -0.12}, {"name": "Dow", "pct": 0.18}])[0]
+    check("a flat tape keeps the 'small tilt' wording, not the full interpretation", "The Dow beat the Nasdaq" not in flat, f"got: {flat!r}")
+    mirror = morning([{"name": "S&P 500", "pct": 0.4}, {"name": "Nasdaq", "pct": 0.9}, {"name": "Dow", "pct": 0.1}])[0]
+    check("control: the Nasdaq-beats-Dow sentence is unchanged", "The Nasdaq beat the Dow by 0.80 percentage points, which suggests the gains were concentrated in large technology companies" in mirror, f"got: {mirror!r}")
+
+
 if __name__ == "__main__":
     tests = [
         test_sept3_fixture_runs_end_to_end,
@@ -1603,6 +1622,7 @@ if __name__ == "__main__":
         test_no_double_period_anywhere_across_every_citation_call_site,
         test_close_now_gets_standalone_oil_gold_sentence,
         test_close_does_not_double_cite_gold_when_composite_already_used_it,
+        test_dow_beating_nasdaq_gets_a_hedged_reading_mirroring_the_reverse,
     ]
     print(f"Running {len(tests)} test groups...\n")
     for t in tests:
