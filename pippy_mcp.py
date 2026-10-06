@@ -395,6 +395,30 @@ def fetch_stock_data(ticker: str) -> str:
                                "error": str(e), "timestamp": ts})
 
 
+def _search_news_items(queries=("stock market", "S&P 500", "Federal Reserve interest rates", "oil prices")) -> list:
+    """
+    Fallback headline source. Yahoo's per-ticker news endpoint (finance.yahoo.com/xhr/ncp,
+    behind yf.Ticker(...).news) intermittently returns HTTP 404, and yfinance swallows that
+    and returns [] — which silently emptied the Top Headlines section (and starved the
+    narrative's event layer) on several production runs. The Search endpoint is separate
+    and was still returning fresh items on those days. Returns the same uniform shape the
+    caller builds from Ticker.news: {title, pub_iso, site, summary}.
+    """
+    from datetime import timezone
+    out = []
+    for q in queries:
+        try:
+            news = yf.Search(q, news_count=8).news or []
+        except Exception:
+            continue
+        for it in news:
+            epoch = it.get("providerPublishTime")
+            pub = datetime.fromtimestamp(epoch, tz=timezone.utc).isoformat() if isinstance(epoch, (int, float)) else ""
+            out.append({"title": it.get("title", ""), "pub_iso": pub,
+                        "site": it.get("publisher") or "Yahoo Finance", "summary": ""})
+    return out
+
+
 @mcp.tool()
 def fetch_top_headlines() -> str:
     """Fetch today's top financial headlines. Returns JSON with 'headlines' list."""
@@ -440,46 +464,60 @@ def fetch_top_headlines() -> str:
                            "confirmation hearing", "reportedly considering"]
             now_utc    = datetime.now(timezone.utc)
             cutoff_hrs = 72
+            import sys
             seen, titles, excluded = set(), [], []
+            raw = []
             for sym in ["SPY", "QQQ", "^VIX", "GLD"]:
                 for item in (yf.Ticker(sym).news or []):
-                    content  = item.get("content", {})
-                    h        = content.get("title") or item.get("title", "")
-                    pub_str  = content.get("pubDate") or content.get("displayTime", "")
-                    site     = content.get("provider", {}).get("displayName", "Yahoo Finance")
-                    if not h or h in seen or len(h) < 20:
-                        continue
-                    if any(k in h.lower() for k in skip):
-                        continue
-                    # Parse publish date
-                    pub_dt   = None
-                    age_hrs  = None
-                    if pub_str:
-                        try:
-                            pub_dt  = datetime.fromisoformat(pub_str.replace("Z", "+00:00"))
-                            age_hrs = (now_utc - pub_dt).total_seconds() / 3600
-                        except Exception:
-                            pass
-                    # Recency gate: discard if older than cutoff
-                    if age_hrs is not None and age_hrs > cutoff_hrs:
-                        excluded.append({"title": h[:60], "age_hrs": round(age_hrs, 1)})
-                        continue
-                    # Speculative-language + age guard: discard if speculative AND not from today
-                    if age_hrs is not None and age_hrs > 24:
-                        if any(s in h.lower() for s in speculative):
-                            excluded.append({"title": h[:60], "age_hrs": round(age_hrs, 1),
-                                             "reason": "speculative language in old article"})
-                            continue
-                    seen.add(h)
-                    titles.append({
-                        "title":     h,
-                        "snippet":   content.get("summary", "")[:350],
-                        "site":      site,
-                        "published": pub_str[:10] if pub_str else "",
-                        "age_hrs":   round(age_hrs, 1) if age_hrs is not None else None,
+                    content = item.get("content", {})
+                    raw.append({
+                        "title":    content.get("title") or item.get("title", ""),
+                        "pub_iso":  content.get("pubDate") or content.get("displayTime", ""),
+                        "site":     content.get("provider", {}).get("displayName", "Yahoo Finance"),
+                        "summary":  content.get("summary", ""),
                     })
+            if not raw:
+                raw = _search_news_items()
+                print(f"[fetch_top_headlines] Ticker.news returned 0 items for every ticker (Yahoo's news "
+                      f"endpoint 404s on some days); fell back to Search -> {len(raw)} items", file=sys.stderr)
+                if not raw:
+                    print("[fetch_top_headlines] WARNING: no headlines from any source — the brief will "
+                          "say so rather than imply there was no news", file=sys.stderr)
+            for item in raw:
+                h        = item["title"]
+                pub_str  = item["pub_iso"]
+                site     = item["site"]
+                if not h or h in seen or len(h) < 20:
+                    continue
+                if any(k in h.lower() for k in skip):
+                    continue
+                pub_dt   = None
+                age_hrs  = None
+                if pub_str:
+                    try:
+                        pub_dt  = datetime.fromisoformat(pub_str.replace("Z", "+00:00"))
+                        age_hrs = (now_utc - pub_dt).total_seconds() / 3600
+                    except Exception:
+                        pass
+                # Recency gate: discard if older than cutoff
+                if age_hrs is not None and age_hrs > cutoff_hrs:
+                    excluded.append({"title": h[:60], "age_hrs": round(age_hrs, 1)})
+                    continue
+                # Speculative-language + age guard: discard if speculative AND not from today
+                if age_hrs is not None and age_hrs > 24:
+                    if any(sp in h.lower() for sp in speculative):
+                        excluded.append({"title": h[:60], "age_hrs": round(age_hrs, 1),
+                                         "reason": "speculative language in old article"})
+                        continue
+                seen.add(h)
+                titles.append({
+                    "title":     h,
+                    "snippet":   (item["summary"] or "")[:350],
+                    "site":      site,
+                    "published": pub_str[:10] if pub_str else "",
+                    "age_hrs":   round(age_hrs, 1) if age_hrs is not None else None,
+                })
             if excluded:
-                import sys
                 print(f"[fetch_top_headlines] excluded {len(excluded)} stale/speculative items: "
                       + ", ".join(f"{e['title']} ({e.get('age_hrs','?')}h)" for e in excluded),
                       file=sys.stderr)

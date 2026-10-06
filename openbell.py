@@ -169,6 +169,8 @@ def _indices(data: list) -> str:
 
 
 def _headlines(headlines: list) -> str:
+    if not headlines:
+        return ""   # no section at all rather than a heading over nothing
     items = ""
     for i, h in enumerate(headlines):
         title   = h.get("title", h) if isinstance(h, dict) else str(h)
@@ -911,9 +913,20 @@ _EVENT_PAST_CUES = [
 ]
 
 
+# Terms that are also ordinary names ("Summit Materials", "Election Systems & Software") only count
+# as an event when the headline carries supporting context.
+_EVENT_CONTEXT_REQUIRED = {
+    "summit": ["g7", "g20", "leaders", "president", "talks", "trade", "peace", "climate", "nato", "eu ",
+               "china", "white house", "prime minister"],
+}
+
+
 def _event_word_boundary_hit(term: str, text_l: str) -> bool:
     pat = r'\b' + re.escape(term) + r'\b' if len(term) <= 6 else re.escape(term)
-    return bool(re.search(pat, text_l))
+    if not re.search(pat, text_l):
+        return False
+    need = _EVENT_CONTEXT_REQUIRED.get(term)
+    return True if not need else any(c in text_l for c in need)
 
 
 def _event_is_scheduled(text_l: str):
@@ -1594,17 +1607,49 @@ _EVENT_CATEGORY_FALLBACK = {"MONETARY": "central-bank or economic-data news",
                             "CORPORATE": "a major company announcement"}
 
 
-def _headline_topic(h: dict, field: str = None) -> str:
-    """The topic a ticker-specific headline covers, in the brief's own words, or ""
-    if no pattern matches (the caller then says it can't tell what it covers)."""
+_TOPIC_WINDOW_WORDS = 5   # a topic keyword counts only within this many words of the stock's own name
+
+
+def _headline_topic(h: dict, field: str = None, symbol: str = "", company: str = "") -> str:
+    """
+    The topic a ticker-specific headline covers, in the brief's own words, or "" if
+    none can be assigned confidently (the caller then says it can't tell what it covers).
+
+    A keyword only counts when it sits within a few words of the stock's own ticker or
+    company name — "Walmart earnings beat estimates; MELI also higher" mentions earnings,
+    but they're Walmart's, so attributing "its latest earnings" to MELI would be a guess
+    presented as fact. When symbol/company are given and no topic keyword is near a
+    mention, the answer is "" rather than the nearest keyword anywhere in the headline.
+    """
+    from_name = _company_short_name(company).lower()
+    sym_l = (symbol or "").lower()
     parts = [h.get("title", "") or "", h.get("snippet", "") or ""]
     if field == "snippet":
         parts.reverse()
     for text in parts:
         tl = text.lower()
+        if not tl:
+            continue
+        tokens = [(m.start(), m.group()) for m in re.finditer(r"[a-z0-9&'.-]+", tl)]
+        mention_idx = []
+        if sym_l or from_name:
+            for k, (_, tok) in enumerate(tokens):
+                if sym_l and tok.strip(".'-") == sym_l:
+                    mention_idx.append(k)
+            if from_name:
+                first = from_name.split()[0]
+                for k, (_, tok) in enumerate(tokens):
+                    if tok.strip(".'-") == first:
+                        mention_idx.append(k)
+            if not mention_idx:
+                continue
         for pat, phrase in _TICKER_HEADLINE_TOPICS:
-            if re.search(pat, tl):
-                return phrase
+            for m in re.finditer(pat, tl):
+                if not mention_idx:
+                    return phrase
+                kw_idx = sum(1 for st, _ in tokens if st < m.start())
+                if any(abs(kw_idx - mi) <= _TOPIC_WINDOW_WORDS for mi in mention_idx):
+                    return phrase
     return ""
 
 
@@ -1653,14 +1698,14 @@ def _outsized_mover_note(movers: dict, headlines: list, used_headlines: set,
                 f"today.{scale}"), sym
 
     if not headlines:
-        return (f"{label} was the day's biggest mover, {_pct_words(pct)}; today's headline feed was "
-                f"empty, so we can't say whether there was company news.{scale}"), sym
+        return (f"{label} was the day's biggest mover, {_pct_words(pct)}; we couldn't pull "
+                f"headlines today, so we can't say whether there was company news.{scale}"), sym
 
     h, is_specific, field = _find_headline_for_symbol(headlines, sym, m.get("name", ""), sector="",
                                                       exclude=used_headlines)
     if h and is_specific:
         used_headlines.add(h.get("title", ""))
-        topic = _headline_topic(h, field)
+        topic = _headline_topic(h, field, sym, m.get("name", ""))
         what = (f"a same-day headline covers {topic}" if topic else
                 "a same-day headline mentions it, though we can't tell what it covers")
         return f"{label} was the day's biggest mover, {_pct_words(pct)}; {what}.{scale}", sym
@@ -1750,7 +1795,7 @@ def _holdings_close_sentences(valid_day: list, perf_since: dict, sector_by_ticke
     if abs(p) >= 0.3:
         h, is_specific, _ = _find_headline_for_symbol(headlines, sym, "", sector="", exclude=used_headlines)
         if not (h and is_specific):
-            no_news = "we found no headline explaining it" if headlines else "today's headline feed was empty"
+            no_news = "we found no headline explaining it" if headlines else "we couldn't pull headlines today to check"
             sector = (sector_by_ticker.get(sym) or "").lower()
             tech = "tech" in sector
             bench_name, bench = ("Nasdaq", ndx) if tech else ("S&P 500", sp)
@@ -2163,11 +2208,11 @@ def _build_market_narrative(
                                 f"{abs(worst[1]):.1f}%.")
                 if featured:
                     fp, fh, ffield = featured
-                    topic = _headline_topic(fh, ffield)
+                    topic = _headline_topic(fh, ffield, fp.get("ticker", ""), fp.get("company", ""))
                     sentence += (f" {fp.get('ticker', '')} is in today's headlines, which cover {topic}." if topic else
                                  f" {fp.get('ticker', '')} is mentioned in today's headlines, though we can't tell what they cover.")
                 elif not headlines:
-                    sentence += " Today's headline feed was empty, so we can't check for company news."
+                    sentence += " We couldn't pull headlines today, so we can't check whether any of your holdings is in the news."
                 else:
                     sentence += (" None of your holdings is in today's headlines, so any move today likely "
                                  "tracks the broader market rather than company news.")
@@ -2232,7 +2277,7 @@ def _build_market_narrative(
         )
         if h and is_specific:
             used_headlines.add(h.get("title", ""))
-            topic = _headline_topic(h, field)
+            topic = _headline_topic(h, field, sym, m.get("name", ""))
             return f"{lead} (a same-day headline covers {topic})" if topic else lead
         return lead
 
@@ -2370,6 +2415,11 @@ def _find_headline_for_keywords(headlines: list, keywords: list, exclude: set = 
     return None, None
 
 
+# Tickers that are also common English words. A bare match on these ("WALL STREET RALLIES NOW")
+# is not evidence a headline is about the company, so only the company name counts.
+_COMMON_WORD_TICKERS = {"NOW", "ON", "IT", "A", "ALL", "ARE", "FOR", "HAS", "ONE", "BIG", "FAST", "WELL",
+                        "REAL", "TRUE", "GOOD", "LOVE", "CARE", "OPEN", "PLAY", "WORK", "TECH", "EAT"}
+
 _CORP_SUFFIXES = {"corporation", "corp", "inc", "holdings", "holding", "co", "ltd", "plc", "company", "group"}
 
 
@@ -2400,6 +2450,10 @@ def _find_headline_for_symbol(headlines: list, symbol: str, company_name: str = 
     if symbol:
         pattern = re.compile(r'\b' + re.escape(symbol) + r'\b')  # case-sensitive — avoids "app"/"APP" false hits
         name_l  = _company_short_name(company_name).lower()
+        if symbol in _COMMON_WORD_TICKERS:
+            # NOW / ON / IT are also ordinary English (and an all-caps headline defeats the
+            # case-sensitivity above), so the bare ticker proves nothing: require the company name.
+            pattern = re.compile(r"(?!x)x")
         for h in headlines or []:
             title, snippet = h.get("title", "") or "", h.get("snippet", "") or ""
             if title in exclude:

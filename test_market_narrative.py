@@ -1001,12 +1001,12 @@ def test_empty_headline_feed_is_not_reported_as_no_news():
     mv = {"gainers": [{"symbol": "MELI", "name": "MercadoLibre, Inc.", "pct": 9.61}], "losers": []}
     s, _ = openbell._outsized_mover_note(mv, [], set(), set())
     check("an empty feed says it can't check, instead of 'no company news we could find'",
-          "headline feed was empty" in s and "no company news we could find" not in s, f"got: {s!r}")
+          "couldn't pull headlines today" in s and "no company news we could find" not in s, f"got: {s!r}")
     picks = {"picks": [{"ticker": "AVGO", "company": "Broadcom Inc.", "pct_change_since_pick": -13.8},
                        {"ticker": "MSFT", "company": "Microsoft", "pct_change_since_pick": 30.0}], "changes_from_last_week": []}
     mem = {"pick_performance_history": [{"ticker": "AVGO", "pct_change_since_pick": -13.8}, {"ticker": "MSFT", "pct_change_since_pick": 30.0}]}
     m, _ = _silent(morning, SEPT3_SNAPSHOT, picks_data=picks, mem=mem, headlines=[])
-    check("morning holdings line says the feed was empty", "headline feed was empty" in m[0] and "None of your holdings" not in m[0], f"got: {m[0]!r}")
+    check("morning holdings line says headlines couldn't be pulled", "couldn't pull headlines today" in m[0] and "None of your holdings" not in m[0], f"got: {m[0]!r}")
 
 
 def test_rotation_claim_requires_utilities_and_real_estate_to_be_genuinely_down():
@@ -1277,6 +1277,105 @@ def test_portfolio_intersection_guards_against_substring_collision():
 
 # ── Run everything ────────────────────────────────────────────────────────────
 
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 14 — Empty headline feed and topic-summarizer false positives
+# ═══════════════════════════════════════════════════════════════════════════
+
+FALLBACK = "mentions it, though we can't tell what it covers"
+
+
+def _hl(*titles, snippet=""):
+    return [{"title": t, "snippet": snippet, "site": "x"} for t in titles]
+
+
+def test_empty_headline_section_is_hidden_never_printed_as_empty():
+    check("_headlines([]) renders nothing at all", openbell._headlines([]) == "", f"got: {openbell._headlines([])!r}")
+    check("_headlines(None) renders nothing at all", openbell._headlines(None) == "")
+    picks = {"picks": [{"ticker": "AVGO", "company": "Broadcom Inc.", "pct_change_since_pick": -13.8}], "changes_from_last_week": []}
+    mem = {"pick_performance_history": [{"ticker": "AVGO", "pct_change_since_pick": -13.8}]}
+    m, _ = _silent(morning, SEPT3_SNAPSHOT, picks_data=picks, mem=mem, headlines=[])
+    c = _silent(close, AUG28_SNAPSHOT, movers={"gainers": [{"symbol": "MELI", "name": "MercadoLibre, Inc.", "pct": 9.6}], "losers": []},
+                headlines=[], mem={"briefing_history": []})[0]
+    for label, txt in (("morning", m[0]), ("close", c)):
+        check(f"{label}: empty feed never prints '(empty)'", "(empty)" not in txt.lower() and "empty)" not in txt.lower(), f"got: {txt[:200]!r}")
+        check(f"{label}: no narrative sentence talks about an 'empty' feed", "empty" not in txt.lower(), f"got: {txt!r}")
+    check("close: an unexplained mover says we couldn't pull headlines, not that no news exists",
+          "couldn't pull headlines today" in c and "no headline explaining" not in c and "no company news" not in c, f"got: {c!r}")
+
+
+def test_html_has_no_headline_section_when_feed_is_empty():
+    html_m = openbell._headlines([])
+    check("the email HTML builder contributes no heading for an empty feed", "Top Headlines" not in html_m)
+    html_ok = openbell._headlines(_hl("Treasury Yields Fall As Inflation Data Cools"))
+    check("a non-empty feed still renders its heading", "Top Headlines" in html_ok)
+
+
+def test_topic_other_companys_earnings_is_not_attributed():
+    # "earnings" is in the headline, but they are Walmart's, not MELI's.
+    t = "Walmart Earnings Beat Estimates As Shoppers Trade Down, MELI Also Higher"
+    h, spec, field = openbell._find_headline_for_symbol(_hl(t), "MELI", "MercadoLibre, Inc.")
+    topic = openbell._headline_topic(h, field, "MELI", "MercadoLibre, Inc.")
+    check("a different company's earnings are not credited to MELI", topic == "", f"got topic {topic!r}")
+    mv = {"gainers": [{"symbol": "MELI", "name": "MercadoLibre, Inc.", "pct": 9.6}], "losers": []}
+    s, _ = openbell._outsized_mover_note(mv, _hl(t), set(), set())
+    check("the mover sentence falls back to 'mentions it, though we can't tell what it covers'",
+          FALLBACK in s and "earnings" not in s, f"got: {s!r}")
+    own = "MELI Earnings Beat Estimates On Strong Brazil Demand"
+    h2, _, f2 = openbell._find_headline_for_symbol(_hl(own), "MELI", "MercadoLibre, Inc.")
+    check("control: the company's own earnings headline is still classified",
+          openbell._headline_topic(h2, f2, "MELI", "MercadoLibre, Inc.") == "its latest earnings or results")
+
+
+def test_topic_keyword_far_from_the_mention_is_not_attributed():
+    t = ("Oil Slides As Inventories Build, Bank Earnings Loom, Treasury Auctions Draw Weak Demand, "
+         "Analysts Warn Of Volatility And MELI Rises")
+    h, spec, field = openbell._find_headline_for_symbol(_hl(t), "MELI", "MercadoLibre, Inc.")
+    check("a keyword many words away from the ticker is not attributed", openbell._headline_topic(h, field, "MELI", "MercadoLibre, Inc.") == "")
+
+
+def test_fed_inside_another_word_is_not_monetary_policy():
+    for title in ("FedEx Reports Strong Quarterly Results", "Federated Hermes Names New Chief Executive",
+                  "Bedfed Holdings Prices Offering", "Why FedEx Shares Are Higher Today"):
+        ev = openbell._extract_market_events(_hl(title), "morning")
+        check(f"'{title[:36]}' is not read as a central-bank event",
+              not any(e["category"] == "MONETARY" for e in ev), f"got: {[(e['category'], e['term']) for e in ev]}")
+    ev = openbell._extract_market_events(_hl("Federal Reserve Holds Interest Rates, Signals Patience"), "morning")
+    check("control: a real Fed headline is still classified", any(e["category"] == "MONETARY" for e in ev),
+          f"got: {[(e['category'], e['term']) for e in ev]}")
+
+
+def test_ambiguous_event_word_needs_supporting_context():
+    ev = openbell._extract_market_events(_hl("Summit Materials Reports Quarterly Results"), "morning")
+    check("'Summit Materials' is a company name, not a diplomatic summit",
+          not any(e["term"] == "summit" for e in ev), f"got: {[(e['category'], e['term']) for e in ev]}")
+    ev = openbell._extract_market_events(_hl("G7 Summit Opens With Trade Talks"), "morning")
+    check("control: a real summit headline still counts", any(e["term"] == "summit" for e in ev))
+
+
+def test_ticker_that_is_an_english_word_does_not_match_by_ticker_alone():
+    cases = [("NOW", "ServiceNow, Inc.", "WALL STREET RALLIES NOW AS YIELDS FALL"),
+             ("NOW", "ServiceNow, Inc.", "Why Investors Are Buying Tech Stocks Now"),
+             ("IT",  "Gartner, Inc.",    "WHY IT STOCKS ARE SELLING OFF TODAY"),
+             ("ON",  "ON Semiconductor Corporation", "Stocks Close Higher On Fed Hopes"),
+             ("A",   "Agilent Technologies, Inc.", "A Strong Jobs Report Lifts Markets"),
+             ("ALL", "The Allstate Corporation", "ALL THREE INDEXES CLIMB AS YIELDS FALL")]
+    for sym, name, title in cases:
+        h, spec, field = openbell._find_headline_for_symbol(_hl(title), sym, name)
+        check(f"{sym}: '{title[:38]}' is not treated as a headline about {name.split(',')[0]}", not (h and spec), f"got: {h}")
+    h, spec, field = openbell._find_headline_for_symbol(_hl("ServiceNow Announces Acquisition Of AI Startup"), "NOW", "ServiceNow, Inc.")
+    check("control: the company's name still matches", bool(h and spec))
+    h, spec, field = openbell._find_headline_for_symbol(_hl("Why ON Semiconductor Stock Fell Today"), "ON", "ON Semiconductor Corporation")
+    check("control: ON Semiconductor matches by name", bool(h and spec))
+
+
+def test_unclassifiable_specific_headline_says_it_cannot_tell_what_it_covers():
+    mv = {"gainers": [{"symbol": "MELI", "name": "MercadoLibre, Inc.", "pct": 9.6}], "losers": []}
+    s, _ = openbell._outsized_mover_note(mv, _hl("MercadoLibre Spotted At Industry Conference In Sao Paulo"), set(), set())
+    check("a headline that names the stock but fits no topic gets the honest fallback", FALLBACK in s, f"got: {s!r}")
+    check("and it does not paste the headline", "sao paulo" not in s.lower() and "conference" not in s.lower(), f"got: {s!r}")
+
+
 if __name__ == "__main__":
     tests = [
         test_sept3_fixture_runs_end_to_end,
@@ -1384,6 +1483,14 @@ if __name__ == "__main__":
         test_earnings_today_forward_looking_only,
         test_handoff_notes_asia_flat,
         test_portfolio_intersection_guards_against_substring_collision,
+        test_empty_headline_section_is_hidden_never_printed_as_empty,
+        test_html_has_no_headline_section_when_feed_is_empty,
+        test_topic_other_companys_earnings_is_not_attributed,
+        test_topic_keyword_far_from_the_mention_is_not_attributed,
+        test_fed_inside_another_word_is_not_monetary_policy,
+        test_ambiguous_event_word_needs_supporting_context,
+        test_ticker_that_is_an_english_word_does_not_match_by_ticker_alone,
+        test_unclassifiable_specific_headline_says_it_cannot_tell_what_it_covers,
     ]
     print(f"Running {len(tests)} test groups...\n")
     for t in tests:
