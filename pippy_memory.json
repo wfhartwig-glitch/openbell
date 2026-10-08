@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 224,
-  "last_session": "2026-10-08T13:31:13.098220",
+  "session_count": 225,
+  "last_session": "2026-10-08T17:00:36.521712",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 213,
-  "last_email_sent": "2026-10-08T13:31:13.095991",
-  "last_email_summary": "morning sent Thursday, October 08, 2026",
+  "email_count": 214,
+  "last_email_sent": "2026-10-08T17:00:36.520183",
+  "last_email_summary": "casestudy sent Thursday, October 08, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "investor_ingvar_kamprad",
-      "category": "investor",
-      "topic": "IKEA's Founder Built a Furniture Giant \u2014 and Later Admitted to a Fascist Past",
-      "remaining_in_pass": 43,
-      "low_inventory_alert": false,
-      "date": "2026-09-13"
-    },
     {
       "type": "morning",
       "direction_called": "lower",
@@ -666,6 +657,15 @@
       "headline_theme": "rate expectations",
       "commodity_note": "Crude oil rose 2.01% to $91.68 a barrel. Pricier energy raises costs for airlines and shippers and can feed inflation (rising prices overall), while helping oil producers.",
       "picks_status": "holding",
+      "date": "2026-10-08"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_anita_roddick",
+      "category": "investor",
+      "topic": "Anita Roddick Started The Body Shop With a Loan and No Money for a Big Product Range",
+      "remaining_in_pass": 19,
+      "low_inventory_alert": false,
       "date": "2026-10-08"
     }
   ],

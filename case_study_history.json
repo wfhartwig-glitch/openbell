@@ -335,6 +335,10 @@
     {
       "id": "investor_oprah_winfrey",
       "date": "2026-10-06"
+    },
+    {
+      "id": "investor_anita_roddick",
+      "date": "2026-10-08"
     }
   ],
   "low_inventory_alert_sent": false
