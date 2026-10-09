@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 228,
-  "last_session": "2026-10-09T17:00:37.649739",
+  "session_count": 229,
+  "last_session": "2026-10-09T20:01:53.347471",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 217,
-  "last_email_sent": "2026-10-09T17:00:37.647635",
-  "last_email_summary": "casestudy sent Friday, October 09, 2026",
+  "email_count": 218,
+  "last_email_sent": "2026-10-09T20:01:53.345772",
+  "last_email_summary": "close sent Friday, October 09, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "lower",
-      "leading_index": "",
-      "lagging_index": "Dow",
-      "headline_theme": "",
-      "commodity_note": "",
-      "picks_status": "holding",
-      "date": "2026-09-15"
-    },
     {
       "type": "case_study",
       "id": "investor_robert_maxwell",
@@ -668,6 +658,15 @@
       "remaining_in_pass": 18,
       "low_inventory_alert": false,
       "date": "2026-10-09"
+    },
+    {
+      "type": "close",
+      "actual_direction": "higher",
+      "actual_sp_pct": 0.59,
+      "best_sector": "Real Estate",
+      "worst_sector": "Comm. Services",
+      "biggest_mover": "HIMS +9.9%",
+      "date": "2026-10-09"
     }
   ],
   "lessons_learned": [
@@ -1076,6 +1075,12 @@
       "called": "lower",
       "actual": "mixed",
       "accurate": false
+    },
+    {
+      "date": "2026-10-09",
+      "called": "higher",
+      "actual": "higher",
+      "accurate": true
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
