@@ -339,6 +339,10 @@
     {
       "id": "investor_anita_roddick",
       "date": "2026-10-08"
+    },
+    {
+      "id": "investor_richard_branson",
+      "date": "2026-10-09"
     }
   ],
   "low_inventory_alert_sent": false

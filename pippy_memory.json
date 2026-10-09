@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 227,
-  "last_session": "2026-10-09T13:31:19.219117",
+  "session_count": 228,
+  "last_session": "2026-10-09T17:00:37.649739",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 216,
-  "last_email_sent": "2026-10-09T13:31:19.217058",
-  "last_email_summary": "morning sent Friday, October 09, 2026",
+  "email_count": 217,
+  "last_email_sent": "2026-10-09T17:00:37.647635",
+  "last_email_summary": "casestudy sent Friday, October 09, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "lower",
-      "actual_sp_pct": -0.46,
-      "best_sector": "Comm. Services",
-      "worst_sector": "Technology",
-      "biggest_mover": "CRWD +14.0%",
-      "date": "2026-09-14"
-    },
     {
       "type": "morning",
       "direction_called": "lower",
@@ -667,6 +658,15 @@
       "headline_theme": "rate expectations",
       "commodity_note": "Crude oil was little changed at $90.77 a barrel, so energy costs aren't adding pressure either way.",
       "picks_status": "holding",
+      "date": "2026-10-09"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_richard_branson",
+      "category": "investor",
+      "topic": "Richard Branson Has Failed at Business More Times Than Most People Try \u2014 and Kept Going Anyway",
+      "remaining_in_pass": 18,
+      "low_inventory_alert": false,
       "date": "2026-10-09"
     }
   ],
