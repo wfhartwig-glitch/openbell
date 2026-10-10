@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 229,
-  "last_session": "2026-10-09T20:01:53.347471",
+  "session_count": 230,
+  "last_session": "2026-10-10T13:30:28.631558",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 218,
-  "last_email_sent": "2026-10-09T20:01:53.345772",
-  "last_email_summary": "close sent Friday, October 09, 2026",
+  "email_count": 219,
+  "last_email_sent": "2026-10-10T13:30:28.629915",
+  "last_email_summary": "casestudy sent Saturday, October 10, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "investor_robert_maxwell",
-      "category": "investor",
-      "topic": "Robert Maxwell Built a Media Empire on Fraud \u2014 and It Collapsed the Moment He Died",
-      "remaining_in_pass": 41,
-      "low_inventory_alert": false,
-      "date": "2026-09-15"
-    },
     {
       "type": "close",
       "actual_direction": "lower",
@@ -667,6 +658,15 @@
       "worst_sector": "Comm. Services",
       "biggest_mover": "HIMS +9.9%",
       "date": "2026-10-09"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_freddie_laker",
+      "category": "investor",
+      "topic": "Freddie Laker Invented the Discount Airline \u2014 and Watched the Majors Crush It",
+      "remaining_in_pass": 17,
+      "low_inventory_alert": false,
+      "date": "2026-10-10"
     }
   ],
   "lessons_learned": [
