@@ -347,6 +347,10 @@
     {
       "id": "investor_freddie_laker",
       "date": "2026-10-10"
+    },
+    {
+      "id": "investor_masayoshi_son",
+      "date": "2026-10-11"
     }
   ],
   "low_inventory_alert_sent": false

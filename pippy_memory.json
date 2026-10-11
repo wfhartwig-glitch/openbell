@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 230,
-  "last_session": "2026-10-10T13:30:28.631558",
+  "session_count": 231,
+  "last_session": "2026-10-11T13:30:29.081661",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 219,
-  "last_email_sent": "2026-10-10T13:30:28.629915",
-  "last_email_summary": "casestudy sent Saturday, October 10, 2026",
+  "email_count": 220,
+  "last_email_sent": "2026-10-11T13:30:29.079806",
+  "last_email_summary": "casestudy sent Sunday, October 11, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "lower",
-      "actual_sp_pct": -0.46,
-      "best_sector": "Energy",
-      "worst_sector": "Consumer Discret.",
-      "biggest_mover": "CRWD +3.0%",
-      "date": "2026-09-15"
-    },
     {
       "type": "morning",
       "direction_called": "higher",
@@ -667,6 +658,15 @@
       "remaining_in_pass": 17,
       "low_inventory_alert": false,
       "date": "2026-10-10"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_masayoshi_son",
+      "category": "investor",
+      "topic": "Masayoshi Son Lost $70 Billion in a Single Crash \u2014 Then Made One of the Best Bets in Tech History",
+      "remaining_in_pass": 16,
+      "low_inventory_alert": false,
+      "date": "2026-10-11"
     }
   ],
   "lessons_learned": [
