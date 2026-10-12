@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 231,
-  "last_session": "2026-10-11T13:30:29.081661",
+  "session_count": 232,
+  "last_session": "2026-10-12T13:31:44.056121",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 220,
-  "last_email_sent": "2026-10-11T13:30:29.079806",
-  "last_email_summary": "casestudy sent Sunday, October 11, 2026",
+  "email_count": 221,
+  "last_email_sent": "2026-10-12T13:31:44.054234",
+  "last_email_summary": "morning sent Monday, October 12, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -35,8 +35,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 376.9,
-      "price_now": 528.49,
-      "pct_change_since_pick": 40.22,
+      "price_now": 538.31,
+      "pct_change_since_pick": 42.83,
       "still_held": true
     },
     {
@@ -46,8 +46,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 571.4,
-      "price_now": 736.39,
-      "pct_change_since_pick": 28.87,
+      "price_now": 734.57,
+      "pct_change_since_pick": 28.56,
       "still_held": true
     },
     {
@@ -57,8 +57,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 212.67,
-      "price_now": 235.81,
-      "pct_change_since_pick": 10.88,
+      "price_now": 227.99,
+      "pct_change_since_pick": 7.2,
       "still_held": true
     },
     {
@@ -90,8 +90,8 @@
       "week_picked": "2026-W25",
       "week_dropped": null,
       "price_when_picked": 411.22,
-      "price_now": 411.1,
-      "pct_change_since_pick": -0.03,
+      "price_now": 425.0,
+      "pct_change_since_pick": 3.35,
       "still_held": true
     },
     {
@@ -101,22 +101,12 @@
       "week_picked": "2026-W32",
       "week_dropped": "2026-W34",
       "price_when_picked": 430.95,
-      "price_now": 357.61,
-      "pct_change_since_pick": -17.02,
+      "price_now": 358.92,
+      "pct_change_since_pick": -16.71,
       "still_held": true
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "higher",
-      "leading_index": "Nasdaq",
-      "lagging_index": "",
-      "headline_theme": "",
-      "commodity_note": "",
-      "picks_status": "holding",
-      "date": "2026-09-16"
-    },
     {
       "type": "case_study",
       "id": "investor_jack_ma",
@@ -667,6 +657,17 @@
       "remaining_in_pass": 16,
       "low_inventory_alert": false,
       "date": "2026-10-11"
+    },
+    {
+      "type": "morning",
+      "direction_called": "mixed",
+      "sp_pct_called": 0.06,
+      "leading_index": "Dow",
+      "lagging_index": "Nasdaq",
+      "headline_theme": "rate expectations",
+      "commodity_note": "Crude oil rose 3.58% to $93.56 a barrel. Pricier energy raises costs for airlines and shippers and can feed inflation (rising prices overall), while helping oil producers.",
+      "picks_status": "holding",
+      "date": "2026-10-12"
     }
   ],
   "lessons_learned": [
@@ -725,6 +726,10 @@
     {
       "week": "2026-W40",
       "note": "Active picks avg +12.6% since entry; Communication Services picks outperforming \u2014 leaning toward more."
+    },
+    {
+      "week": "2026-W41",
+      "note": "Active picks avg +13.0% since entry; Communication Services picks outperforming \u2014 leaning toward more."
     }
   ],
   "prediction_accuracy": [
@@ -1089,7 +1094,7 @@
     "inflation data": 6,
     "earnings season": 7,
     "geopolitical tensions": 3,
-    "rate expectations": 9,
+    "rate expectations": 10,
     "commodities": 9
   }
 }
