@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 232,
-  "last_session": "2026-10-12T13:31:44.056121",
+  "session_count": 233,
+  "last_session": "2026-10-12T17:00:39.149840",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 221,
-  "last_email_sent": "2026-10-12T13:31:44.054234",
-  "last_email_summary": "morning sent Monday, October 12, 2026",
+  "email_count": 222,
+  "last_email_sent": "2026-10-12T17:00:39.147913",
+  "last_email_summary": "casestudy sent Monday, October 12, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "investor_jack_ma",
-      "category": "investor",
-      "topic": "Jack Ma Was Rejected From Dozens of Jobs Before Building Alibaba \u2014 Then Vanished From Public View",
-      "remaining_in_pass": 40,
-      "low_inventory_alert": false,
-      "date": "2026-09-16"
-    },
     {
       "type": "close",
       "actual_direction": "lower",
@@ -667,6 +658,15 @@
       "headline_theme": "rate expectations",
       "commodity_note": "Crude oil rose 3.58% to $93.56 a barrel. Pricier energy raises costs for airlines and shippers and can feed inflation (rising prices overall), while helping oil producers.",
       "picks_status": "holding",
+      "date": "2026-10-12"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_li_kashing",
+      "category": "investor",
+      "topic": "Li Ka-shing Fled War as a Child Refugee and Built One of Asia's Largest Business Empires",
+      "remaining_in_pass": 15,
+      "low_inventory_alert": false,
       "date": "2026-10-12"
     }
   ],

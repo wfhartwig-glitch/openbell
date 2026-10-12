@@ -351,6 +351,10 @@
     {
       "id": "investor_masayoshi_son",
       "date": "2026-10-11"
+    },
+    {
+      "id": "investor_li_kashing",
+      "date": "2026-10-12"
     }
   ],
   "low_inventory_alert_sent": false
