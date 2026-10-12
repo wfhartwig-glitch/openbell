@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 233,
-  "last_session": "2026-10-12T17:00:39.149840",
+  "session_count": 234,
+  "last_session": "2026-10-12T20:01:42.238104",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 222,
-  "last_email_sent": "2026-10-12T17:00:39.147913",
-  "last_email_summary": "casestudy sent Monday, October 12, 2026",
+  "email_count": 223,
+  "last_email_sent": "2026-10-12T20:01:42.235858",
+  "last_email_summary": "close sent Monday, October 12, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "lower",
-      "actual_sp_pct": -0.44,
-      "best_sector": "Industrials",
-      "worst_sector": "Energy",
-      "biggest_mover": "AXON +5.6%",
-      "date": "2026-09-16"
-    },
     {
       "type": "morning",
       "direction_called": "higher",
@@ -668,6 +659,15 @@
       "remaining_in_pass": 15,
       "low_inventory_alert": false,
       "date": "2026-10-12"
+    },
+    {
+      "type": "close",
+      "actual_direction": "mixed",
+      "actual_sp_pct": -0.06,
+      "best_sector": "Energy",
+      "worst_sector": "Technology",
+      "biggest_mover": "META +3.4%",
+      "date": "2026-10-12"
     }
   ],
   "lessons_learned": [
@@ -1085,6 +1085,12 @@
       "date": "2026-10-09",
       "called": "higher",
       "actual": "higher",
+      "accurate": true
+    },
+    {
+      "date": "2026-10-12",
+      "called": "mixed",
+      "actual": "mixed",
       "accurate": true
     }
   ],
