@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 236,
-  "last_session": "2026-10-13T17:00:35.633906",
+  "session_count": 237,
+  "last_session": "2026-10-13T20:02:14.536131",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 225,
-  "last_email_sent": "2026-10-13T17:00:35.632711",
-  "last_email_summary": "casestudy sent Tuesday, October 13, 2026",
+  "email_count": 226,
+  "last_email_sent": "2026-10-13T20:02:14.533554",
+  "last_email_summary": "close sent Tuesday, October 13, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "higher",
-      "actual_sp_pct": 1.12,
-      "best_sector": "Technology",
-      "worst_sector": "Comm. Services",
-      "biggest_mover": "HOOD +3.9%",
-      "date": "2026-09-17"
-    },
     {
       "type": "morning",
       "direction_called": "mixed",
@@ -669,6 +660,15 @@
       "remaining_in_pass": 14,
       "low_inventory_alert": false,
       "date": "2026-10-13"
+    },
+    {
+      "type": "close",
+      "actual_direction": "lower",
+      "actual_sp_pct": -0.03,
+      "best_sector": "Energy",
+      "worst_sector": "Health Care",
+      "biggest_mover": "META +2.6%",
+      "date": "2026-10-13"
     }
   ],
   "lessons_learned": [
@@ -734,12 +734,6 @@
     }
   ],
   "prediction_accuracy": [
-    {
-      "date": "2026-06-23",
-      "called": "lower",
-      "actual": "lower",
-      "accurate": true
-    },
     {
       "date": "2026-07-14",
       "called": "mixed",
@@ -1093,6 +1087,12 @@
       "called": "mixed",
       "actual": "mixed",
       "accurate": true
+    },
+    {
+      "date": "2026-10-13",
+      "called": "mixed",
+      "actual": "lower",
+      "accurate": false
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
