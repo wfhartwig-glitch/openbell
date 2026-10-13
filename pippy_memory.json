@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 235,
-  "last_session": "2026-10-13T13:31:38.222880",
+  "session_count": 236,
+  "last_session": "2026-10-13T17:00:35.633906",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 224,
-  "last_email_sent": "2026-10-13T13:31:38.220597",
-  "last_email_summary": "morning sent Tuesday, October 13, 2026",
+  "email_count": 225,
+  "last_email_sent": "2026-10-13T17:00:35.632711",
+  "last_email_summary": "casestudy sent Tuesday, October 13, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "investor_carlos_ghosn",
-      "category": "investor",
-      "topic": "Carlos Ghosn Saved Nissan From Collapse \u2014 Then Fled Japan Hidden in a Box",
-      "remaining_in_pass": 39,
-      "low_inventory_alert": false,
-      "date": "2026-09-17"
-    },
     {
       "type": "close",
       "actual_direction": "higher",
@@ -668,6 +659,15 @@
       "headline_theme": "rate expectations",
       "commodity_note": "Crude oil was little changed at $92.96 a barrel, so energy costs aren't adding pressure either way.",
       "picks_status": "holding",
+      "date": "2026-10-13"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_cyrus_field",
+      "category": "investor",
+      "topic": "Cyrus Field's First Transatlantic Cable Failed After Three Weeks \u2014 He Tried Again for a Decade",
+      "remaining_in_pass": 14,
+      "low_inventory_alert": false,
       "date": "2026-10-13"
     }
   ],

@@ -355,6 +355,10 @@
     {
       "id": "investor_li_kashing",
       "date": "2026-10-12"
+    },
+    {
+      "id": "investor_cyrus_field",
+      "date": "2026-10-13"
     }
   ],
   "low_inventory_alert_sent": false
