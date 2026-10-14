@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 239,
-  "last_session": "2026-10-14T17:00:37.892111",
+  "session_count": 240,
+  "last_session": "2026-10-14T20:01:30.129978",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 228,
-  "last_email_sent": "2026-10-14T17:00:37.890220",
-  "last_email_summary": "casestudy sent Wednesday, October 14, 2026",
+  "email_count": 229,
+  "last_email_sent": "2026-10-14T20:01:30.128219",
+  "last_email_summary": "close sent Wednesday, October 14, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "mixed",
-      "actual_sp_pct": 0.17,
-      "best_sector": "Technology",
-      "worst_sector": "Utilities",
-      "biggest_mover": "HOOD +9.9%",
-      "date": "2026-09-18"
-    },
     {
       "type": "case_study",
       "id": "investor_dhirubhai_ambani",
@@ -670,6 +661,15 @@
       "remaining_in_pass": 13,
       "low_inventory_alert": false,
       "date": "2026-10-14"
+    },
+    {
+      "type": "close",
+      "actual_direction": "lower",
+      "actual_sp_pct": -1.1,
+      "best_sector": "Health Care",
+      "worst_sector": "Technology",
+      "biggest_mover": "HOOD -8.5%",
+      "date": "2026-10-14"
     }
   ],
   "lessons_learned": [
@@ -735,12 +735,6 @@
     }
   ],
   "prediction_accuracy": [
-    {
-      "date": "2026-07-14",
-      "called": "mixed",
-      "actual": "higher",
-      "accurate": false
-    },
     {
       "date": "2026-07-15",
       "called": "mixed",
@@ -1094,6 +1088,12 @@
       "called": "mixed",
       "actual": "lower",
       "accurate": false
+    },
+    {
+      "date": "2026-10-14",
+      "called": "lower",
+      "actual": "lower",
+      "accurate": true
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
