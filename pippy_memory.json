@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 238,
-  "last_session": "2026-10-14T13:31:29.476763",
+  "session_count": 239,
+  "last_session": "2026-10-14T17:00:37.892111",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 227,
-  "last_email_sent": "2026-10-14T13:31:29.474744",
-  "last_email_summary": "morning sent Wednesday, October 14, 2026",
+  "email_count": 228,
+  "last_email_sent": "2026-10-14T17:00:37.890220",
+  "last_email_summary": "casestudy sent Wednesday, October 14, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "investor_chung_juyung_hyundai",
-      "category": "investor",
-      "topic": "Chung Ju-yung Ran Away From a Farm Four Times Before Building Hyundai",
-      "remaining_in_pass": 38,
-      "low_inventory_alert": false,
-      "date": "2026-09-18"
-    },
     {
       "type": "close",
       "actual_direction": "mixed",
@@ -669,6 +660,15 @@
       "headline_theme": "rate expectations",
       "commodity_note": "Gold fell 1.94% to $4,104 an ounce. A drop can mean less demand for safe places to park money.",
       "picks_status": "holding",
+      "date": "2026-10-14"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_sam_zemurray",
+      "category": "investor",
+      "topic": "Sam Zemurray Started Selling Bananas Nobody Wanted \u2014 and Ended Up Backing a Coup to Protect His Business",
+      "remaining_in_pass": 13,
+      "low_inventory_alert": false,
       "date": "2026-10-14"
     }
   ],
