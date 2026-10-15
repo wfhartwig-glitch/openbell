@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 241,
-  "last_session": "2026-10-15T13:31:21.752466",
+  "session_count": 242,
+  "last_session": "2026-10-15T17:00:42.208747",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 230,
-  "last_email_sent": "2026-10-15T13:31:21.750404",
-  "last_email_summary": "morning sent Thursday, October 15, 2026",
+  "email_count": 231,
+  "last_email_sent": "2026-10-15T17:00:42.206826",
+  "last_email_summary": "casestudy sent Thursday, October 15, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "investor_king_camp_gillette",
-      "category": "investor",
-      "topic": "King Camp Gillette's Disposable Razor Nearly Failed \u2014 Until He Gave the Razors Away",
-      "remaining_in_pass": 36,
-      "low_inventory_alert": false,
-      "date": "2026-09-20"
-    },
     {
       "type": "morning",
       "direction_called": "higher",
@@ -671,6 +662,15 @@
       "headline_theme": "rate expectations",
       "commodity_note": "Crude oil was little changed at $94.67 a barrel, so energy costs aren't adding pressure either way.",
       "picks_status": "holding",
+      "date": "2026-10-15"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_cyrus_mccormick",
+      "category": "investor",
+      "topic": "Cyrus McCormick's Reaper Sparked Decades of Patent Wars Before Building an Industrial Giant",
+      "remaining_in_pass": 12,
+      "low_inventory_alert": false,
       "date": "2026-10-15"
     }
   ],
