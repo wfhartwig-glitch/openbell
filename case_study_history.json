@@ -367,6 +367,10 @@
     {
       "id": "investor_cyrus_mccormick",
       "date": "2026-10-15"
+    },
+    {
+      "id": "investor_josiah_wedgwood",
+      "date": "2026-10-16"
     }
   ],
   "low_inventory_alert_sent": false
