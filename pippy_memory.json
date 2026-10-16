@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 245,
-  "last_session": "2026-10-16T17:00:38.881713",
+  "session_count": 246,
+  "last_session": "2026-10-16T20:01:41.727241",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 234,
-  "last_email_sent": "2026-10-16T17:00:38.879765",
-  "last_email_summary": "casestudy sent Friday, October 16, 2026",
+  "email_count": 235,
+  "last_email_sent": "2026-10-16T20:01:41.725831",
+  "last_email_summary": "close sent Friday, October 16, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "higher",
-      "leading_index": "Dow",
-      "lagging_index": "",
-      "headline_theme": "commodities",
-      "commodity_note": "WTI at $89.68 (\u25bc 3.54%) keeps the inflation input hot",
-      "picks_status": "holding",
-      "date": "2026-09-22"
-    },
     {
       "type": "case_study",
       "id": "investor_jpaul_getty",
@@ -673,6 +663,15 @@
       "remaining_in_pass": 11,
       "low_inventory_alert": false,
       "date": "2026-10-16"
+    },
+    {
+      "type": "close",
+      "actual_direction": "lower",
+      "actual_sp_pct": -1.09,
+      "best_sector": "Energy",
+      "worst_sector": "Technology",
+      "biggest_mover": "CRWD -7.0%",
+      "date": "2026-10-16"
     }
   ],
   "lessons_learned": [
@@ -738,12 +737,6 @@
     }
   ],
   "prediction_accuracy": [
-    {
-      "date": "2026-07-16",
-      "called": "mixed",
-      "actual": "lower",
-      "accurate": false
-    },
     {
       "date": "2026-07-17",
       "called": "lower",
@@ -1096,6 +1089,12 @@
       "date": "2026-10-15",
       "called": "mixed",
       "actual": "higher",
+      "accurate": false
+    },
+    {
+      "date": "2026-10-16",
+      "called": "mixed",
+      "actual": "lower",
       "accurate": false
     }
   ],
