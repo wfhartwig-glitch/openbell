@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 246,
-  "last_session": "2026-10-16T20:01:41.727241",
+  "session_count": 247,
+  "last_session": "2026-10-17T13:30:30.601698",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 235,
-  "last_email_sent": "2026-10-16T20:01:41.725831",
-  "last_email_summary": "close sent Friday, October 16, 2026",
+  "email_count": 236,
+  "last_email_sent": "2026-10-17T13:30:30.599703",
+  "last_email_summary": "casestudy sent Saturday, October 17, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "investor_jpaul_getty",
-      "category": "investor",
-      "topic": "J. Paul Getty Became the World's Richest Man \u2014 and Installed a Payphone for His Guests",
-      "remaining_in_pass": 34,
-      "low_inventory_alert": false,
-      "date": "2026-09-22"
-    },
     {
       "type": "close",
       "actual_direction": "mixed",
@@ -672,6 +663,15 @@
       "worst_sector": "Technology",
       "biggest_mover": "CRWD -7.0%",
       "date": "2026-10-16"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_sara_blakely",
+      "category": "investor",
+      "topic": "Sara Blakely Sold Fax Machines Door-to-Door for Years Before Spanx Made Her a Billionaire",
+      "remaining_in_pass": 10,
+      "low_inventory_alert": false,
+      "date": "2026-10-17"
     }
   ],
   "lessons_learned": [

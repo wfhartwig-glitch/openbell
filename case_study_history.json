@@ -371,6 +371,10 @@
     {
       "id": "investor_josiah_wedgwood",
       "date": "2026-10-16"
+    },
+    {
+      "id": "investor_sara_blakely",
+      "date": "2026-10-17"
     }
   ],
   "low_inventory_alert_sent": false
