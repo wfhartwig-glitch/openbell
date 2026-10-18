@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 247,
-  "last_session": "2026-10-17T13:30:30.601698",
+  "session_count": 248,
+  "last_session": "2026-10-18T13:30:30.921715",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 236,
-  "last_email_sent": "2026-10-17T13:30:30.599703",
-  "last_email_summary": "casestudy sent Saturday, October 17, 2026",
+  "email_count": 237,
+  "last_email_sent": "2026-10-18T13:30:30.919648",
+  "last_email_summary": "casestudy sent Sunday, October 18, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "mixed",
-      "actual_sp_pct": 0.01,
-      "best_sector": "Materials",
-      "worst_sector": "Financials",
-      "biggest_mover": "CELH +4.4%",
-      "date": "2026-09-22"
-    },
     {
       "type": "morning",
       "direction_called": "lower",
@@ -672,6 +663,15 @@
       "remaining_in_pass": 10,
       "low_inventory_alert": false,
       "date": "2026-10-17"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_enzo_ferrari",
+      "category": "investor",
+      "topic": "Enzo Ferrari Built a Racing Legend While Grieving the Son He Lost Too Young",
+      "remaining_in_pass": 9,
+      "low_inventory_alert": false,
+      "date": "2026-10-18"
     }
   ],
   "lessons_learned": [

@@ -375,6 +375,10 @@
     {
       "id": "investor_sara_blakely",
       "date": "2026-10-17"
+    },
+    {
+      "id": "investor_enzo_ferrari",
+      "date": "2026-10-18"
     }
   ],
   "low_inventory_alert_sent": false
