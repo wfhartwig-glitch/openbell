@@ -379,6 +379,10 @@
     {
       "id": "investor_enzo_ferrari",
       "date": "2026-10-18"
+    },
+    {
+      "id": "investor_william_randolph_hearst",
+      "date": "2026-10-19"
     }
   ],
   "low_inventory_alert_sent": false
