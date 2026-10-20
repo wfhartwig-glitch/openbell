@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 251,
-  "last_session": "2026-10-19T20:01:30.690721",
+  "session_count": 252,
+  "last_session": "2026-10-20T13:31:14.482124",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 240,
-  "last_email_sent": "2026-10-19T20:01:30.688552",
-  "last_email_summary": "close sent Monday, October 19, 2026",
+  "email_count": 241,
+  "last_email_sent": "2026-10-20T13:31:14.479061",
+  "last_email_summary": "morning sent Tuesday, October 20, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "investor_andrew_carnegie",
-      "category": "investor",
-      "topic": "Andrew Carnegie Rose From a Bobbin Boy to Steel Magnate \u2014 Then Gave Almost All of It Away",
-      "remaining_in_pass": 32,
-      "low_inventory_alert": false,
-      "date": "2026-09-24"
-    },
     {
       "type": "close",
       "actual_direction": "mixed",
@@ -673,6 +664,17 @@
       "worst_sector": "Utilities",
       "biggest_mover": "CELH +6.0%",
       "date": "2026-10-19"
+    },
+    {
+      "type": "morning",
+      "direction_called": "lower",
+      "sp_pct_called": -0.21,
+      "leading_index": "",
+      "lagging_index": "Nasdaq",
+      "headline_theme": "rate expectations",
+      "commodity_note": "Crude oil rose 1.14% to $99.71 a barrel. Pricier energy raises costs for airlines and shippers and can feed inflation (rising prices overall), while helping oil producers.",
+      "picks_status": "holding",
+      "date": "2026-10-20"
     }
   ],
   "lessons_learned": [
@@ -1109,7 +1111,7 @@
     "inflation data": 6,
     "earnings season": 7,
     "geopolitical tensions": 3,
-    "rate expectations": 15,
+    "rate expectations": 16,
     "commodities": 9
   }
 }
