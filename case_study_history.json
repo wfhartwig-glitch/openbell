@@ -383,6 +383,10 @@
     {
       "id": "investor_william_randolph_hearst",
       "date": "2026-10-19"
+    },
+    {
+      "id": "investor_colonel_sanders_kfc",
+      "date": "2026-10-20"
     }
   ],
   "low_inventory_alert_sent": false
