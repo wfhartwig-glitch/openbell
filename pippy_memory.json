@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 254,
-  "last_session": "2026-10-20T20:01:35.803417",
+  "session_count": 255,
+  "last_session": "2026-10-21T13:31:28.329918",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 243,
-  "last_email_sent": "2026-10-20T20:01:35.800227",
-  "last_email_summary": "close sent Tuesday, October 20, 2026",
+  "email_count": 244,
+  "last_email_sent": "2026-10-21T13:31:28.327419",
+  "last_email_summary": "morning sent Wednesday, October 21, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "investor_john_d_rockefeller",
-      "category": "investor",
-      "topic": "John D. Rockefeller Built a Monopoly So Total the Government Broke It Apart",
-      "remaining_in_pass": 31,
-      "low_inventory_alert": false,
-      "date": "2026-09-25"
-    },
     {
       "type": "close",
       "actual_direction": "higher",
@@ -674,6 +665,17 @@
       "worst_sector": "Technology",
       "biggest_mover": "HIMS +4.0%",
       "date": "2026-10-20"
+    },
+    {
+      "type": "morning",
+      "direction_called": "higher",
+      "sp_pct_called": 0.3,
+      "leading_index": "Nasdaq",
+      "lagging_index": "",
+      "headline_theme": "rate expectations",
+      "commodity_note": "Crude oil fell 2.06% to $97.21 a barrel. Cheaper energy lowers costs for airlines and shippers and can ease inflation, while squeezing oil producers.",
+      "picks_status": "holding",
+      "date": "2026-10-21"
     }
   ],
   "lessons_learned": [
@@ -1110,7 +1112,7 @@
     "inflation data": 6,
     "earnings season": 7,
     "geopolitical tensions": 3,
-    "rate expectations": 16,
+    "rate expectations": 17,
     "commodities": 9
   }
 }
