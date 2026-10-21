@@ -387,6 +387,10 @@
     {
       "id": "investor_colonel_sanders_kfc",
       "date": "2026-10-20"
+    },
+    {
+      "id": "investor_vidal_sassoon",
+      "date": "2026-10-21"
     }
   ],
   "low_inventory_alert_sent": false
