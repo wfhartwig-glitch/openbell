@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 256,
-  "last_session": "2026-10-21T17:00:38.521136",
+  "session_count": 257,
+  "last_session": "2026-10-21T20:01:31.292047",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 245,
-  "last_email_sent": "2026-10-21T17:00:38.519203",
-  "last_email_summary": "casestudy sent Wednesday, October 21, 2026",
+  "email_count": 246,
+  "last_email_sent": "2026-10-21T20:01:31.288351",
+  "last_email_summary": "close sent Wednesday, October 21, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "investor_jp_morgan_1907",
-      "category": "investor",
-      "topic": "J.P. Morgan Personally Organized a Bailout of the U.S. Financial System \u2014 Before the Fed Existed",
-      "remaining_in_pass": 30,
-      "low_inventory_alert": false,
-      "date": "2026-09-26"
-    },
     {
       "type": "case_study",
       "id": "investor_ferdinand_de_lesseps",
@@ -676,6 +667,15 @@
       "remaining_in_pass": 6,
       "low_inventory_alert": false,
       "date": "2026-10-21"
+    },
+    {
+      "type": "close",
+      "actual_direction": "higher",
+      "actual_sp_pct": 0.6,
+      "best_sector": "Technology",
+      "worst_sector": "Comm. Services",
+      "biggest_mover": "DDOG +5.6%",
+      "date": "2026-10-21"
     }
   ],
   "lessons_learned": [
@@ -745,12 +745,6 @@
     }
   ],
   "prediction_accuracy": [
-    {
-      "date": "2026-07-21",
-      "called": "higher",
-      "actual": "higher",
-      "accurate": true
-    },
     {
       "date": "2026-07-22",
       "called": "lower",
@@ -1104,6 +1098,12 @@
       "called": "lower",
       "actual": "mixed",
       "accurate": false
+    },
+    {
+      "date": "2026-10-21",
+      "called": "higher",
+      "actual": "higher",
+      "accurate": true
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
