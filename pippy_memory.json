@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 262,
-  "last_session": "2026-10-23T17:00:43.357402",
+  "session_count": 263,
+  "last_session": "2026-10-23T20:01:44.754121",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 251,
-  "last_email_sent": "2026-10-23T17:00:43.355862",
-  "last_email_summary": "casestudy sent Friday, October 23, 2026",
+  "email_count": 252,
+  "last_email_sent": "2026-10-23T20:01:44.750799",
+  "last_email_summary": "close sent Friday, October 23, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "rivalry_arden_rubinstein",
-      "category": "rivalry",
-      "topic": "Elizabeth Arden vs. Helena Rubinstein \u2014 The Cosmetics Rivalry Between Two Self-Made Immigrant Women",
-      "remaining_in_pass": 27,
-      "low_inventory_alert": false,
-      "date": "2026-09-29"
-    },
     {
       "type": "close",
       "actual_direction": "lower",
@@ -678,6 +669,15 @@
       "remaining_in_pass": 4,
       "low_inventory_alert": false,
       "date": "2026-10-23"
+    },
+    {
+      "type": "close",
+      "actual_direction": "lower",
+      "actual_sp_pct": -0.52,
+      "best_sector": "Energy",
+      "worst_sector": "Consumer Staples",
+      "biggest_mover": "CRWD +8.8%",
+      "date": "2026-10-23"
     }
   ],
   "lessons_learned": [
@@ -747,12 +747,6 @@
     }
   ],
   "prediction_accuracy": [
-    {
-      "date": "2026-07-23",
-      "called": "lower",
-      "actual": "lower",
-      "accurate": true
-    },
     {
       "date": "2026-07-24",
       "called": "mixed",
@@ -1106,6 +1100,12 @@
       "called": "lower",
       "actual": "mixed",
       "accurate": false
+    },
+    {
+      "date": "2026-10-23",
+      "called": "lower",
+      "actual": "lower",
+      "accurate": true
     }
   ],
   "data_quality_note": "pct_change_since_pick was bugged (always 0.0) prior to 2026-06-23 due to price_when_picked being reset each Monday. Fixed this date \u2014 entries before this used stored price_now (not live price) for the correction.",
