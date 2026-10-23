@@ -395,6 +395,10 @@
     {
       "id": "investor_jay_gould",
       "date": "2026-10-22"
+    },
+    {
+      "id": "investor_aliko_dangote",
+      "date": "2026-10-23"
     }
   ],
   "low_inventory_alert_sent": false

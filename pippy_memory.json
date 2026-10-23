@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 261,
-  "last_session": "2026-10-23T13:31:16.565071",
+  "session_count": 262,
+  "last_session": "2026-10-23T17:00:43.357402",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 250,
-  "last_email_sent": "2026-10-23T13:31:16.561522",
-  "last_email_summary": "morning sent Friday, October 23, 2026",
+  "email_count": 251,
+  "last_email_sent": "2026-10-23T17:00:43.355862",
+  "last_email_summary": "casestudy sent Friday, October 23, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "mixed",
-      "leading_index": "Nasdaq",
-      "lagging_index": "Dow",
-      "headline_theme": "commodities",
-      "commodity_note": "Crude at $90.32 (\u25bc 4.04%) keeps inflation in the conversation",
-      "picks_status": "holding",
-      "date": "2026-09-29"
-    },
     {
       "type": "case_study",
       "id": "rivalry_arden_rubinstein",
@@ -678,6 +668,15 @@
       "headline_theme": "rate expectations",
       "commodity_note": "Crude oil rose 1.70% to $101.69 a barrel. Pricier energy raises costs for airlines and shippers and can feed inflation (rising prices overall), while helping oil producers.",
       "picks_status": "holding",
+      "date": "2026-10-23"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_aliko_dangote",
+      "category": "investor",
+      "topic": "Aliko Dangote Borrowed From an Uncle to Trade Commodities \u2014 and Built Africa's Largest Industrial Empire",
+      "remaining_in_pass": 4,
+      "low_inventory_alert": false,
       "date": "2026-10-23"
     }
   ],
