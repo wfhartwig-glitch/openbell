@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 260,
-  "last_session": "2026-10-22T20:01:17.790009",
+  "session_count": 261,
+  "last_session": "2026-10-23T13:31:16.565071",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 249,
-  "last_email_sent": "2026-10-22T20:01:17.786854",
-  "last_email_summary": "close sent Thursday, October 22, 2026",
+  "email_count": 250,
+  "last_email_sent": "2026-10-23T13:31:16.561522",
+  "last_email_summary": "morning sent Friday, October 23, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "lower",
-      "actual_sp_pct": -0.75,
-      "best_sector": "Health Care",
-      "worst_sector": "Comm. Services",
-      "biggest_mover": "CRWD +2.5%",
-      "date": "2026-09-28"
-    },
     {
       "type": "morning",
       "direction_called": "mixed",
@@ -677,6 +668,17 @@
       "worst_sector": "Technology",
       "biggest_mover": "LULU +8.3%",
       "date": "2026-10-22"
+    },
+    {
+      "type": "morning",
+      "direction_called": "lower",
+      "sp_pct_called": -0.53,
+      "leading_index": "",
+      "lagging_index": "Dow",
+      "headline_theme": "rate expectations",
+      "commodity_note": "Crude oil rose 1.70% to $101.69 a barrel. Pricier energy raises costs for airlines and shippers and can feed inflation (rising prices overall), while helping oil producers.",
+      "picks_status": "holding",
+      "date": "2026-10-23"
     }
   ],
   "lessons_learned": [
@@ -1113,7 +1115,7 @@
     "inflation data": 6,
     "earnings season": 7,
     "geopolitical tensions": 3,
-    "rate expectations": 18,
+    "rate expectations": 19,
     "commodities": 9
   }
 }
