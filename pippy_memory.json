@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 263,
-  "last_session": "2026-10-23T20:01:44.754121",
+  "session_count": 264,
+  "last_session": "2026-10-24T13:30:31.852755",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 252,
-  "last_email_sent": "2026-10-23T20:01:44.750799",
-  "last_email_summary": "close sent Friday, October 23, 2026",
+  "email_count": 253,
+  "last_email_sent": "2026-10-24T13:30:31.850812",
+  "last_email_summary": "casestudy sent Saturday, October 24, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "lower",
-      "actual_sp_pct": -0.17,
-      "best_sector": "Utilities",
-      "worst_sector": "Energy",
-      "biggest_mover": "META +2.9%",
-      "date": "2026-09-29"
-    },
     {
       "type": "morning",
       "direction_called": "higher",
@@ -678,6 +669,15 @@
       "worst_sector": "Consumer Staples",
       "biggest_mover": "CRWD +8.8%",
       "date": "2026-10-23"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_carlos_slim",
+      "category": "investor",
+      "topic": "Carlos Slim Bought Distressed Companies During Mexico's Economic Crisis \u2014 and Became One of the World's Richest Men",
+      "remaining_in_pass": 3,
+      "low_inventory_alert": true,
+      "date": "2026-10-24"
     }
   ],
   "lessons_learned": [

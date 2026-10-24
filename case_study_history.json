@@ -399,7 +399,11 @@
     {
       "id": "investor_aliko_dangote",
       "date": "2026-10-23"
+    },
+    {
+      "id": "investor_carlos_slim",
+      "date": "2026-10-24"
     }
   ],
-  "low_inventory_alert_sent": false
+  "low_inventory_alert_sent": true
 }
