@@ -403,6 +403,10 @@
     {
       "id": "investor_carlos_slim",
       "date": "2026-10-24"
+    },
+    {
+      "id": "investor_onsi_sawiris",
+      "date": "2026-10-25"
     }
   ],
   "low_inventory_alert_sent": true

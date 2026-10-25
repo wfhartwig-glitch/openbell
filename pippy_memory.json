@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 264,
-  "last_session": "2026-10-24T13:30:31.852755",
+  "session_count": 265,
+  "last_session": "2026-10-25T13:30:28.627505",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 253,
-  "last_email_sent": "2026-10-24T13:30:31.850812",
-  "last_email_summary": "casestudy sent Saturday, October 24, 2026",
+  "email_count": 254,
+  "last_email_sent": "2026-10-25T13:30:28.625876",
+  "last_email_summary": "casestudy sent Sunday, October 25, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "higher",
-      "leading_index": "Nasdaq",
-      "lagging_index": "",
-      "headline_theme": "commodities",
-      "commodity_note": "WTI at $91.05 (\u25b2 1.39%) keeps the inflation input hot",
-      "picks_status": "holding",
-      "date": "2026-09-30"
-    },
     {
       "type": "case_study",
       "id": "investor_vera_wang",
@@ -678,6 +668,15 @@
       "remaining_in_pass": 3,
       "low_inventory_alert": true,
       "date": "2026-10-24"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_onsi_sawiris",
+      "category": "investor",
+      "topic": "Onsi Sawiris Lost His Family's Business to Nationalization \u2014 Then Built a Bigger One From Scratch",
+      "remaining_in_pass": 2,
+      "low_inventory_alert": false,
+      "date": "2026-10-25"
     }
   ],
   "lessons_learned": [
