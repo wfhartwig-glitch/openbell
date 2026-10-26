@@ -254,14 +254,38 @@ class YFinanceClient:
         return {"name": i.get("shortName") or i.get("longName"), "sector": i.get("sector")}
 
     def news(self, symbol):
+        """Search first: it kept working on the days Yahoo's per-ticker news endpoint (Ticker.news)
+        404'd and returned []. If Search itself fails, fall back to Ticker.news. Because Ticker.news
+        swallows its 404 into [], an empty backup after a Search failure is reported as a FAILURE
+        (the caller then says "couldn't pull headlines"), never as "no news"."""
+        import sys
         import yfinance as yf
-        out = []
-        for it in (yf.Search(symbol, news_count=8).news or []):
-            ep = it.get("providerPublishTime")
-            out.append({"title": it.get("title", ""), "snippet": "", "site": it.get("publisher", ""),
-                        "published": (datetime.datetime.fromtimestamp(ep, tz=datetime.timezone.utc)
-                                      if isinstance(ep, (int, float)) else None)})
-        return out
+        try:
+            return [self._from_search(it) for it in (yf.Search(symbol, news_count=8).news or [])]
+        except Exception as e:
+            print(f"[watchlist] Search news failed for {symbol} ({type(e).__name__}); trying Ticker.news", file=sys.stderr)
+        items = yf.Ticker(symbol).news or []
+        if not items:
+            raise RuntimeError(f"news unavailable for {symbol}: Search failed and Ticker.news returned nothing")
+        return [self._from_ticker_news(it) for it in items]
+
+    @staticmethod
+    def _from_search(it):
+        ep = it.get("providerPublishTime")
+        return {"title": it.get("title", ""), "snippet": "", "site": it.get("publisher", ""),
+                "published": (datetime.datetime.fromtimestamp(ep, tz=datetime.timezone.utc)
+                              if isinstance(ep, (int, float)) else None)}
+
+    @staticmethod
+    def _from_ticker_news(it):
+        c = it.get("content", {}) or {}
+        raw = c.get("pubDate") or c.get("displayTime") or ""
+        try:
+            pub = datetime.datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        except Exception:
+            pub = None
+        return {"title": c.get("title") or it.get("title", ""), "snippet": c.get("summary", "") or "",
+                "site": (c.get("provider") or {}).get("displayName", ""), "published": pub}
 
 
 # ── Headline matching (reuses the shared summarizer, plus a stricter name check) ──────

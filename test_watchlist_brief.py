@@ -238,6 +238,77 @@ def test_news_failure_is_not_reported_as_no_news():
           "couldn't pull headlines today" in t and "No same-day headline" not in t, t)
 
 
+
+def _fake_yfinance(search=None, ticker_news=None):
+    """A stand-in `yfinance` module for YFinanceClient.news. A callable raises when called."""
+    import types
+    m = types.ModuleType("yfinance")
+
+    class Search:
+        def __init__(self, q, news_count=8):
+            r = search() if callable(search) else search
+            self.news = r
+
+    class Ticker:
+        def __init__(self, sym):
+            r = ticker_news() if callable(ticker_news) else ticker_news
+            self.news = r
+    m.Search, m.Ticker = Search, Ticker
+    return m
+
+
+def _with_fake_yf(fake, fn):
+    real = sys.modules.get("yfinance")
+    sys.modules["yfinance"] = fake
+    try:
+        return fn()
+    finally:
+        if real is None:
+            del sys.modules["yfinance"]
+        else:
+            sys.modules["yfinance"] = real
+
+
+def test_news_lookup_uses_search_first_and_ticker_news_as_backup():
+    ep = int(hours_ago(2).timestamp())
+    items = [{"title": "Alfa Systems Reports Record Quarterly Revenue", "publisher": "Wire", "providerPublishTime": ep}]
+    boom = lambda: (_ for _ in ()).throw(RuntimeError("search 500"))
+    c = wb.YFinanceClient()
+    got = _with_fake_yf(_fake_yfinance(search=items, ticker_news=boom), lambda: c.news("ALFA"))
+    check("Search works: used, and Ticker.news is never touched", len(got) == 1 and got[0]["published"].tzinfo is not None, str(got))
+    check("Search works but is empty: returns [] (a real 'no news', not a failure)",
+          _with_fake_yf(_fake_yfinance(search=[], ticker_news=boom), lambda: c.news("ALFA")) == [])
+    iso = hours_ago(1).isoformat().replace("+00:00", "Z")
+    backup = [{"content": {"title": "Alfa Systems Raises Outlook", "pubDate": iso, "provider": {"displayName": "AP"}, "summary": "s"}}]
+    got = _with_fake_yf(_fake_yfinance(search=boom, ticker_news=backup), lambda: c.news("ALFA"))
+    check("Search fails: falls back to Ticker.news and parses its format", got and got[0]["title"] == "Alfa Systems Raises Outlook"
+          and got[0]["site"] == "AP" and got[0]["published"] == hours_ago(1), str(got))
+    try:
+        _with_fake_yf(_fake_yfinance(search=boom, ticker_news=[]), lambda: c.news("ALFA"))
+        ok = False
+    except RuntimeError:
+        ok = True
+    check("Search fails and Ticker.news is empty (its swallowed 404): a failure, not 'no news'", ok)
+    try:
+        _with_fake_yf(_fake_yfinance(search=boom, ticker_news=boom), lambda: c.news("ALFA"))
+        ok = False
+    except RuntimeError:
+        ok = True
+    check("both sources raise: a failure", ok)
+
+
+def test_news_failing_for_every_ticker_keeps_the_facts_and_says_so():
+    subs = {"a": ["ALFA", "BRVO", "CHLH"]}
+    client = FakeClient(news_fails=True)
+    results, plan = wb.build_for_subscribers(subs, client, "close", NOW)
+    t = _text(results["a"].html)
+    check("every ticker still shows price, move and comparisons",
+          "Alfa Systems closed at $103.10, up 3.10% today." in t and "Bravo Energy closed at $49.10" in t and "Charlie Health closed at $201.40" in t, t)
+    check("each one says headlines couldn't be pulled", t.count("We couldn't pull headlines today, so we can't say whether it is in the news.") == 3, t)
+    check("none claims 'no same-day headline' or a topic", "No same-day headline" not in t and "headline covers" not in t)
+    check("the run did not abort: every ticker was attempted once", sorted(client.news_calls) == ["ALFA", "BRVO", "CHLH"])
+
+
 # ── summarizer false positives (reusing the shared guards, plus the name check) ──────
 
 def _td(symbol, name, titles, sector="Technology"):
@@ -398,6 +469,39 @@ def test_never_reads_private_data():
         builtins.open = real_open
     check("a full multi-subscriber build opens no files at all", opened == [], str(opened))
 
+
+
+def test_runtime_audit_import_and_full_build_touch_no_private_file():
+    """Runs in a clean interpreter with an audit hook: every file opened, process spawned and network
+    event during `import watchlist_brief` plus a full multi-subscriber build."""
+    import json
+    import subprocess
+    here = os.path.dirname(os.path.abspath(__file__))
+    code = r"""
+import sys, os, json
+ev = {"open": [], "spawn": [], "net": []}
+def hook(e, a):
+    if e == "open" and isinstance(a[0], (str, bytes)) and not str(a[0]).endswith((".pyc", ".so", ".pyd")):
+        ev["open"].append(os.path.abspath(str(a[0])))
+    elif e in ("subprocess.Popen", "os.exec", "os.posix_spawn", "os.system"): ev["spawn"].append(e)
+    elif e in ("socket.connect", "socket.getaddrinfo"): ev["net"].append(e)
+sys.addaudithook(hook); sys.path.insert(0, os.getcwd())
+import watchlist_brief as wb, test_watchlist_brief as T
+wb.build_for_subscribers({"a": ["ALFA", "BRVO", "CHLH"], "b": ["BRVO"]}, T.FakeClient(), "close", T.NOW)
+repo = os.getcwd()
+print(json.dumps({"opened": sorted({os.path.relpath(p, repo) for p in ev["open"] if p.startswith(repo) and "__pycache__" not in p}),
+                  "pippy_mcp": "pippy_mcp" in sys.modules, "spawn": ev["spawn"], "net": ev["net"]}))
+"""
+    out = subprocess.run([sys.executable, "-c", code], cwd=here, capture_output=True, text=True)
+    r = json.loads(out.stdout.strip().splitlines()[-1])
+    allowed = {".env", "openbell.py", "watchlist_brief.py", "test_watchlist_brief.py"}
+    check("the only repo files opened are source files plus .env (read by openbell's load_dotenv)",
+          set(r["opened"]) <= allowed, str(r["opened"]))
+    check("no memory / picks / send-log / case-study / scan-cache file is opened",
+          not [p for p in r["opened"] if p.endswith(".json")], str(r["opened"]))
+    check("pippy_mcp (the server that owns the memory and picks tools) is never imported", r["pippy_mcp"] is False)
+    check("no subprocess is started and no network call is made by import + build with a fake client",
+          r["spawn"] == [] and r["net"] == [], str(r))
 
 if __name__ == "__main__":
     tests = [v for k, v in sorted(globals().items(), key=lambda kv: list(globals()).index(kv[0])) if k.startswith("test_")]
