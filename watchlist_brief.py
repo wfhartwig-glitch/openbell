@@ -11,8 +11,8 @@ and with the ticker's sector, and whether a same-day headline names it (topic su
 a headline is never pasted or quoted). Explanations are hedged readings, never causes.
 
 Safety properties (each is tested):
-  * Never reads the owner's private data. It does not import pippy_mcp, does not call the
-    memory/picks tools and opens no files.
+  * Never reads the owner's private data. It imports only brief_common (pure helpers; no
+    load_dotenv, no files), never openbell or pippy_mcp, calls no memory/picks tools, opens no files.
   * Facts only: an advice-language guard (buy/sell/hold, thesis, target, upside, score,
     rating, since entry, ...) fails generation if any such word is in what this module wrote.
   * At most MAX_TICKERS tickers per subscriber; malformed tickers are rejected with a reason;
@@ -28,7 +28,7 @@ import html as _html
 import re
 from dataclasses import dataclass, field
 
-import openbell
+import brief_common as bc
 
 MAX_TICKERS = 15
 SP500_SYMBOL = "^GSPC"
@@ -301,10 +301,10 @@ def _names_ticker(h: dict, symbol: str, name: str) -> bool:
     "Visa" inside "Advisable"). Require whole-word matches here. Tickers of one or two letters,
     and tickers that are ordinary English words, count only via the company name."""
     text = f"{h.get('title', '') or ''} {h.get('snippet', '') or ''}"
-    short = openbell._company_short_name(name)
+    short = bc._company_short_name(name)
     if short and len(short) >= 3 and _whole(short, text, re.I):
         return True
-    ambiguous = len(symbol) <= 2 or symbol in openbell._COMMON_WORD_TICKERS
+    ambiguous = len(symbol) <= 2 or symbol in bc._COMMON_WORD_TICKERS
     return (not ambiguous) and _whole(symbol, text)      # case-sensitive: "app" is not APP
 
 
@@ -313,10 +313,10 @@ def headline_sentence(td: TickerData) -> str:
     if not td.news_ok:
         return "We couldn't pull headlines today, so we can't say whether it is in the news."
     for h in td.news:
-        found, specific, field_ = openbell._find_headline_for_symbol([h], td.symbol, td.name, sector="")
+        found, specific, field_ = bc._find_headline_for_symbol([h], td.symbol, td.name, sector="")
         if not (found and specific and _names_ticker(h, td.symbol, td.name)):
             continue
-        topic = openbell._headline_topic(h, field_, td.symbol, td.name)
+        topic = bc._headline_topic(h, field_, td.symbol, td.name)
         topic = _TOPIC_OVERRIDES.get(topic, topic)
         if topic:
             return (f"A same-day headline covers {topic}; the data can't show whether that "
@@ -330,7 +330,7 @@ def headline_sentence(td: TickerData) -> str:
 def _vs(pct: float, ref: float, ref_label: str) -> tuple:
     """(kind, clause) where kind is 'in', 'ahead' or 'behind'."""
     diff = pct - ref
-    words = openbell._pct_words(ref)
+    words = bc._pct_words(ref)
     if abs(diff) < IN_LINE_PP:
         return "in", f"in line with {ref_label} ({words})"
     return ("ahead", f"ahead of {ref_label} ({words})") if diff > 0 else ("behind", f"behind {ref_label} ({words})")
@@ -369,9 +369,9 @@ def _when(edition: str, td: TickerData) -> str:
 def ticker_text(td: TickerData, data: MarketData, edition: str) -> str:
     if not td.known:
         return f"We couldn't find market data for {td.symbol}, so it is left out of this summary."
-    name = openbell._company_short_name(td.name) or td.symbol
+    name = bc._company_short_name(td.name) or td.symbol
     verb = "closed at" if edition == "close" else "last closed at"
-    head = f"{name} {verb} ${td.price:,.2f}, {openbell._pct_words(td.pct)} {_when(edition, td)}."
+    head = f"{name} {verb} ${td.price:,.2f}, {bc._pct_words(td.pct)} {_when(edition, td)}."
     return " ".join([head, relative_sentences(td, data), headline_sentence(td)])
 
 
@@ -403,9 +403,9 @@ def _visible(html_str: str) -> str:
 def _card(td: TickerData, data: MarketData, edition: str) -> str:
     sym = _html.escape(td.symbol)
     if td.known:
-        name = _html.escape(openbell._company_short_name(td.name) or td.symbol)
+        name = _html.escape(bc._company_short_name(td.name) or td.symbol)
         price = f"${td.price:,.2f}"
-        pct = f'<span style="color:{openbell._pct_color(td.pct)}">{openbell._fmt(td.pct)}</span>'
+        pct = f'<span style="color:{bc._pct_color(td.pct)}">{bc._fmt(td.pct)}</span>'
     else:
         name, price, pct = "", "—", "—"
     body = _html.escape(ticker_text(td, data, edition))
@@ -433,14 +433,14 @@ def build_watchlist_section(watchlist: Watchlist, data: MarketData, edition: str
         bits = "; ".join(f"{r.raw} ({r.reason})" for r in watchlist.rejected)
         note = (f'<p style="margin:10px 0 0;font-size:13px;color:#6b7280">Not included: {_html.escape(bits)}.</p>')
     foot = f'<p style="margin:14px 0 0;font-size:12px;line-height:1.5;color:#6b7280">{FOOTER_LINE}</p>'
-    section = openbell._section(label, cards + note + foot)
+    section = bc._section(label, cards + note + foot)
 
     # Guard everything this module wrote; third-party strings (names, tickers, sectors) are masked.
     mask = [t for t in watchlist.tickers] + [r.raw for r in watchlist.rejected]
     for t in watchlist.tickers:
         td = data.tickers.get(t)
         if td and td.name:
-            mask += [td.name, openbell._company_short_name(td.name)]
+            mask += [td.name, bc._company_short_name(td.name)]
     hits = find_advice_language(_visible(section), mask)
     if hits:
         raise AdviceLanguageError(f"advice language in watchlist section: {hits}")
@@ -450,7 +450,7 @@ def build_watchlist_section(watchlist: Watchlist, data: MarketData, edition: str
 def build_watchlist_page(watchlist: Watchlist, data: MarketData, edition: str, title_date: str = "") -> str:
     """Standalone page for previewing a section (no unsubscribe/address; this is not the sendable email)."""
     section = build_watchlist_section(watchlist, data, edition)
-    return openbell._wrap(section, f"Watchlist &nbsp; {title_date}", "Pippy's Brief", footer_html="")
+    return bc._wrap(section, f"Watchlist &nbsp; {title_date}", "Pippy's Brief", footer_html="")
 
 
 # ── Many subscribers, one fetch ───────────────────────────────────────────────

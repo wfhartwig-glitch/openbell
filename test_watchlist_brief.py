@@ -472,13 +472,14 @@ def test_never_reads_private_data():
 
 
 def test_runtime_audit_import_and_full_build_touch_no_private_file():
-    """Runs in a clean interpreter with an audit hook: every file opened, process spawned and network
-    event during `import watchlist_brief` plus a full multi-subscriber build."""
+    """Clean interpreter + audit hook, with NOTHING else imported (no test module, no openbell):
+    every file opened, module loaded, process spawned and network event during
+    `import watchlist_brief` and a full multi-subscriber build with an inline fake client."""
     import json
     import subprocess
     here = os.path.dirname(os.path.abspath(__file__))
     code = r"""
-import sys, os, json
+import sys, os, json, datetime
 ev = {"open": [], "spawn": [], "net": []}
 def hook(e, a):
     if e == "open" and isinstance(a[0], (str, bytes)) and not str(a[0]).endswith((".pyc", ".so", ".pyd")):
@@ -486,22 +487,48 @@ def hook(e, a):
     elif e in ("subprocess.Popen", "os.exec", "os.posix_spawn", "os.system"): ev["spawn"].append(e)
     elif e in ("socket.connect", "socket.getaddrinfo"): ev["net"].append(e)
 sys.addaudithook(hook); sys.path.insert(0, os.getcwd())
-import watchlist_brief as wb, test_watchlist_brief as T
-wb.build_for_subscribers({"a": ["ALFA", "BRVO", "CHLH"], "b": ["BRVO"]}, T.FakeClient(), "close", T.NOW)
+import watchlist_brief as wb
+after_import = sorted(sys.modules)
+D = datetime.date
+def bars(a, b): return [(D(2026,10,21), a), (D(2026,10,22), a), (D(2026,10,23), b)]
+class C:
+    def history(self, s): return {"ALFA": bars(100, 103), "BRVO": bars(50, 49), "^GSPC": bars(5000, 5040), "XLK": bars(100, 101)}
+    def info(self, s): return {"name": s + " Inc.", "sector": "Technology"}
+    def news(self, s): return []
+now = datetime.datetime(2026, 10, 23, 21, 0, tzinfo=datetime.timezone.utc)
+wb.build_for_subscribers({"a": ["ALFA", "BRVO"], "b": ["BRVO"]}, C(), "close", now)
 repo = os.getcwd()
 print(json.dumps({"opened": sorted({os.path.relpath(p, repo) for p in ev["open"] if p.startswith(repo) and "__pycache__" not in p}),
-                  "pippy_mcp": "pippy_mcp" in sys.modules, "spawn": ev["spawn"], "net": ev["net"]}))
+                  "loaded_project": sorted(m for m in sys.modules if os.path.exists(m + ".py")),
+                  "forbidden_loaded": sorted(m for m in ("openbell", "pippy_mcp", "dotenv", "mcp", "yfinance") if m in sys.modules),
+                  "forbidden_after_import": sorted(m for m in ("openbell", "pippy_mcp", "dotenv", "mcp", "yfinance") if m in after_import),
+                  "spawn": ev["spawn"], "net": ev["net"]}))
 """
     out = subprocess.run([sys.executable, "-c", code], cwd=here, capture_output=True, text=True)
     r = json.loads(out.stdout.strip().splitlines()[-1])
-    allowed = {".env", "openbell.py", "watchlist_brief.py", "test_watchlist_brief.py"}
-    check("the only repo files opened are source files plus .env (read by openbell's load_dotenv)",
-          set(r["opened"]) <= allowed, str(r["opened"]))
-    check("no memory / picks / send-log / case-study / scan-cache file is opened",
-          not [p for p in r["opened"] if p.endswith(".json")], str(r["opened"]))
-    check("pippy_mcp (the server that owns the memory and picks tools) is never imported", r["pippy_mcp"] is False)
-    check("no subprocess is started and no network call is made by import + build with a fake client",
-          r["spawn"] == [] and r["net"] == [], str(r))
+    check("the only repo files opened are the module's own two source files", set(r["opened"]) <= {"watchlist_brief.py", "brief_common.py"}, str(r["opened"]))
+    check(".env is not read", ".env" not in r["opened"], str(r["opened"]))
+    check("no memory / picks / send-log / case-study / scan-cache file is opened", not [p for p in r["opened"] if p.endswith(".json")], str(r["opened"]))
+    check("only watchlist_brief and brief_common are loaded from the project", set(r["loaded_project"]) == {"watchlist_brief", "brief_common"}, str(r["loaded_project"]))
+    check("openbell, pippy_mcp, dotenv and the mcp library are never imported", r["forbidden_loaded"] in ([], ["yfinance"]) and "openbell" not in r["forbidden_loaded"], str(r))
+    check("importing the module alone loads none of them (yfinance is imported lazily, inside the client)", r["forbidden_after_import"] == [], str(r))
+    check("no subprocess is started and no network call is made", r["spawn"] == [] and r["net"] == [], str(r))
+
+
+def test_brief_common_is_pure():
+    import ast
+    src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "brief_common.py")).read()
+    tree = ast.parse(src)
+    imports = {a.name for n in ast.walk(tree) if isinstance(n, ast.Import) for a in n.names} | \
+              {n.module for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)}
+    check("brief_common imports only 're'", imports == {"re"}, str(imports))
+    calls = {c.func.id for c in ast.walk(tree) if isinstance(c, ast.Call) and isinstance(c.func, ast.Name)}
+    check("brief_common never calls load_dotenv, open or print", not (calls & {"load_dotenv", "open", "print", "exec", "eval"}), str(calls))
+    check("every helper openbell used to define is still reachable as openbell._x",
+          all(hasattr(openbell, n) for n in ("_find_headline_for_symbol", "_headline_topic", "_company_short_name", "_wrap",
+                                             "_section", "_pct_words", "_fmt", "_pct_color", "_COMMON_WORD_TICKERS", "GREEN")))
+    check("and they are the same objects, not copies", openbell._wrap is __import__("brief_common")._wrap)
+
 
 if __name__ == "__main__":
     tests = [v for k, v in sorted(globals().items(), key=lambda kv: list(globals()).index(kv[0])) if k.startswith("test_")]
