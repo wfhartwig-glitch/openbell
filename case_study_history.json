@@ -407,6 +407,10 @@
     {
       "id": "investor_onsi_sawiris",
       "date": "2026-10-25"
+    },
+    {
+      "id": "investor_ratan_tata",
+      "date": "2026-10-26"
     }
   ],
   "low_inventory_alert_sent": true
