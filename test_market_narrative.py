@@ -1508,6 +1508,42 @@ def test_dow_beating_nasdaq_gets_a_hedged_reading_mirroring_the_reverse():
     check("control: the Nasdaq-beats-Dow sentence is unchanged", "The Nasdaq beat the Dow by 0.80 percentage points, which suggests the gains were concentrated in large technology companies" in mirror, f"got: {mirror!r}")
 
 
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 16 — Company-name matching is whole-word (was a bare substring test)
+# ═══════════════════════════════════════════════════════════════════════════
+
+def test_company_name_match_is_whole_word():
+    def hit(title, sym, name):
+        h, spec, _ = openbell._find_headline_for_symbol([{"title": title, "snippet": "", "site": "x"}], sym, name, sector="")
+        return bool(h and spec)
+    check("'Pineapple' is not Apple", not hit("Pineapple Prices Surge After Hurricane", "AAPL", "Apple Inc."))
+    check("'Advisable' is not Visa", not hit("Advisable Moves For Travel Seekers", "V", "Visa Inc."))
+    check("a hyphenated compound ('Visa-Free') is not Visa", not hit("Visa-Free Travel Expands Across Europe", "V", "Visa Inc."))
+    check("a name inside a longer word at the end is not a match ('Snapple' vs Apple)", not hit("Snapple Launches New Flavors", "AAPL", "Apple Inc."))
+    check("control: 'Apple' as a whole word matches", hit("Apple Reports Record Quarterly Revenue", "AAPL", "Apple Inc."))
+    check("control: a possessive matches ('Apple's')", hit("Apple's Services Business Keeps Growing", "AAPL", "Apple Inc."))
+    check("control: a multi-word name matches", hit("Best Buy Reports Strong Quarterly Results", "BBY", "Best Buy Co., Inc."))
+    check("control: the name at the end of the title matches", hit("Why Shares Jumped At Apple", "AAPL", "Apple Inc."))
+    check("control: the ticker still matches on its own", hit("AAPL Shares Edge Higher", "AAPL", "Apple Inc."))
+    check("snippets are held to the same rule", not openbell._find_headline_for_symbol(
+        [{"title": "Fruit Market Report", "snippet": "Pineapple supply tightens", "site": "x"}], "AAPL", "Apple Inc.", sector="")[1])
+
+
+def test_bogus_name_match_reaches_neither_narrative_nor_holdings_sentence():
+    hl = [{"title": "Pineapple Prices Surge After Hurricane Hits Hawaii", "snippet": "", "site": "x"}]
+    mv = {"gainers": [{"symbol": "AAPL", "name": "Apple Inc.", "pct": 9.6}], "losers": []}
+    s, _ = openbell._outsized_mover_note(mv, hl, set(), set())
+    check("the biggest-mover sentence claims no headline mention", "headline mentions it" not in s and "headline covers" not in s, s)
+    check("it says plainly that no company news was found", "no company news we could find" in s, s)
+    picks = {"picks": [{"ticker": "AAPL", "company": "Apple Inc."}], "changes_from_last_week": []}
+    mem = {"pick_performance_history": [{"ticker": "AAPL", "pct_change_since_pick": 5.0}]}
+    text, _ = morning(SNAPSHOT_UP, headlines=hl, picks_data=picks, mem=mem)
+    check("the morning holdings sentence does not claim AAPL is in the headlines; it says none is",
+          "AAPL is in today's headlines" not in text and "AAPL is mentioned" not in text
+          and "None of your holdings is in today's headlines" in text, text)
+
+
 if __name__ == "__main__":
     tests = [
         test_sept3_fixture_runs_end_to_end,
@@ -1633,6 +1669,8 @@ if __name__ == "__main__":
         test_close_now_gets_standalone_oil_gold_sentence,
         test_close_does_not_double_cite_gold_when_composite_already_used_it,
         test_dow_beating_nasdaq_gets_a_hedged_reading_mirroring_the_reverse,
+        test_company_name_match_is_whole_word,
+        test_bogus_name_match_reaches_neither_narrative_nor_holdings_sentence,
     ]
     print(f"Running {len(tests)} test groups...\n")
     for t in tests:

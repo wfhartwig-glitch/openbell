@@ -2484,6 +2484,14 @@ def _company_short_name(name: str) -> str:
     return " ".join(tokens)
 
 
+def _name_in_text(name_l: str, text: str) -> bool:
+    """Whole-word company-name match. A bare substring test matched "apple" inside "Pineapple" and
+    "visa" inside "Advisable"; hyphenated compounds ("Visa-Free") are refused too. A miss only
+    under-claims a mention, which is the safe direction."""
+    return bool(name_l) and bool(re.search(
+        r"(?<![a-z0-9-])" + re.escape(name_l) + r"(?![a-z0-9])(?!-[a-z])", (text or "").lower()))
+
+
 def _find_headline_for_symbol(headlines: list, symbol: str, company_name: str = "", sector: str = "",
                               exclude: set = None):
     """
@@ -2510,9 +2518,9 @@ def _find_headline_for_symbol(headlines: list, symbol: str, company_name: str = 
             title, snippet = h.get("title", "") or "", h.get("snippet", "") or ""
             if title in exclude:
                 continue
-            if pattern.search(title) or (name_l and name_l in title.lower()):
+            if pattern.search(title) or _name_in_text(name_l, title):
                 return h, True, "title"
-            if pattern.search(snippet) or (name_l and name_l in snippet.lower()):
+            if pattern.search(snippet) or _name_in_text(name_l, snippet):
                 return h, True, "snippet"
 
     fam = _sector_family(sector)
