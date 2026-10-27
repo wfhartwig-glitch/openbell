@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 268,
-  "last_session": "2026-10-26T20:01:13.133957",
+  "session_count": 269,
+  "last_session": "2026-10-27T13:31:24.303064",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 257,
-  "last_email_sent": "2026-10-26T20:01:13.130740",
-  "last_email_summary": "close sent Monday, October 26, 2026",
+  "email_count": 258,
+  "last_email_sent": "2026-10-27T13:31:24.299718",
+  "last_email_summary": "morning sent Tuesday, October 27, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "investor_larry_ellison_oracle",
-      "category": "investor",
-      "topic": "Oracle Nearly Collapsed in a 1990 Accounting Scandal Larry Ellison Almost Didn't Survive",
-      "remaining_in_pass": 25,
-      "low_inventory_alert": false,
-      "date": "2026-10-01"
-    },
     {
       "type": "close",
       "actual_direction": "higher",
@@ -678,6 +669,17 @@
       "worst_sector": "Comm. Services",
       "biggest_mover": "TSLA +5.2%",
       "date": "2026-10-26"
+    },
+    {
+      "type": "morning",
+      "direction_called": "higher",
+      "sp_pct_called": 0.29,
+      "leading_index": "Nasdaq",
+      "lagging_index": "",
+      "headline_theme": "rate expectations",
+      "commodity_note": "Crude oil was little changed at $101.15 a barrel, so energy costs aren't adding pressure either way.",
+      "picks_status": "holding",
+      "date": "2026-10-27"
     }
   ],
   "lessons_learned": [
@@ -1118,7 +1120,7 @@
     "inflation data": 6,
     "earnings season": 7,
     "geopolitical tensions": 3,
-    "rate expectations": 20,
+    "rate expectations": 21,
     "commodities": 9
   }
 }
