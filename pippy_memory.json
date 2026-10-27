@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 269,
-  "last_session": "2026-10-27T13:31:24.303064",
+  "session_count": 270,
+  "last_session": "2026-10-27T17:00:40.598080",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 258,
-  "last_email_sent": "2026-10-27T13:31:24.299718",
-  "last_email_summary": "morning sent Tuesday, October 27, 2026",
+  "email_count": 259,
+  "last_email_sent": "2026-10-27T17:00:40.596125",
+  "last_email_summary": "casestudy sent Tuesday, October 27, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "higher",
-      "actual_sp_pct": 0.17,
-      "best_sector": "Energy",
-      "worst_sector": "Health Care",
-      "biggest_mover": "NOW +2.8%",
-      "date": "2026-10-01"
-    },
     {
       "type": "morning",
       "direction_called": "higher",
@@ -679,6 +670,15 @@
       "headline_theme": "rate expectations",
       "commodity_note": "Crude oil was little changed at $101.15 a barrel, so energy costs aren't adding pressure either way.",
       "picks_status": "holding",
+      "date": "2026-10-27"
+    },
+    {
+      "type": "case_study",
+      "id": "investor_werner_von_siemens",
+      "category": "investor",
+      "topic": "Werner von Siemens Was Nearly Court-Martialed as a Young Officer \u2014 Then Built One of Europe's First Great Electrical Companies",
+      "remaining_in_pass": 0,
+      "low_inventory_alert": false,
       "date": "2026-10-27"
     }
   ],
