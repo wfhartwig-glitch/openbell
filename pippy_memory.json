@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 272,
-  "last_session": "2026-10-28T13:31:11.898039",
+  "session_count": 273,
+  "last_session": "2026-10-28T17:00:42.041524",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 261,
-  "last_email_sent": "2026-10-28T13:31:11.894737",
-  "last_email_summary": "morning sent Wednesday, October 28, 2026",
+  "email_count": 262,
+  "last_email_sent": "2026-10-28T17:00:42.039516",
+  "last_email_summary": "casestudy sent Wednesday, October 28, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "higher",
-      "actual_sp_pct": 0.71,
-      "best_sector": "Consumer Discret.",
-      "worst_sector": "Consumer Staples",
-      "biggest_mover": "TSLA +4.2%",
-      "date": "2026-10-02"
-    },
     {
       "type": "case_study",
       "id": "investor_madam_cj_walker",
@@ -680,6 +671,15 @@
       "headline_theme": "rate expectations",
       "commodity_note": "Crude oil was little changed at $101.76 a barrel, so energy costs aren't adding pressure either way.",
       "picks_status": "holding",
+      "date": "2026-10-28"
+    },
+    {
+      "type": "case_study",
+      "id": "crash_1929",
+      "category": "crisis",
+      "topic": "The 1929 Crash and the Myth of the Permanent Boom",
+      "remaining_in_pass": 0,
+      "low_inventory_alert": false,
       "date": "2026-10-28"
     }
   ],

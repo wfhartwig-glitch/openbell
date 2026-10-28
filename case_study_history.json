@@ -415,6 +415,10 @@
     {
       "id": "investor_werner_von_siemens",
       "date": "2026-10-27"
+    },
+    {
+      "id": "crash_1929",
+      "date": "2026-10-28"
     }
   ],
   "low_inventory_alert_sent": true
