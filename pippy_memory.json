@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 273,
-  "last_session": "2026-10-28T17:00:42.041524",
+  "session_count": 274,
+  "last_session": "2026-10-28T20:01:44.953871",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 262,
-  "last_email_sent": "2026-10-28T17:00:42.039516",
-  "last_email_summary": "casestudy sent Wednesday, October 28, 2026",
+  "email_count": 263,
+  "last_email_sent": "2026-10-28T20:01:44.951666",
+  "last_email_summary": "close sent Wednesday, October 28, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "investor_madam_cj_walker",
-      "category": "investor",
-      "topic": "Madam C.J. Walker Went From Orphaned Laundress to America's First Self-Made Female Millionaire",
-      "remaining_in_pass": 23,
-      "low_inventory_alert": false,
-      "date": "2026-10-03"
-    },
     {
       "type": "case_study",
       "id": "investor_reginald_lewis",
@@ -681,6 +672,15 @@
       "remaining_in_pass": 0,
       "low_inventory_alert": false,
       "date": "2026-10-28"
+    },
+    {
+      "type": "close",
+      "actual_direction": "higher",
+      "actual_sp_pct": 0.28,
+      "best_sector": "Technology",
+      "worst_sector": "Real Estate",
+      "biggest_mover": "VRT +15.2%",
+      "date": "2026-10-28"
     }
   ],
   "lessons_learned": [
@@ -754,12 +754,6 @@
     }
   ],
   "prediction_accuracy": [
-    {
-      "date": "2026-08-03",
-      "called": "higher",
-      "actual": "higher",
-      "accurate": true
-    },
     {
       "date": "2026-08-04",
       "called": "higher",
@@ -1110,6 +1104,12 @@
     },
     {
       "date": "2026-10-27",
+      "called": "higher",
+      "actual": "higher",
+      "accurate": true
+    },
+    {
+      "date": "2026-10-28",
       "called": "higher",
       "actual": "higher",
       "accurate": true
