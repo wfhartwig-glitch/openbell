@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 271,
-  "last_session": "2026-10-27T20:01:28.310101",
+  "session_count": 272,
+  "last_session": "2026-10-28T13:31:11.898039",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 260,
-  "last_email_sent": "2026-10-27T20:01:28.307952",
-  "last_email_summary": "close sent Tuesday, October 27, 2026",
+  "email_count": 261,
+  "last_email_sent": "2026-10-28T13:31:11.894737",
+  "last_email_summary": "morning sent Wednesday, October 28, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "investor_muriel_siebert",
-      "category": "investor",
-      "topic": "Muriel Siebert Was Rejected by Nine Firms Before Becoming the First Woman to Own a Seat on the NYSE",
-      "remaining_in_pass": 24,
-      "low_inventory_alert": false,
-      "date": "2026-10-02"
-    },
     {
       "type": "close",
       "actual_direction": "higher",
@@ -679,6 +670,17 @@
       "worst_sector": "Energy",
       "biggest_mover": "ANET +4.6%",
       "date": "2026-10-27"
+    },
+    {
+      "type": "morning",
+      "direction_called": "higher",
+      "sp_pct_called": 0.18,
+      "leading_index": "Nasdaq",
+      "lagging_index": "",
+      "headline_theme": "rate expectations",
+      "commodity_note": "Crude oil was little changed at $101.76 a barrel, so energy costs aren't adding pressure either way.",
+      "picks_status": "holding",
+      "date": "2026-10-28"
     }
   ],
   "lessons_learned": [
@@ -1119,7 +1121,7 @@
     "inflation data": 6,
     "earnings season": 7,
     "geopolitical tensions": 3,
-    "rate expectations": 21,
+    "rate expectations": 22,
     "commodities": 9
   }
 }
