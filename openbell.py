@@ -22,6 +22,7 @@ from datetime import date, datetime, timedelta, timezone
 from dotenv import load_dotenv
 from mcp import ClientSession
 from mcp.client.stdio import StdioServerParameters, stdio_client
+from desks import framework as desk_framework, registry as desk_registry
 from brief_common import (  # noqa: F401  (re-exported: openbell._x keeps working)
     GREEN,
     RED,
@@ -2653,6 +2654,9 @@ async def morning(session: ClientSession) -> tuple[str, str]:
     today_str = today.strftime("%A, %B %d")
     is_monday = today.weekday() == 0
 
+    # Specialist desks run in the background while the rest of the pipeline fetches (see desks/).
+    desk_run = desk_framework.start_desks(desk_registry.ALL, "morning", include_private=True)
+
     print("    fetching snapshot + global + commodities…")
     snapshot, global_idx, commodities_raw, treasury_raw, headlines, econ, earnings, mem, scan_raw = \
         await asyncio.gather(
@@ -2694,6 +2698,8 @@ async def morning(session: ClientSession) -> tuple[str, str]:
     comm_list   = commodities_raw.get("commodities", [])
     tsy         = treasury_raw if treasury_raw.get("yield") else {}
 
+    desk_sections = desk_run.sections(desk_run.collect())
+
     morning_section, log_data = _morning_summary_html(
         snap_list, hl_list, picks_data, comm_list, tsy,
         mem if isinstance(mem, dict) else {},
@@ -2706,6 +2712,7 @@ async def morning(session: ClientSession) -> tuple[str, str]:
         + _indices(snap_list)
         + _global_indices(global_list)
         + _commodities_and_yields(comm_list, tsy)
+        + "".join(desk_sections)
         + _headlines(hl_list)
         + _calendar(econ.get("events", []), earnings.get("earnings", []),
                     econ_failed=econ.get("source") == "unavailable")
@@ -2725,6 +2732,8 @@ async def morning(session: ClientSession) -> tuple[str, str]:
 
 async def close(session: ClientSession) -> tuple[str, str, dict]:
     today = _today_ct().strftime("%A, %B %d")
+    desk_run = desk_framework.start_desks(desk_registry.ALL, "close", include_private=True)
+
     print("    fetching snapshot + sectors + movers + commodities + treasury + earnings…")
     snapshot, sectors, movers, commodities_raw, treasury_raw, headlines, earnings_raw, mem, scan_raw, picks_data = \
         await asyncio.gather(
@@ -2769,6 +2778,8 @@ async def close(session: ClientSession) -> tuple[str, str, dict]:
     earn_list    = earnings_raw.get("earnings", [])
     tsy          = treasury_raw if treasury_raw.get("yield") else {}
 
+    desk_sections = desk_run.sections(desk_run.collect())
+
     body = (
         _close_summary_html(snap_list, movers, sectors_list, comm_list, treasury=tsy, earnings=earn_list,
                             headlines=headlines.get("headlines", []),
@@ -2779,6 +2790,7 @@ async def close(session: ClientSession) -> tuple[str, str, dict]:
         + _movers(movers.get("gainers", []), movers.get("losers", []))
         + _sectors(sectors_list)
         + _commodities_and_yields(comm_list, tsy)
+        + "".join(desk_sections)
         + _watchlist(watchlist, "Your Watchlist — End of Day")
         + _headlines(headlines.get("headlines", []))
         + _daily_scan(scan_raw.get("candidates", []),

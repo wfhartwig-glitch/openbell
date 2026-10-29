@@ -34,6 +34,7 @@ import re
 import sys
 
 import openbell
+from desks import framework as desk_framework, registry as desk_registry
 
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -177,20 +178,20 @@ def _public_movers(movers: dict) -> str:
 
 
 def build_public_morning(snap_list, hl_list, global_list, comm_list, tsy, earnings_list, mem,
-                         unsubscribe_url=UNSUBSCRIBE_PLACEHOLDER, address=ADDRESS_PLACEHOLDER):
+                         unsubscribe_url=UNSUBSCRIBE_PLACEHOLDER, address=ADDRESS_PLACEHOLDER, desk_sections=()):
     today_str = openbell._today_ct().strftime("%A, %B %d")
     narrative, _ = openbell._morning_summary_html(
         snap_list, hl_list, {}, comm_list, tsy, _public_mem(mem), earnings_list, [], global_list)
     parts = [openbell._indices(snap_list),
              openbell._global_indices(global_list),
-             openbell._commodities_and_yields(comm_list, tsy)]
+             openbell._commodities_and_yields(comm_list, tsy)] + list(desk_sections)
     html = _finish(parts, narrative, openbell._headlines(hl_list),
                    f"Morning Briefing &nbsp; {today_str}", "Pippy's Brief ☀️", unsubscribe_url, address)
     return f"Pippy's Brief — {today_str} Morning Briefing", html
 
 
 def build_public_close(snap_list, movers, sectors_list, comm_list, tsy, earnings_list, hl_list, mem,
-                       unsubscribe_url=UNSUBSCRIBE_PLACEHOLDER, address=ADDRESS_PLACEHOLDER):
+                       unsubscribe_url=UNSUBSCRIBE_PLACEHOLDER, address=ADDRESS_PLACEHOLDER, desk_sections=()):
     today_str = openbell._today_ct().strftime("%A, %B %d")
     movers = movers if isinstance(movers, dict) else {}
     narrative = openbell._close_summary_html(
@@ -200,7 +201,7 @@ def build_public_close(snap_list, movers, sectors_list, comm_list, tsy, earnings
     parts = [openbell._indices(snap_list),
              _public_movers(movers),
              openbell._sectors(sectors_list),
-             openbell._commodities_and_yields(comm_list, tsy)]
+             openbell._commodities_and_yields(comm_list, tsy)] + list(desk_sections)
     html = _finish(parts, narrative, openbell._headlines(hl_list),
                    f"Market Close &nbsp; {today_str}", "Pippy's Brief 📊", unsubscribe_url, address)
     return f"Pippy's Brief — {today_str} Market Close", html
@@ -210,6 +211,8 @@ def build_public_close(snap_list, movers, sectors_list, comm_list, tsy, earnings
 
 async def _fetch_and_build(session, mode, unsubscribe_url, address):
     call = openbell.call
+    # Public edition: only non-private desks are even started.
+    desk_run = desk_framework.start_desks(desk_registry.ALL, mode, include_private=False)
     if mode == "morning":
         snap, glob, comm, tsy_raw, hl, earn, mem = await asyncio.gather(
             call(session, "fetch_market_snapshot"), call(session, "fetch_global_indices"),
@@ -219,7 +222,7 @@ async def _fetch_and_build(session, mode, unsubscribe_url, address):
         tsy = tsy_raw if tsy_raw.get("yield") else {}
         return build_public_morning(snap.get("data", []), hl.get("headlines", []), glob.get("indices", []),
                                     comm.get("commodities", []), tsy, earn.get("earnings", []), mem,
-                                    unsubscribe_url, address)
+                                    unsubscribe_url, address, desk_sections=desk_run.sections(desk_run.collect()))
     snap, sect, movers, comm, tsy_raw, hl, earn, mem = await asyncio.gather(
         call(session, "fetch_market_snapshot"), call(session, "fetch_sector_performance"),
         call(session, "fetch_top_movers"), call(session, "fetch_commodities"),
@@ -228,7 +231,7 @@ async def _fetch_and_build(session, mode, unsubscribe_url, address):
     tsy = tsy_raw if tsy_raw.get("yield") else {}
     return build_public_close(snap.get("data", []), movers, sect.get("sectors", []), comm.get("commodities", []),
                               tsy, earn.get("earnings", []), hl.get("headlines", []), mem,
-                              unsubscribe_url, address)
+                              unsubscribe_url, address, desk_sections=desk_run.sections(desk_run.collect()))
 
 
 def write_html(out_dir: str, name: str, html: str) -> str:
