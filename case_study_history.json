@@ -419,6 +419,10 @@
     {
       "id": "crash_1929",
       "date": "2026-10-28"
+    },
+    {
+      "id": "crisis_2008_lehman",
+      "date": "2026-10-29"
     }
   ],
   "low_inventory_alert_sent": true

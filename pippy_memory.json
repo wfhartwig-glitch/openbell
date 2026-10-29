@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 275,
-  "last_session": "2026-10-29T13:31:07.796814",
+  "session_count": 276,
+  "last_session": "2026-10-29T17:00:40.182375",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 264,
-  "last_email_sent": "2026-10-29T13:31:07.793696",
-  "last_email_summary": "morning sent Thursday, October 29, 2026",
+  "email_count": 265,
+  "last_email_sent": "2026-10-29T17:00:40.180445",
+  "last_email_summary": "casestudy sent Thursday, October 29, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,16 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "mixed",
-      "leading_index": "Nasdaq",
-      "lagging_index": "Dow",
-      "headline_theme": "",
-      "commodity_note": "",
-      "picks_status": "holding",
-      "date": "2026-10-05"
-    },
     {
       "type": "case_study",
       "id": "investor_berry_gordy_motown",
@@ -682,6 +672,15 @@
       "headline_theme": "rate expectations",
       "commodity_note": "Crude oil fell 1.10% to $100.30 a barrel. Cheaper energy lowers costs for airlines and shippers and can ease inflation, while squeezing oil producers.",
       "picks_status": "holding",
+      "date": "2026-10-29"
+    },
+    {
+      "type": "case_study",
+      "id": "crisis_2008_lehman",
+      "category": "crisis",
+      "topic": "The 2008 Collapse of Lehman Brothers",
+      "remaining_in_pass": 0,
+      "low_inventory_alert": false,
       "date": "2026-10-29"
     }
   ],
