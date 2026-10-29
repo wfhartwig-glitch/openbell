@@ -1913,6 +1913,225 @@ def test_close_engine_applies_the_rule_to_rotation_and_flat_day_sentences():
           "Pricier oil so far today could weigh on stocks while falling yields could support them" in flat, flat)
 
 
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 19 — Direction-aware wording: breadth vs index direction, Dow/Nasdaq gap sentences, LOOP-CLOSE
+# Regression numbers are Oct 29 2026 mid-session: 8 of 11 sectors up, S&P -0.58%, Nasdaq -1.63%, Dow -0.51%.
+# The close then said "Stocks rallied broadly today ... with the S&P 500 down 0.58%" and "the gains were in
+# more traditional ... companies" on a day when every index fell.
+# ═══════════════════════════════════════════════════════════════════════════
+
+_SECTOR_NAMES = ["Technology", "Financials", "Energy", "Industrials", "Health Care", "Consumer Discret.", "Materials",
+                 "Consumer Staples", "Comm. Services", "Utilities", "Real Estate"]
+
+
+def _breadth_sectors(n_up):
+    return [{"sector": n, "pct": (0.4 + 0.1 * i) if i < n_up else (-0.4 - 0.1 * i)} for i, n in enumerate(_SECTOR_NAMES)]
+
+
+def _close_text(sp, ndx, dow, n_up, **kw):
+    snap = [{"name": "S&P 500", "pct": sp}, {"name": "Nasdaq", "pct": ndx}, {"name": "Dow", "pct": dow}]
+    kw.setdefault("commodities", [])
+    kw.setdefault("treasury", {})
+    return _silent(close, snap, sectors=_breadth_sectors(n_up), **kw)[0]
+
+
+def _first_sentence(text):
+    return text.split("\n\n")[0].split(". ")[0]
+
+
+TODAY = (-0.58, -1.63, -0.51)
+
+
+def test_most_sectors_up_but_indexes_down_says_so_plainly():
+    t = _close_text(*TODAY, 8)
+    p1 = t.split("\n\n")[0]
+    check("today's numbers open by naming the disagreement",
+          p1.startswith("Most sectors rose even as the major indexes fell \u2014 8 of 11 sectors finished higher, yet the S&P 500 down 0.58%, the Nasdaq down 1.63% and the Dow down 0.51%."), p1[:220])
+    check("with a hedged reason (can happen when the largest companies fall while most others rise)",
+          "That can happen when the largest companies, which carry the most weight in the indexes, fall while most others rise." in p1, p1[:400])
+    for bad in ("rallied", "wide rise", "carrying the index", "Stocks rose", "edged higher"):
+        check(f"never '{bad}' when the S&P 500 and Nasdaq are down", bad not in t, t)
+
+
+def test_most_sectors_down_but_indexes_up_is_the_mirror():
+    t = _close_text(0.4, 0.6, 0.3, 3)               # 3 of 11 up -> 8 of 11 down
+    p1 = t.split("\n\n")[0]
+    check("3 of 11 up with the indexes up: names the disagreement",
+          p1.startswith("Most sectors fell even as the major indexes rose \u2014 8 of 11 sectors finished lower, yet the S&P 500 up 0.40%, the Nasdaq up 0.60% and the Dow up 0.30%."), p1[:220])
+    check("with the mirrored hedge", "which carry the most weight in the indexes, rise while most others fall." in p1, p1[:400])
+    for bad in ("sold off", "wide decline", "dragging the index"):
+        check(f"never '{bad}' when the S&P 500 and Nasdaq are up", bad not in t, t)
+
+
+def test_aligned_breadth_keeps_its_original_wording():
+    up = _close_text(0.8, 1.1, 0.6, 9)
+    check("9 of 11 up, indexes up: 'rallied broadly' as before", up.startswith("Stocks rallied broadly today \u2014 9 of 11 sectors rose, with the S&P 500 up 0.80%")
+          and "a wide rise rather than a few big companies carrying the index" in up, up[:300])
+    dn = _close_text(-0.8, -1.1, -0.6, 2)            # 9 of 11 down
+    check("9 of 11 down, indexes down: 'sold off broadly' as before", dn.startswith("Stocks sold off broadly today \u2014 9 of 11 sectors fell, with the S&P 500 down 0.80%")
+          and "a wide decline rather than a few big companies dragging the index" in dn, dn[:300])
+
+
+def test_breadth_with_split_or_flat_indexes():
+    check("8 up, S&P up but Nasdaq down: split", _first_sentence(_close_text(0.3, -0.4, 0.1, 8)).startswith("Most sectors rose (8 of 11), but the major indexes were split"), _first_sentence(_close_text(0.3, -0.4, 0.1, 8)))
+    check("8 down, S&P down but Nasdaq up: split", _first_sentence(_close_text(-0.3, 0.4, -0.1, 3)).startswith("Most sectors fell (8 of 11), but the major indexes were split"))
+    check("9 up, S&P and Nasdaq within 0.10: barely moved", "while the major indexes barely moved" in _close_text(0.03, -0.05, 0.02, 9).split("\n\n")[0])
+    check("9 down, indexes barely moved: the mirror", "Most sectors fell (9 of 11) while the major indexes barely moved" in _close_text(-0.03, 0.05, -0.02, 2).split("\n\n")[0])
+
+
+def test_breadth_alignment_table_and_boundaries():
+    a = openbell._breadth_alignment
+    rows = [("broad_rally", 0.5, 0.5, "aligned"), ("broad_rally", -0.58, -1.63, "opposite"), ("broad_rally", 0.3, -0.4, "split"),
+            ("broad_rally", -0.4, 0.3, "split"), ("broad_rally", 0.09, -0.09, "flat"), ("broad_rally", 0.10, 0.10, "aligned"),
+            ("broad_selloff", -0.5, -0.5, "aligned"), ("broad_selloff", 0.5, 0.6, "opposite"), ("broad_selloff", -0.3, 0.4, "split"),
+            ("broad_selloff", 0.05, -0.05, "flat"), ("broad_selloff", 0.2, 0.0, "split")]
+    for kind, sp, ndx, want in rows:
+        check(f"{kind} sp {sp:+.2f} ndx {ndx:+.2f} -> {want}", a(kind, sp, ndx) == want, a(kind, sp, ndx))
+
+
+# ── Dow vs Nasdaq gap sentences ──────────────────────────────────────────────
+
+def _gap(sp, ndx, dow, ychg=0.0, **kw):
+    return openbell._divergence_note(sp, ndx, dow, ychg, **kw)["text"]
+
+
+def test_dow_nasdaq_gap_sentences_say_gains_only_when_the_leader_rose():
+    n = _gap(0.5, 1.2, 0.3)
+    check("Nasdaq beats Dow, both up: 'gains were concentrated in large technology companies'", "The Nasdaq beat the Dow" in n and "the gains were concentrated in large technology companies" in n, n)
+    n = _gap(-0.5, -0.2, -1.0)
+    check("Nasdaq beats Dow, both DOWN: 'fell less than ... declines were concentrated in ... traditional'",
+          "The Nasdaq fell less than the Dow, by" in n and "the declines were concentrated in more traditional, economically sensitive companies" in n and "gains" not in n and "beat" not in n, n)
+    d = _gap(0.5, 0.2, 1.1)
+    check("Dow beats Nasdaq, both up: 'gains were in more traditional ... companies'", "The Dow beat the Nasdaq" in d and "the gains were in more traditional" in d, d)
+    d = _gap(*TODAY[:2], TODAY[2])
+    check("Dow beats Nasdaq, both DOWN (today): 'The Dow fell less than the Nasdaq ... declines ... in technology'",
+          "The Dow fell less than the Nasdaq, by more than a full percentage point, which suggests the declines were concentrated in technology companies rather than spread across the whole market." in d and "gains" not in d, d)
+    mixed = _gap(0.2, -0.4, 0.6)
+    check("Dow up, Nasdaq down: the Dow did gain, so 'gains' is true", "The Dow beat the Nasdaq" in mixed and "the gains were in more traditional" in mixed, mixed)
+    mixed = _gap(0.2, 0.9, -0.5)
+    check("Nasdaq up, Dow down: the Nasdaq did gain", "The Nasdaq beat the Dow" in mixed and "gains were concentrated in large technology" in mixed, mixed)
+
+
+def test_gap_sentences_with_yields_and_skip_yields_are_direction_aware_too():
+    up_yields_down_day = _gap(-0.5, -0.2, -1.0, 0.08)
+    check("down day, yields up: 'technology held up better', not 'buyers sided with technology'",
+          "technology held up better despite the headwind" in up_yields_down_day and "buyers sided" not in up_yields_down_day, up_yields_down_day)
+    check("up day, yields up: the original 'buyers sided' wording", "buyers sided with technology despite the headwind" in _gap(0.5, 1.2, 0.3, 0.08))
+    check("falling yields: wording unchanged and direction-neutral", "consistent with the fall in yields" in _gap(-0.5, -0.2, -1.0, -0.08))
+    s = _gap(-0.5, -0.2, -1.0, 0.0, skip_yields=True)
+    check("skip_yields path (a rotation note already covered yields) is direction-aware", "fell less than the Dow" in s and "gains" not in s, s)
+    s = _gap(*TODAY, 0.0, skip_yields=True)
+    check("skip_yields, Dow ahead on a down day", "The Dow fell less than the Nasdaq" in s and "gains" not in s, s)
+    sd = _gap(-0.5, -0.9, -1.0)
+    check("S&P 500 ahead of the Dow on a down day: 'fell less than', not 'beat'", "The S&P 500 fell less than the Dow by" in sd or "The S&P 500 fell less than the Dow" in sd, sd)
+    check("S&P 500 ahead of the Dow on an up day keeps 'beat'", "The S&P 500 beat the Dow by" in _gap(0.9, 0.2, 0.1) or "The S&P 500 beat the Dow" in _gap(0.9, 0.7, 0.1))
+
+
+def test_gap_sentence_grid_never_contradicts_the_indexes():
+    V = (-1.5, -0.4, 0.4, 1.5)
+    bad = []
+    for sp in V:
+        for ndx in V:
+            for dow in V:
+                for y in (-0.08, 0.0, 0.08):
+                    for skip in (False, True):
+                        txt = _gap(sp, ndx, dow, y, skip_yields=skip)
+                        if "gains" in txt:
+                            m = re.search(r"The (Nasdaq|Dow) beat the (Dow|Nasdaq)", txt)
+                            leader = {"Nasdaq": ndx, "Dow": dow}[m.group(1)] if m else None
+                            if leader is None or leader <= 0:
+                                bad.append(("gains with a falling leader", sp, ndx, dow, txt))
+                        if "declines" in txt and not (ndx < 0 and dow < 0):
+                            bad.append(("declines without both down", sp, ndx, dow, txt))
+                        if "beat the" in txt and ndx < 0 and dow < 0 and ("Nasdaq beat" in txt or "Dow beat" in txt):
+                            bad.append(("'beat' on an all-down pair", sp, ndx, dow, txt))
+    check("2,000+ combinations: 'gains' only with a rising leader, 'declines' only when both fell, no 'beat' on a both-down pair", not bad, str(bad[:2]))
+
+
+# ── LOOP-CLOSE ───────────────────────────────────────────────────────────────
+
+def _loop_sign(sp_close, ndx_close, dow_close, called, best, worst, spread=1.0, sp_called=None):
+    if sp_called is None:
+        sp_called = -0.6 if called == "lower" else 0.6
+    mem = {"briefing_history": [{"date": openbell._today_ct_iso(), "type": "morning", "direction_called": called,
+                                 "sp_pct_called": sp_called}]}
+    snap = [{"name": "S&P 500", "pct": sp_close}, {"name": "Nasdaq", "pct": ndx_close}, {"name": "Dow", "pct": dow_close}]
+    return openbell._loop_close_note(snap, mem, divergence_spread=spread, best_index_name=best, worst_index_name=worst)
+
+
+def test_loop_close_never_says_gains_on_a_down_day():
+    s = _loop_sign(-0.58, -1.63, -0.51, "lower", best="Dow", worst="Nasdaq", spread=1.12)
+    check("today: a held 'lower' call, down day -> 'declines', tech falling most, Dow fell less",
+          s == "We called it lower this morning and the S&P delivered, though the declines were uneven, with tech falling most while the Dow fell less.", s)
+    check("no 'gains' anywhere", "gains" not in s)
+    s = _loop_sign(-0.5, -0.9, 0.2, "lower", best="Dow", worst="Nasdaq")
+    check("down day but the best index rose: 'while the Dow rose'", "tech falling most while the Dow rose" in s and "gains" not in s, s)
+
+
+def test_loop_close_up_day_wording_is_exact_about_the_laggard():
+    s = _loop_sign(0.5, 1.0, -0.2, "higher", best="Nasdaq", worst="Dow")
+    check("up day, laggard fell: 'gains stayed concentrated in tech while the Dow slipped'", "though the gains stayed concentrated in tech while the Dow slipped" in s, s)
+    s = _loop_sign(0.5, 1.0, 0.1, "higher", best="Nasdaq", worst="Dow")
+    check("up day, laggard still rose: 'rose less', not 'slipped'", "while the Dow rose less" in s and "slipped" not in s, s)
+    s = _loop_sign(0.5, 0.2, 0.9, "higher", best="Dow", worst="Nasdaq")
+    check("up day led by the Dow", "gains stayed concentrated in Dow while the Nasdaq rose less" in s, s)
+    q = _loop_sign(-1.2, -1.5, -0.9, "mixed", best="Dow", worst="Nasdaq", sp_called=0.05)
+    check("a missed 'quiet' call on a down day is unchanged and already direction-aware", "stocks fell instead" in q and "with tech falling hardest" in q, q)
+
+
+# ── movers ───────────────────────────────────────────────────────────────────
+
+def test_mover_words_match_the_sign():
+    snap = [{"name": "S&P 500", "pct": -0.8}, {"name": "Nasdaq", "pct": -1.0}, {"name": "Dow", "pct": -0.6}]
+    mv_down = {"gainers": [{"symbol": "AAA", "name": "Aaa Inc", "pct": -2.5}], "losers": [{"symbol": "XXX", "name": "Xxx Inc", "pct": -4.1}]}
+    t = _silent(close, snap, movers=mv_down, sectors=_breadth_sectors(3), commodities=[], treasury={})[0]
+    check("a 'gainer' that fell did not 'lead': it 'held up best'", "AAA held up best, down 2.50%" in t and "AAA led" not in t, t)
+    check("the weakest is still 'the day's weakest' when it fell", "XXX was the day's weakest, down 4.10%" in t)
+    mv_up = {"gainers": [{"symbol": "AAA", "name": "Aaa Inc", "pct": 3.5}], "losers": [{"symbol": "XXX", "name": "Xxx Inc", "pct": 2.4}]}
+    snap_up = [{"name": "S&P 500", "pct": 0.8}, {"name": "Nasdaq", "pct": 1.0}, {"name": "Dow", "pct": 0.6}]
+    t = _silent(close, snap_up, movers=mv_up, sectors=_breadth_sectors(9), commodities=[], treasury={})[0]
+    check("a 'loser' that rose 'gained least', not 'was the weakest, up'", "XXX gained least, up 2.40%" in t and "weakest, up" not in t, t)
+    check("the ordinary case is unchanged: 'AAA led, up 3.50%'", "AAA led, up 3.50%" in t)
+
+
+# ── end to end and a sweep ───────────────────────────────────────────────────
+
+def test_todays_close_end_to_end():
+    mem = {"briefing_history": [{"date": openbell._today_ct_iso(), "type": "morning", "direction_called": "lower", "sp_pct_called": -0.6}]}
+    t = _close_text(*TODAY, 8, treasury={"yield": 4.99, "change": -0.06}, mem=mem)
+    p1 = t.split("\n\n")[0]
+    for bad in ("rallied", "wide rise", "gains", "beat", "Stocks rose"):
+        check(f"today's whole close never says '{bad}'", bad not in t, t)
+    check("it says the sectors and indexes disagree", "Most sectors rose even as the major indexes fell" in p1)
+    check("and that the Dow fell less than the Nasdaq", "The Dow fell less than the Nasdaq" in p1)
+    check("and the LOOP-CLOSE sentence talks about declines", "declines were uneven" in t, t)
+
+
+def test_sign_sweep_no_directional_word_contradicts_the_indexes():
+    V = (-1.5, -0.4, 0.4, 1.5)
+    down_bad = ("rallied", "wide rise", "carrying the index", "Stocks rose", "edged higher")
+    up_bad = ("sold off", "wide decline", "dragging the index")
+    bad = []
+    for sp in V:
+        for ndx in V:
+            for dow in V:
+                for n_up in (8, 3, 6):
+                    for msign in (1, -1):
+                        mv = {"gainers": [{"symbol": "AAA", "name": "Aaa Inc", "pct": msign * 3.0}], "losers": [{"symbol": "XXX", "name": "Xxx Inc", "pct": -msign * 3.1}]}
+                        mem = {"briefing_history": [{"date": openbell._today_ct_iso(), "type": "morning",
+                                                     "direction_called": "lower" if sp < 0 else "higher", "sp_pct_called": -0.6 if sp < 0 else 0.6}]}
+                        t = _close_text(sp, ndx, dow, n_up, movers=mv, mem=mem, treasury={"yield": 4.5, "change": 0.0})
+                        if sp < 0 and ndx < 0:
+                            bad += [(w, sp, ndx, dow, n_up) for w in down_bad if w in t]
+                            if re.search(r"\bgains\b", t) and not (dow > 0):
+                                bad.append(("gains", sp, ndx, dow, n_up))
+                        if sp > 0 and ndx > 0:
+                            bad += [(w, sp, ndx, dow, n_up) for w in up_bad if w in t]
+                        bad += [("mover sign", sp, ndx, dow, n_up) for pat in (r"weakest, up", r"\bled, down") if re.search(pat, t)]
+    check("768 close narratives: no word contradicts the S&P 500 / Nasdaq direction, and mover words match their sign", not bad, str(bad[:3]))
+
+
 if __name__ == "__main__":
     tests = [
         test_sept3_fixture_runs_end_to_end,
@@ -2061,6 +2280,19 @@ if __name__ == "__main__":
         test_rotation_and_flat_day_sentences_follow_the_same_rule,
         test_close_engine_applies_the_rule_to_rotation_and_flat_day_sentences,
         test_oct28_close_at_send_time_end_to_end,
+        test_most_sectors_up_but_indexes_down_says_so_plainly,
+        test_most_sectors_down_but_indexes_up_is_the_mirror,
+        test_aligned_breadth_keeps_its_original_wording,
+        test_breadth_with_split_or_flat_indexes,
+        test_breadth_alignment_table_and_boundaries,
+        test_dow_nasdaq_gap_sentences_say_gains_only_when_the_leader_rose,
+        test_gap_sentences_with_yields_and_skip_yields_are_direction_aware_too,
+        test_gap_sentence_grid_never_contradicts_the_indexes,
+        test_loop_close_never_says_gains_on_a_down_day,
+        test_loop_close_up_day_wording_is_exact_about_the_laggard,
+        test_mover_words_match_the_sign,
+        test_todays_close_end_to_end,
+        test_sign_sweep_no_directional_word_contradicts_the_indexes,
     ]
     print(f"Running {len(tests)} test groups...\n")
     for t in tests:

@@ -1283,9 +1283,32 @@ _DOW_30_COMPONENTS = {
 }
 
 
-def _dow_beat_nasdaq_base(gap: str) -> str:
+def _pair_dir(a: float, b: float) -> str:
+    """Direction of two index moves taken together: 'up' (both rose), 'down' (both fell) or 'split'."""
+    if a > 0.005 and b > 0.005:
+        return "up"
+    if a < -0.005 and b < -0.005:
+        return "down"
+    return "split"
+
+
+def _dow_beat_nasdaq_base(gap: str, pair_dir: str = "up") -> str:
+    """The Dow did better than the Nasdaq. 'Gains' is right whenever the Dow (the leader) rose; only when
+    both fell does the sentence become about declines."""
+    if pair_dir == "down":
+        return (f"The Dow fell less than the Nasdaq, by {gap}, which suggests the declines were concentrated in "
+                f"technology companies rather than spread across the whole market.")
     return (f"The Dow beat the Nasdaq by {gap}, which suggests the gains were in more traditional, "
             f"economically sensitive companies rather than in technology.")
+
+
+def _nasdaq_beat_dow_base(gap: str, pair_dir: str = "up") -> str:
+    """The Nasdaq did better than the Dow. Mirror of the above."""
+    if pair_dir == "down":
+        return (f"The Nasdaq fell less than the Dow, by {gap}, which suggests the declines were concentrated in "
+                f"more traditional, economically sensitive companies rather than in technology.")
+    return (f"The Nasdaq beat the Dow by {gap}, which suggests the gains were concentrated in "
+            f"large technology companies rather than spread across the whole market.")
 
 
 def _divergence_note(sp: float, ndx: float, dow: float, treasury_chg, sectors: list = None,
@@ -1339,10 +1362,9 @@ def _divergence_note(sp: float, ndx: float, dow: float, treasury_chg, sectors: l
                                f"which may account for part of that.", chain=True)
 
     if skip_yields and best_name == "Nasdaq" and worst_name == "Dow" and not flat:
-        return out(f"The Nasdaq beat the Dow by {gap}, which suggests the gains were concentrated in "
-                   f"large technology companies rather than spread across the whole market.", True, True)
+        return out(_nasdaq_beat_dow_base(gap, _pair_dir(ndx, dow)), True, True)
     if skip_yields and best_name == "Dow" and worst_name == "Nasdaq" and not flat:
-        return out(_dow_beat_nasdaq_base(gap), True, True)
+        return out(_dow_beat_nasdaq_base(gap, _pair_dir(dow, ndx)), True, True)
     if skip_yields and worst_name == "Nasdaq" and not flat:
         return out(f"The Nasdaq trailed by {gap}.", True, False)
 
@@ -1357,15 +1379,17 @@ def _divergence_note(sp: float, ndx: float, dow: float, treasury_chg, sectors: l
                     return out(f"{lead} came even though yields rose, which usually pressures tech, "
                                f"so buyers had a slight edge on balance.", True, True)
                 return out(f"{lead} isn't explained by interest rates, which were little changed.", True, False)
-            base = (f"The Nasdaq beat the Dow by {gap}, which suggests the gains were concentrated in "
-                    f"large technology companies rather than spread across the whole market.")
+            pdir = _pair_dir(ndx, dow)
+            base = _nasdaq_beat_dow_base(gap, pdir)
             if yields_down:
                 return out(f"{base} That is consistent with the fall in yields: {growth_down}.", True, True)
             if yields_up:
-                return out(f"{base} That happened even though yields rose, which usually pressures tech, "
-                           f"so buyers sided with technology despite the headwind.", True, True)
+                tail = ("so technology held up better despite the headwind." if pdir == "down"
+                        else "so buyers sided with technology despite the headwind.")
+                return out(f"{base} That happened even though yields rose, which usually pressures tech, {tail}", True, True)
             return out(f"{base} Yields were little changed, so interest rates don't explain the gap.", True, True)
-        return out(f"The S&P 500 {'was slightly ahead of' if flat else 'beat'} the Dow by {gap}, "
+        verb = "was slightly ahead of" if flat else ("fell less than" if _pair_dir(sp, dow) == "down" else "beat")
+        return out(f"The S&P 500 {verb} the Dow by {gap}, "
                    f"though nothing in today's data points to a clear reason.")
 
     # Nasdaq lagging, yields rising — the direct, checkable mapping.
@@ -1387,7 +1411,7 @@ def _divergence_note(sp: float, ndx: float, dow: float, treasury_chg, sectors: l
 
     # Mirror of the Nasdaq-beats-Dow reading above (yields rising is handled earlier).
     if best_name == "Dow" and worst_name == "Nasdaq" and not flat:
-        base = _dow_beat_nasdaq_base(gap)
+        base = _dow_beat_nasdaq_base(gap, _pair_dir(dow, ndx))
         if yields_down:
             return out(f"{base} Falling yields usually help tech, so rates don't explain it.", True, True)
         return out(f"{base} Yields were little changed, so interest rates don't explain the gap.", True, True)
@@ -1902,6 +1926,13 @@ def _holdings_close_sentences(valid_day: list, perf_since: dict, sector_by_ticke
     return out
 
 
+def _num_or_none(v):
+    try:
+        return float(v)
+    except Exception:
+        return None
+
+
 def _loop_close_note(snapshot_data: list, mem: dict, divergence_spread: float = None,
                      best_index_name: str = None, worst_index_name: str = None) -> str:
     """
@@ -1983,8 +2014,18 @@ def _loop_close_note(snapshot_data: list, mem: dict, divergence_spread: float = 
         return f"We called the tape {called_sign} this morning, and the S&P held that call through the close."
 
     if has_names:
-        led_name = "tech" if best_index_name == "Nasdaq" else best_index_name
-        lag_clause = f", though the gains stayed concentrated in {led_name} while the {worst_index_name} slipped"
+        moves = {i.get("name"): _num_or_none(i.get("pct") if i.get("pct") is not None else i.get("changesPercentage"))
+                 for i in snapshot_data}
+        best_mv, worst_mv = moves.get(best_index_name), moves.get(worst_index_name)
+        nice = lambda n: "tech" if n == "Nasdaq" else n
+        if sp_close >= 0:
+            # An up day: gains, concentrated in the leader; the laggard rose less or fell.
+            how = "rose less" if (worst_mv is not None and worst_mv >= 0) else "slipped"
+            lag_clause = f", though the gains stayed concentrated in {nice(best_index_name)} while the {worst_index_name} {how}"
+        else:
+            # A down day: never "gains". The weakest index is where the declines concentrated.
+            how = "fell less" if (best_mv is not None and best_mv < 0) else "rose"
+            lag_clause = f", though the declines were uneven, with {nice(worst_index_name)} falling most while the {best_index_name} {how}"
     else:
         lag_clause = ", though the move stayed uneven across the market"
 
@@ -2144,11 +2185,8 @@ def _build_market_narrative(
         elif close_tape["kind"] in ("broad_rally", "broad_selloff"):
             rally = close_tape["kind"] == "broad_rally"
             n = close_tape["up_count"] if rally else close_tape["down_count"]
-            opener = (f"Stocks {'rallied' if rally else 'sold off'} broadly today — {n} of "
-                      f"{close_tape['total']} sectors {'rose' if rally else 'fell'}, with {trio}. "
-                      f"With so many sectors moving together, this was a wide "
-                      f"{'rise' if rally else 'decline'} rather than a few big companies "
-                      f"{'carrying' if rally else 'dragging'} the index.")
+            opener = _broad_opener(close_tape["kind"], _breadth_alignment(close_tape["kind"], sp, ndx),
+                                   n, close_tape["total"], trio)
         elif flat:
             opener = (f"Stocks ended close to unchanged today — {trio} — with {close_tape['up_count']} "
                       f"of {close_tape['total']} sectors higher.")
@@ -2406,7 +2444,10 @@ def _build_market_narrative(
         if abs(pct) < 2.0:
             return ""
         sym = m.get("symbol", "")
-        word = "led" if kind == "best" else "was the day's weakest"
+        if kind == "best":
+            word = "led" if pct >= 0 else "held up best"          # a "gainer" that fell did not "lead"
+        else:
+            word = "was the day's weakest" if pct <= 0 else "gained least"
         lead = f"{sym} {word}, {_pct_words(pct)}"
         if sym in earnings_today:
             return f"{lead}, after reporting earnings today"
@@ -2553,6 +2594,43 @@ def _classify_close_tape(sp: float, ndx: float, dow: float, sectors: list) -> di
         "best_sector": best_sector, "worst_sector": worst_sector,
         "spread": spread, "up_count": up_count, "down_count": down_count, "total": total,
     }
+
+
+_INDEX_BARELY_MOVED = 0.10     # both S&P and Nasdaq inside this: the indexes "barely moved"
+
+
+def _breadth_alignment(kind: str, sp: float, ndx: float) -> str:
+    """How a breadth call (most sectors up = broad_rally / most down = broad_selloff) sits with the S&P 500
+    and Nasdaq: 'aligned', 'opposite' (they went the other way), 'split' (one each way) or 'flat'."""
+    if abs(sp) < _INDEX_BARELY_MOVED and abs(ndx) < _INDEX_BARELY_MOVED:
+        return "flat"
+    rally = kind == "broad_rally"
+    same = (lambda v: v > 0) if rally else (lambda v: v < 0)
+    opp = (lambda v: v < 0) if rally else (lambda v: v > 0)
+    if same(sp) and same(ndx):
+        return "aligned"
+    if opp(sp) and opp(ndx):
+        return "opposite"
+    return "split"
+
+
+def _broad_opener(kind: str, alignment: str, n: int, total: int, trio: str) -> str:
+    """Opening sentence for a day on which most sectors moved one way. 'Rallied' / 'sold off' only when
+    the S&P 500 and Nasdaq moved the same way; otherwise sectors and indexes are said to disagree."""
+    rally = kind == "broad_rally"
+    if alignment == "aligned":
+        return (f"Stocks {'rallied' if rally else 'sold off'} broadly today — {n} of {total} sectors "
+                f"{'rose' if rally else 'fell'}, with {trio}. With so many sectors moving together, this was a wide "
+                f"{'rise' if rally else 'decline'} rather than a few big companies {'carrying' if rally else 'dragging'} the index.")
+    sect, idx_dir = ("rose", "fell") if rally else ("fell", "rose")
+    if alignment == "opposite":
+        big, rest = ("fall", "rise") if rally else ("rise", "fall")
+        return (f"Most sectors {sect} even as the major indexes {idx_dir} — {n} of {total} sectors finished "
+                f"{'higher' if rally else 'lower'}, yet {trio}. That can happen when the largest companies, which "
+                f"carry the most weight in the indexes, {big} while most others {rest}.")
+    if alignment == "split":
+        return f"Most sectors {sect} ({n} of {total}), but the major indexes were split — {trio}."
+    return f"Most sectors {sect} ({n} of {total}) while the major indexes barely moved — {trio}."
 
 
 def _join_sector_moves(pairs: list, words: bool = False) -> str:
