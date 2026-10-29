@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 276,
-  "last_session": "2026-10-29T17:00:40.182375",
+  "session_count": 277,
+  "last_session": "2026-10-29T20:02:01.363457",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 265,
-  "last_email_sent": "2026-10-29T17:00:40.180445",
-  "last_email_summary": "casestudy sent Thursday, October 29, 2026",
+  "email_count": 266,
+  "last_email_sent": "2026-10-29T20:02:01.361206",
+  "last_email_summary": "close sent Thursday, October 29, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "investor_berry_gordy_motown",
-      "category": "investor",
-      "topic": "Berry Gordy Borrowed $800 From His Family and Built Motown Records",
-      "remaining_in_pass": 21,
-      "low_inventory_alert": false,
-      "date": "2026-10-05"
-    },
     {
       "type": "close",
       "actual_direction": "higher",
@@ -682,6 +673,15 @@
       "remaining_in_pass": 0,
       "low_inventory_alert": false,
       "date": "2026-10-29"
+    },
+    {
+      "type": "close",
+      "actual_direction": "lower",
+      "actual_sp_pct": -0.36,
+      "best_sector": "Real Estate",
+      "worst_sector": "Technology",
+      "biggest_mover": "LULU +4.4%",
+      "date": "2026-10-29"
     }
   ],
   "lessons_learned": [
@@ -755,12 +755,6 @@
     }
   ],
   "prediction_accuracy": [
-    {
-      "date": "2026-08-04",
-      "called": "higher",
-      "actual": "higher",
-      "accurate": true
-    },
     {
       "date": "2026-08-05",
       "called": "higher",
@@ -1113,6 +1107,12 @@
       "date": "2026-10-28",
       "called": "higher",
       "actual": "higher",
+      "accurate": true
+    },
+    {
+      "date": "2026-10-29",
+      "called": "lower",
+      "actual": "lower",
       "accurate": true
     }
   ],
