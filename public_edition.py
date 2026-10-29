@@ -220,6 +220,7 @@ async def _fetch_and_build(session, mode, unsubscribe_url, address):
             call(session, "fetch_top_headlines"), call(session, "fetch_earnings_calendar"),
             call(session, "load_memory"))
         tsy = tsy_raw if tsy_raw.get("yield") else {}
+        openbell._log_pct_mismatches(comm)
         return build_public_morning(snap.get("data", []), hl.get("headlines", []), glob.get("indices", []),
                                     comm.get("commodities", []), tsy, earn.get("earnings", []), mem,
                                     unsubscribe_url, address, desk_sections=desk_run.sections(desk_run.collect()))
@@ -229,6 +230,7 @@ async def _fetch_and_build(session, mode, unsubscribe_url, address):
         call(session, "fetch_treasury_yield"), call(session, "fetch_top_headlines"),
         call(session, "fetch_earnings_calendar"), call(session, "load_memory"))
     tsy = tsy_raw if tsy_raw.get("yield") else {}
+    openbell._log_pct_mismatches(comm, movers)
     return build_public_close(snap.get("data", []), movers, sect.get("sectors", []), comm.get("commodities", []),
                               tsy, earn.get("earnings", []), hl.get("headlines", []), mem,
                               unsubscribe_url, address, desk_sections=desk_run.sections(desk_run.collect()))
@@ -269,9 +271,12 @@ def main():
     ap.add_argument("--address", default=None,
                     help=f"postal address or merge tag (else ${ENV_ADDRESS}, else the config file, else a placeholder)")
     ap.add_argument("--config", default=None, help=f"JSON config with unsubscribe_url / mailing_address (default {CONFIG_FILE})")
+    ap.add_argument("--verbose", action="store_true", help="log every per-symbol detail instead of one summary line")
     ap.add_argument("--require-footer-values", action="store_true",
                     help="fail instead of writing a page whose unsubscribe/address are still placeholders")
     a = ap.parse_args()
+    if a.verbose:
+        os.environ["PIPPY_VERBOSE"] = "1"
     url, addr = resolve_footer_values(a.unsubscribe_url, a.address, a.config)
     if a.require_footer_values and not footer_is_complete(url, addr):
         sys.exit("refusing to build: unsubscribe URL and/or mailing address are still placeholders "

@@ -101,11 +101,32 @@ def patched(fake, universe=None):
             setattr(pippy_mcp, k, v)
 
 
-def _all_tools(fake):
-    with patched(fake, ["HOOD", "VRT", "NOW", "APP", "NVDA"]) as err:
-        comm = {c["symbol"]: c for c in json.loads(pippy_mcp.fetch_commodities())["commodities"]}
+RAW = {}          # the last run's raw tool payloads, for the summary-line tests
+
+
+@contextlib.contextmanager
+def _verbose(on=True):
+    old = os.environ.get("PIPPY_VERBOSE")
+    if on:
+        os.environ["PIPPY_VERBOSE"] = "1"
+    else:
+        os.environ.pop("PIPPY_VERBOSE", None)
+    try:
+        yield
+    finally:
+        if old is None:
+            os.environ.pop("PIPPY_VERBOSE", None)
+        else:
+            os.environ["PIPPY_VERBOSE"] = old
+
+
+def _all_tools(fake, verbose=False):
+    with _verbose(verbose), patched(fake, ["HOOD", "VRT", "NOW", "APP", "NVDA"]) as err:
+        comm_raw = json.loads(pippy_mcp.fetch_commodities())
         movers = json.loads(pippy_mcp.fetch_top_movers())
         stocks = {s: json.loads(pippy_mcp.fetch_stock_data(s)) for s in ("HOOD", "VRT", "NOW", "APP", "NVDA")}
+    comm = {c["symbol"]: c for c in comm_raw["commodities"]}
+    RAW.update(comm=comm_raw, movers=movers, stocks=stocks)
     return comm, movers, stocks, err.getvalue()
 
 
@@ -132,37 +153,81 @@ def test_top_movers_rank_on_the_corrected_moves():
     check("movers are enriched with names", all(m.get("name") for m in movers["gainers"] + movers["losers"]))
 
 
-def test_mismatch_guard_logs_loudly_for_disagreement_over_half_a_point_only():
+def test_mismatches_are_returned_in_the_payloads_and_the_server_stays_quiet_by_default():
     _, _, _, err = _all_tools(FakeYF())
+    check("default: no per-symbol [PCT-MISMATCH] lines on stderr", "[PCT-MISMATCH]" not in err, err[:300])
+    recs = {m["symbol"]: m for k in ("comm", "movers") for m in RAW[k]["pct_mismatches"]}
+    check("flagged in the payloads: HOOD, VRT, Gold and WTI Crude Oil",
+          {"HOOD", "VRT", "Gold", "WTI Crude Oil"} <= set(recs), str(set(recs)))
+    check("not flagged: NOW, APP, NVDA (within 0.5 points)", not ({"NOW", "APP", "NVDA"} & set(recs)), str(set(recs)))
+    hood = recs["HOOD"]
+    check("a record carries both numbers, the gap and the closes used",
+          hood["computed"] == -3.31 and hood["source"] == 4.68 and hood["diff"] == 7.99 and hood["prev_close"] == 94.56 and hood["last_close"] == 91.43, str(hood))
+    check("pct_checked lists everything that was compared (so a denominator exists)", {"HOOD", "NOW", "Gold"} <= set(RAW["movers"]["pct_checked"]) | set(RAW["comm"]["pct_checked"]))
+    check("fetch_stock_data returns its own record too", RAW["stocks"]["HOOD"]["pct_mismatches"][0]["symbol"] == "HOOD" and RAW["stocks"]["NOW"]["pct_mismatches"] == [])
+
+
+def test_verbose_mode_prints_every_symbol_with_both_numbers():
+    _, _, _, err = _all_tools(FakeYF(), verbose=True)
     lines = [l for l in err.splitlines() if l.startswith("[PCT-MISMATCH]")]
     flagged = {l.split("]")[1].split(":")[0].strip() for l in lines}
-    check("flagged: HOOD, VRT, gold and crude (differences of 8.0, 1.3, 1.1 and 1.7 points)",
-          {"HOOD", "VRT", "Gold", "WTI Crude Oil"} <= flagged, str(flagged))
-    check("not flagged: NOW, APP, NVDA (within 0.5 points)", not ({"NOW", "APP", "NVDA"} & flagged), str(flagged))
+    check("verbose: per-symbol lines for HOOD, VRT, Gold, WTI", {"HOOD", "VRT", "Gold", "WTI Crude Oil"} <= flagged, str(flagged))
+    check("and still not for NOW / APP / NVDA", not ({"NOW", "APP", "NVDA"} & flagged))
     hood = next(l for l in lines if " HOOD:" in l)
-    check("the message carries the computed move, the closes used and the source's move",
+    check("the line carries the computed move, the closes used and the source's move",
           "computed -3.31%" in hood and "94.56 -> 91.43" in hood and "source says +4.68%" in hood and "using the computed move" in hood, hood)
-    check("it goes to stderr (stdout is the MCP channel), once per symbol per fetch", all(sum(f" {n}:" in l for l in lines) >= 1 for n in ("HOOD", "VRT")))
+
+
+def test_one_summary_line_per_run_names_the_three_worst_with_both_numbers():
+    import openbell
+    _all_tools(FakeYF())
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        openbell._log_pct_mismatches(RAW["comm"], RAW["movers"], list(RAW["stocks"].values()))
+    out = buf.getvalue().strip().splitlines()
+    check("exactly one line", len(out) == 1, str(out))
+    line = out[0]
+    check("it is tagged and counts mismatched symbols out of those checked",
+          line.startswith("[PCT-MISMATCH] 4 of 7 symbols differ by more than 0.5 points"), line)
+    check("the three worst, worst first, each with both numbers",
+          "Worst: HOOD computed -3.31% vs source +4.68%; WTI Crude Oil computed +2.88% vs source +1.19%; VRT computed +16.48% vs source +15.18%." in line.replace("Gold computed", "Gold computed"), line)
+    check("it points at --verbose for the rest", "--verbose" in line)
+    check("a symbol seen in several tool results is counted once", "4 of 7" in line)
+    clean = io.StringIO()
+    with contextlib.redirect_stdout(clean):
+        openbell._log_pct_mismatches({"pct_checked": ["A", "B"], "pct_mismatches": []}, [], None, {"x": 1})
+    check("no mismatches -> no line at all", clean.getvalue() == "")
+    two = io.StringIO()
+    with contextlib.redirect_stdout(two):
+        openbell._log_pct_mismatches({"pct_checked": ["A", "B", "C"], "pct_mismatches": [
+            {"symbol": "A", "computed": 1.0, "source": 3.0, "diff": 2.0}, {"symbol": "B", "computed": -1.0, "source": 1.0, "diff": 2.0}]})
+    check("fewer than three offenders is fine", two.getvalue().startswith("[PCT-MISMATCH] 2 of 3 symbols") and "Worst: A computed +1.00% vs source +3.00%; B" in two.getvalue(), two.getvalue())
+
+
+def test_verbose_flag_reaches_the_server_process():
+    import subprocess
+    here = os.path.dirname(os.path.abspath(__file__))
+    help_text = subprocess.run([sys.executable, "openbell.py", "--help"], cwd=here, capture_output=True, text=True).stdout
+    check("openbell.py advertises --verbose", "--verbose" in help_text, help_text[:300])
+    src = open(os.path.join(here, "openbell.py")).read()
+    check("--verbose sets PIPPY_VERBOSE before the server is spawned (env=dict(os.environ))",
+          'os.environ["PIPPY_VERBOSE"] = "1"' in src and src.index('os.environ["PIPPY_VERBOSE"]') < src.index("asyncio.run(run(args.mode"), "")
 
 
 def test_guard_threshold_boundary_and_missing_inputs():
-    def lines(*a):
-        e = io.StringIO()
-        with contextlib.redirect_stderr(e):
-            pippy_mcp._pct_guard("X", *a)
-        return e.getvalue()
-    check("exactly 0.5 points apart: silent", lines(1.0, 1.5) == "")
-    check("just over 0.5 points: loud", "[PCT-MISMATCH] X" in lines(1.0, 1.51))
-    check("negative direction counts the same", "[PCT-MISMATCH]" in lines(-2.0, 0.1))
-    check("no source move: silent (nothing to compare)", lines(1.0, None) == "")
-    check("no computed move: silent", lines(None, 1.0) == "")
+    g = lambda *a: pippy_mcp._pct_guard("X", *a)
+    check("exactly 0.5 points apart: no record", g(1.0, 1.5) is None)
+    check("just over 0.5 points: a record", g(1.0, 1.51) is not None and g(1.0, 1.51)["diff"] == 0.51)
+    check("negative direction counts the same", g(-2.0, 0.1) is not None)
+    check("no source move: nothing to compare", g(1.0, None) is None)
+    check("no computed move: nothing to compare", g(None, 1.0) is None)
 
 
 def test_fast_info_previous_close_is_never_the_number_used():
     wild = dict(SOURCE, APP=(259.97, 100.0))          # a source previous_close that is simply wrong
     _, _, stocks, err = _all_tools(FakeYF(source=wild))
     check("APP still -1.08% even though the source says +160%", stocks["APP"]["pct"] == -1.08, str(stocks["APP"]))
-    check("and the disagreement is logged", "APP: computed -1.08%" in err)
+    check("and the disagreement is reported", any(m["symbol"] == "APP" and m["computed"] == -1.08 for m in RAW["stocks"]["APP"]["pct_mismatches"]))
 
 
 def test_fallbacks_are_loud_not_silent():
@@ -190,7 +255,7 @@ def test_premarket_move_is_measured_from_the_last_completed_session():
         pippy_mcp._today_ct = real
     check("pre-market base is Oct 28's official close (91.43), not today's partial bar or the source's base",
           out["pct"] == round((92.00 - 91.43) / 91.43 * 100, 2) == 0.62, str(out))
-    check("a disagreement with the source's +5.33% is logged", "[PCT-MISMATCH] HOOD (pre-market)" in err.getvalue())
+    check("a disagreement with the source's +5.33% is reported", out["pct_mismatches"] and out["pct_mismatches"][0]["symbol"] == "HOOD (pre-market)", str(out))
 
 
 def test_untouched_series_still_use_their_own_sources():
@@ -203,7 +268,8 @@ def test_untouched_series_still_use_their_own_sources():
 
 if __name__ == "__main__":
     for t in (test_oct28_numbers_come_from_daily_closes_including_both_sign_flips, test_top_movers_rank_on_the_corrected_moves,
-              test_mismatch_guard_logs_loudly_for_disagreement_over_half_a_point_only, test_guard_threshold_boundary_and_missing_inputs,
+              test_mismatches_are_returned_in_the_payloads_and_the_server_stays_quiet_by_default, test_verbose_mode_prints_every_symbol_with_both_numbers,
+              test_one_summary_line_per_run_names_the_three_worst_with_both_numbers, test_verbose_flag_reaches_the_server_process, test_guard_threshold_boundary_and_missing_inputs,
               test_fast_info_previous_close_is_never_the_number_used, test_fallbacks_are_loud_not_silent,
               test_premarket_move_is_measured_from_the_last_completed_session, test_untouched_series_still_use_their_own_sources):
         print(f"{t.__name__}:")

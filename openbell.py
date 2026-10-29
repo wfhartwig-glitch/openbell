@@ -1827,6 +1827,30 @@ def _number_word(n: int) -> str:
     return {1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five"}.get(n, str(n))
 
 
+def _log_pct_mismatches(*results) -> None:
+    """ONE line per run: how many symbols had a source move that disagreed with the move computed from
+    daily closes by more than 0.5 points, and the three worst with both numbers. The tools return the
+    detail (pct_checked / pct_mismatches); per-symbol lines are printed only with --verbose."""
+    checked, worst = set(), {}
+    for r in results:
+        for d in (r if isinstance(r, list) else [r]):
+            if not isinstance(d, dict):
+                continue
+            checked.update(d.get("pct_checked") or [])
+            for m in d.get("pct_mismatches") or []:
+                sym = m.get("symbol")
+                if sym is not None and (sym not in worst or m.get("diff", 0) > worst[sym].get("diff", 0)):
+                    worst[sym] = m
+    if not worst:
+        return
+    checked.update(worst)
+    top = sorted(worst.values(), key=lambda m: -m.get("diff", 0))[:3]
+    named = "; ".join(f"{m['symbol']} computed {m['computed']:+.2f}% vs source {m['source']:+.2f}%" for m in top)
+    print(f"[PCT-MISMATCH] {len(worst)} of {len(checked)} symbols differ by more than 0.5 points between the "
+          f"source and the daily closes (computed moves used). Worst: {named}. "
+          f"Run with --verbose for every symbol.")
+
+
 def _log_scan_exclusions(scan_raw) -> None:
     """Surface rows the scan dropped as outliers in the run log (never silently)."""
     for x in (scan_raw.get("excluded", []) if isinstance(scan_raw, dict) else []):
@@ -2691,6 +2715,7 @@ async def morning(session: ClientSession) -> tuple[str, str]:
     for t in flagged[:5]:
         print(f"    pre-market {t}…")
         watchlist.append(await call(session, "fetch_premarket_data", {"ticker": t}))
+    _log_pct_mismatches(commodities_raw, watchlist)
 
     snap_list   = snapshot.get("data", [])
     hl_list     = headlines.get("headlines", [])
@@ -2760,17 +2785,20 @@ async def close(session: ClientSession) -> tuple[str, str, dict]:
     # distinct from the since-entry P&L already shown in the Stock Picks section.
     picks_list = picks_data.get("picks", []) if isinstance(picks_data, dict) else []
     picks_day_performance = []
+    pick_fetches = []
     for p in picks_list:
         sym = p.get("ticker", "")
         if not sym:
             continue
         print(f"    EOD picks {sym}…")
         d = await call(session, "fetch_stock_data", {"ticker": sym})
+        pick_fetches.append(d)
         try:
             pct = float(d.get("pct")) if isinstance(d, dict) and d.get("pct") is not None else None
         except Exception:
             pct = None
         picks_day_performance.append({"ticker": sym, "pct": pct})
+    _log_pct_mismatches(commodities_raw, movers, watchlist, pick_fetches)
 
     snap_list    = snapshot.get("data", [])
     sectors_list = sectors.get("sectors", [])
@@ -3145,7 +3173,11 @@ def main():
     parser.add_argument("mode", choices=["morning", "close", "casestudy", "alert"])
     parser.add_argument("--dry-run", action="store_true",
                         help="Run full pipeline but skip send_email and save_memory")
+    parser.add_argument("--verbose", action="store_true",
+                        help="Log every per-symbol detail (e.g. each [PCT-MISMATCH]) instead of one summary line")
     args = parser.parse_args()
+    if args.verbose:
+        os.environ["PIPPY_VERBOSE"] = "1"       # inherited by the MCP server subprocess
     if args.mode == "alert":
         subject = os.environ.get("ALERT_SUBJECT", "Pippy's Brief — Alert")
         body    = os.environ.get("ALERT_BODY", "<p>Alert triggered with no ALERT_BODY set.</p>")

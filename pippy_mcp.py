@@ -242,18 +242,45 @@ def _move_from_closes(closes: list):
     return last, prev, (last - prev) / prev * 100
 
 
-def _pct_guard(label: str, computed_pct, source_pct, closes=None) -> None:
-    """Log loudly (stderr) when the computed move and the source's move disagree by more than
-    PCT_DISAGREE_POINTS. The computed number is the one that is used."""
+def _verbose() -> bool:
+    return os.environ.get("PIPPY_VERBOSE", "").strip().lower() in ("1", "true", "yes", "on")
+
+
+def _pct_guard(label: str, computed_pct, source_pct, closes=None):
+    """Compare the computed move with the source's. Returns a record when they disagree by more than
+    PCT_DISAGREE_POINTS, else None. The computed number is the one that is used. The per-symbol
+    stderr line is printed only in verbose mode (PIPPY_VERBOSE=1 / `openbell.py --verbose`);
+    otherwise the client logs ONE summary line per run from the records the tools return."""
     if computed_pct is None or source_pct is None:
-        return
-    if abs(computed_pct - source_pct) > PCT_DISAGREE_POINTS:
-        basis = ""
-        if closes and len(closes) >= 2:
-            basis = f" (daily closes {closes[-2][1]:.2f} -> {closes[-1][1]:.2f})"
+        return None
+    diff = abs(computed_pct - source_pct)
+    if diff <= PCT_DISAGREE_POINTS:
+        return None
+    rec = {"symbol": label, "computed": round(computed_pct, 2), "source": round(source_pct, 2), "diff": round(diff, 2)}
+    if closes and len(closes) >= 2:
+        rec["prev_close"], rec["last_close"] = round(closes[-2][1], 2), round(closes[-1][1], 2)
+    if _verbose():
+        basis = f" (daily closes {rec['prev_close']:.2f} -> {rec['last_close']:.2f})" if "prev_close" in rec else ""
         print(f"[PCT-MISMATCH] {label}: computed {computed_pct:+.2f}%{basis} but the source says "
-              f"{source_pct:+.2f}% (differ by {abs(computed_pct - source_pct):.2f} points); using the computed move.",
-              file=__import__("sys").stderr)
+              f"{source_pct:+.2f}% (differ by {diff:.2f} points); using the computed move.", file=__import__("sys").stderr)
+    return rec
+
+
+class _PctTrack:
+    """Collects, for one tool call, which symbols were checked and which disagreed."""
+
+    def __init__(self):
+        self.checked, self.mismatches = [], []
+
+    def check(self, label, computed_pct, source_pct, closes=None):
+        if computed_pct is not None and source_pct is not None:
+            self.checked.append(label)
+        rec = _pct_guard(label, computed_pct, source_pct, closes)
+        if rec:
+            self.mismatches.append(rec)
+
+    def json(self) -> dict:
+        return {"pct_checked": self.checked, "pct_mismatches": self.mismatches}
 
 
 def _source_pct(fi):
@@ -439,6 +466,7 @@ def fetch_stock_data(ticker: str) -> str:
             full  = t.info
             price = fi.last_price
             src   = _source_pct(fi)
+            track = _PctTrack()
             try:
                 closes = _closes_one(sym)
                 mv = _move_from_closes(closes)
@@ -446,7 +474,7 @@ def fetch_stock_data(ticker: str) -> str:
                 closes, mv = [], None
             if mv:
                 price, _, pct = mv
-                _pct_guard(sym, pct, src, closes)
+                track.check(sym, pct, src, closes)
             else:
                 pct = src
                 print(f"[PCT-FALLBACK] {sym}: fewer than two daily closes available; using the source's move", file=__import__("sys").stderr)
@@ -469,6 +497,7 @@ def fetch_stock_data(ticker: str) -> str:
                 "market_cap": f"${mkt_cap/1e9:.1f}B" if mkt_cap else None,
                 "headline":   headline,
                 "timestamp":  ts,
+                **track.json(),
             })
         except Exception as e:
             return json.dumps({"source": "unavailable", "ticker": sym,
@@ -687,6 +716,7 @@ def fetch_top_movers() -> str:
             except Exception:
                 closes_by = {}
             results = []
+            track = _PctTrack()
             for ticker in scan:
                 try:
                     fi   = yf.Ticker(ticker).fast_info
@@ -696,7 +726,7 @@ def fetch_top_movers() -> str:
                 mv = _move_from_closes(closes_by.get(ticker, []))
                 if mv:
                     price, _, pct = mv
-                    _pct_guard(ticker, pct, src, closes_by.get(ticker))
+                    track.check(ticker, pct, src, closes_by.get(ticker))
                 elif src is not None:
                     price, pct = fi.last_price, src
                     print(f"[PCT-FALLBACK] {ticker}: no daily closes; using the source's move", file=__import__("sys").stderr)
@@ -721,7 +751,8 @@ def fetch_top_movers() -> str:
                                "universe_size": len(scan),   # lets a reader label this honestly: top of N tracked names, not the whole market
                                "gainers": gainers,
                                "losers":  losers,
-                               "timestamp": ts})
+                               "timestamp": ts,
+                               **track.json()})
         except Exception as e:
             return json.dumps({"source": "unavailable", "error": str(e), "timestamp": ts})
 
@@ -832,17 +863,18 @@ def fetch_premarket_data(ticker: str) -> str:
             price = fi.last_price
             src   = _source_pct(fi)
             pct   = round(src, 2) if src is not None else None
+            track = _PctTrack()
             try:
                 # Base = the last COMPLETED session's official close (never today's in-progress bar).
                 done = [(d, c) for d, c in _closes_one(sym) if d < _today_ct()]
                 if price and done:
                     base = done[-1][1]
                     pct = round((price - base) / base * 100, 2)
-                    _pct_guard(f"{sym} (pre-market)", pct, src, [(None, base), (None, price)])
+                    track.check(f"{sym} (pre-market)", pct, src, [(None, base), (None, price)])
             except Exception:
                 print(f"[PCT-FALLBACK] {sym} (pre-market): using the source's move", file=__import__("sys").stderr)
             return json.dumps({"source": "fallback", "ticker": sym,
-                               "price": price, "pct": pct, "timestamp": ts})
+                               "price": price, "pct": pct, "timestamp": ts, **track.json()})
         except Exception as e:
             return json.dumps({"source": "unavailable", "ticker": sym,
                                "error": str(e), "timestamp": ts})
@@ -973,6 +1005,7 @@ def fetch_commodities() -> str:
     ts = _ts()
     items = [("WTI Crude Oil", "CL=F"), ("Gold", "GC=F")]
     results = []
+    track = _PctTrack()
     for name, sym in items:
         try:
             fi  = yf.Ticker(sym).fast_info
@@ -984,7 +1017,7 @@ def fetch_commodities() -> str:
                 closes, mv = [], None
             if mv:
                 price, prev, pct = mv
-                _pct_guard(name, pct, src, closes)
+                track.check(name, pct, src, closes)
             elif src is not None:
                 price, prev = fi.last_price, fi.previous_close
                 pct = src
@@ -1000,7 +1033,7 @@ def fetch_commodities() -> str:
             })
         except Exception:
             continue
-    return json.dumps({"source": "yfinance", "commodities": results, "timestamp": ts})
+    return json.dumps({"source": "yfinance", "commodities": results, "timestamp": ts, **track.json()})
 
 
 @mcp.tool()
