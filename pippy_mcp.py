@@ -172,7 +172,7 @@ SCAN_UNIVERSE = [
     # Real estate / utilities
     "AMT","PLD","EQIX","SPG","O","NEE","DUK","SO","D",
     # Communications / media
-    "NFLX","DIS","CMCSA","CHTR","T","VZ","SPOT","PARA","FOXA",
+    "NFLX","DIS","CMCSA","CHTR","T","VZ","SPOT","PSKY","FOXA",
     # Small/mid-cap growth from WATCHLIST
     "SOUN","IONQ","RGTI","HIMS","TMDX","HOOD","APP","TTD",
 ]
@@ -1318,6 +1318,32 @@ def get_last_email_summary() -> str:
         return json.dumps({"error": str(e)})
 
 
+# ── Scan sanity filter ────────────────────────────────────────────────────────
+# A bad data row must not reach the email as a "top candidate". Oct 28: PARA (a recycled ticker —
+# Paramount now trades as PSKY; PARA is a ~$2M microcap) scored 7044 on a bogus "7043% upside".
+SCAN_MAX_UPSIDE_PCT = 300           # an analyst target >4x the price is data noise, not a signal
+SCAN_MIN_MARKET_CAP = 300_000_000   # the universe is liquid, established names; far below this means a recycled/illiquid ticker
+SCAN_RECYCLED_TICKERS = {           # known ticker/name mismatches (checked first, whatever the numbers say)
+    "PARA": "ticker reassigned: Paramount Global now trades as PSKY; PARA is an unrelated microcap",
+}
+
+
+def _scan_outlier_reason(sym: str, info: dict):
+    """Why a scanned row should be excluded, or None. Pure function of the row."""
+    if sym in SCAN_RECYCLED_TICKERS:
+        return SCAN_RECYCLED_TICKERS[sym]
+    price = info.get("currentPrice") or info.get("regularMarketPrice") or 0
+    target = info.get("targetMeanPrice")
+    if price and target:
+        upside = (target - price) / price * 100
+        if upside > SCAN_MAX_UPSIDE_PCT:
+            return f"analyst-target upside {upside:.0f}% exceeds the {SCAN_MAX_UPSIDE_PCT}% sanity cap"
+    cap = info.get("marketCap")
+    if isinstance(cap, (int, float)) and cap < SCAN_MIN_MARKET_CAP:
+        return f"market cap ${cap/1e6:,.1f}M is below the ${SCAN_MIN_MARKET_CAP/1e6:,.0f}M floor (recycled or illiquid ticker?)"
+    return None
+
+
 @mcp.tool()
 def run_daily_scan() -> str:
     """
@@ -1335,7 +1361,8 @@ def run_daily_scan() -> str:
                 cached = json.load(f)
             if cached.get("date") == today_s:
                 return json.dumps({"source": "cache", "date": today_s,
-                                   "candidates": cached["candidates"], "timestamp": ts})
+                                   "candidates": cached["candidates"],
+                                   "excluded": cached.get("excluded", []), "timestamp": ts})
         except Exception:
             pass
 
@@ -1437,11 +1464,17 @@ def run_daily_scan() -> str:
 
     # ── Phase 2: fetch .info for top candidates and apply full formula ─────────
     candidates = []
+    excluded = []
     for sym in to_score:
         try:
             info = yf.Ticker(sym).info
             price = info.get("currentPrice") or info.get("regularMarketPrice")
             if not price:
+                continue
+            bad = _scan_outlier_reason(sym, info)
+            if bad:
+                excluded.append({"ticker": sym, "name": info.get("shortName") or info.get("longName") or "", "reason": bad})
+                print(f"[run_daily_scan] excluded {sym}: {bad}", file=__import__("sys").stderr)
                 continue
             sc = _score(info, sector_bias, risk_bias)
             candidates.append({
@@ -1465,6 +1498,7 @@ def run_daily_scan() -> str:
     result = {
         "date":       today_s,
         "candidates": top20,
+        "excluded":   excluded,
         "scanned":    len(candidates),
         "elapsed_s":  elapsed,
         "timestamp":  ts,
@@ -1476,7 +1510,7 @@ def run_daily_scan() -> str:
         pass
 
     return json.dumps({"source": "live", "date": today_s,
-                       "candidates": top20, "scanned": len(candidates),
+                       "candidates": top20, "excluded": excluded, "scanned": len(candidates),
                        "elapsed_s": elapsed, "timestamp": ts})
 
 

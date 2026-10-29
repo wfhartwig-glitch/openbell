@@ -1793,6 +1793,12 @@ def _number_word(n: int) -> str:
     return {1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five"}.get(n, str(n))
 
 
+def _log_scan_exclusions(scan_raw) -> None:
+    """Surface rows the scan dropped as outliers in the run log (never silently)."""
+    for x in (scan_raw.get("excluded", []) if isinstance(scan_raw, dict) else []):
+        print(f"[SCAN-FILTER] {x.get('ticker')} ({x.get('name', '')}) excluded: {x.get('reason')}")
+
+
 def _day_verb(p: float) -> str:
     if p >= 0:
         return "rose"
@@ -2626,6 +2632,7 @@ async def morning(session: ClientSession) -> tuple[str, str]:
             call(session, "load_memory"),
             call(session, "run_daily_scan"),
         )
+    _log_scan_exclusions(scan_raw)
 
     # Weekly picks — regenerate every Monday
     if is_monday:
@@ -2698,6 +2705,7 @@ async def close(session: ClientSession) -> tuple[str, str, dict]:
             call(session, "run_daily_scan"),
             call(session, "get_weekly_picks"),
         )
+    _log_scan_exclusions(scan_raw)
 
     flagged   = mem.get("flagged_tickers", []) if isinstance(mem, dict) else []
     watchlist = []
