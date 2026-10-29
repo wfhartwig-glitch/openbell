@@ -1,0 +1,335 @@
+# ONE-OFF MEASUREMENT. Not part of the brief pipeline and nothing depends on it.
+#
+# Question it answers: from a real GitHub Actions runner, can we download the Nasdaq Trader symbol
+# lists and scan Yahoo Finance's spark endpoint fast enough, and without 429s, to support a market-wide
+# breadth desk inside the run-time budget? It only measures; it builds no email and changes nothing.
+#
+# What it CANNOT do (enforced by test_scan_probe_workflow.py, which fails if any of this changes):
+#   - send email: no secrets are referenced, so the Gmail credentials do not exist in this job, and the
+#     script imports nothing but the standard library (no smtplib, no project code; there is no checkout)
+#   - write state files: `permissions: {}` gives the job token no scopes (a push would be refused), the
+#     repository is never checked out, no git command runs, and the only file the script opens is the
+#     runner-local $GITHUB_STEP_SUMMARY, in append mode
+#   - run on its own: the only trigger is workflow_dispatch (no schedule, push or pull_request)
+#
+# The host restriction is IN CODE, not a network firewall: every request goes through one function that
+# refuses any URL whose host is not www.nasdaqtrader.com, query1.finance.yahoo.com or
+# query2.finance.yahoo.com (https only, no userinfo, no custom port) and refuses to follow redirects.
+# The runner itself can still reach the internet; only this script is restricted.
+#
+# WHEN TO RUN IT (manual: `gh workflow run scan_probe.yml`, then `gh run view --log`). The script also
+# refuses to start if its 6-minute run would overlap a protected window (UTC, every day):
+#     13:00-15:00  morning brief 13:30 + catch-up retrigger ~14:15
+#     16:30-17:45  case-study email 17:00 (weekdays)
+#     19:30-21:20  close brief 20:00 + catch-up retrigger ~20:45
+# Suggested slots (all outside those windows): 12:15 UTC (pre-market), 15:30 UTC (mid-session),
+# 22:15 UTC (after the close), plus a Saturday 15:30 UTC (market closed); repeat any one of them ~10
+# minutes later to see whether throttling builds up. Total: ~90 requests per run, hard cap 450.
+name: Scan probe (one-off measurement)
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: scan-probe
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Measure Nasdaq Trader and Yahoo spark from this runner
+        shell: python3 {0}
+        run: |
+          """Scan probe: measurement only. Standard library only. Writes nothing but $GITHUB_STEP_SUMMARY."""
+          import concurrent.futures
+          import datetime
+          import json
+          import math
+          import os
+          import queue
+          import random
+          import re
+          import statistics
+          import sys
+          import threading
+          import time
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+
+          ALLOWED_HOSTS = ("www.nasdaqtrader.com", "query1.finance.yahoo.com", "query2.finance.yahoo.com")
+          NASDAQ_URL = "https://www.nasdaqtrader.com/dynamic/SymDir/"
+          YAHOO = "https://query2.finance.yahoo.com"
+          UA = "scan-probe/1.0 (measurement only; GitHub Actions)"
+          MAX_REQUESTS = 450          # hard cap on every request made in this run
+          DEADLINE_S = 300            # hard cap on the run's wall time
+          MAX_RUN_MINUTES = 6         # matches timeout-minutes
+          # (start_hour, start_minute, end_hour, end_minute) UTC: do not overlap a brief's send window
+          BLOCKED_UTC = ((13, 0, 15, 0), (16, 30, 17, 45), (19, 30, 21, 20))
+          SPARK_MAX = 20              # symbols per spark request
+          SAMPLE = 400                # symbols per concurrency level (20 requests)
+          PAUSE = 0.1                 # seconds each worker waits between its requests
+          FULL_SECONDS_BUDGET = 40    # a full scan must project to this or less to be called FULL
+          P95_LIMIT = 3.0             # seconds
+
+          _budget = {"requests": 0, "t0": time.monotonic(), "lock": threading.Lock()}
+
+
+          def in_blocked_window(start, run_minutes=MAX_RUN_MINUTES):
+              """True if a run starting at `start` (aware or naive UTC) would overlap a protected window."""
+              s = start.hour * 60 + start.minute
+              e = s + run_minutes
+              for sh, sm, eh, em in BLOCKED_UTC:
+                  ws, we = sh * 60 + sm, eh * 60 + em
+                  if s < we and e > ws:
+                      return True
+              return False
+
+
+          def assert_host_allowed(url):
+              u = urllib.parse.urlsplit(url)
+              if u.scheme != "https" or u.hostname not in ALLOWED_HOSTS:
+                  raise ValueError("host not allowed: %s" % url)
+              if u.username or u.password or (u.port not in (None, 443)):
+                  raise ValueError("userinfo or port not allowed: %s" % url)
+
+
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, req, fp, code, msg, headers, newurl):
+                  raise urllib.error.HTTPError(req.full_url, code, "redirect refused", headers, fp)
+
+
+          def http_get(url, timeout=20):
+              """The only network function. -> (status, headers, body_bytes, elapsed_seconds)."""
+              assert_host_allowed(url)
+              with _budget["lock"]:
+                  if _budget["requests"] >= MAX_REQUESTS or time.monotonic() - _budget["t0"] > DEADLINE_S:
+                      raise RuntimeError("request budget or deadline reached")
+                  _budget["requests"] += 1
+              opener = urllib.request.build_opener(NoRedirect)
+              req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "*/*"})
+              t = time.monotonic()
+              try:
+                  with opener.open(req, timeout=timeout) as r:
+                      return r.status, dict(r.headers), r.read(), time.monotonic() - t
+              except urllib.error.HTTPError as e:
+                  body = b""
+                  try:
+                      body = e.read()
+                  except Exception:
+                      pass
+                  return e.code, dict(e.headers or {}), body, time.monotonic() - t
+              except Exception as e:
+                  return 0, {}, str(e).encode()[:200], time.monotonic() - t
+
+
+          def parse_universe(texts):
+              """Approximate US-listed common-stock tickers from the two Nasdaq Trader files (filter simplified)."""
+              syms, rows = set(), 0
+              for text in texts.values():
+                  lines = [l for l in text.splitlines() if l.strip()]
+                  if not lines:
+                      continue
+                  head = lines[0].split("|")
+                  sym_col = 0
+                  test_col = head.index("Test Issue") if "Test Issue" in head else None
+                  etf_col = head.index("ETF") if "ETF" in head else None
+                  for l in lines[1:]:
+                      if l.startswith("File Creation Time"):
+                          continue
+                      f = l.split("|")
+                      rows += 1
+                      if test_col is not None and f[test_col] != "N":
+                          continue
+                      if etf_col is not None and f[etf_col] != "N":
+                          continue
+                      if re.fullmatch(r"[A-Z]{1,5}", f[sym_col]):
+                          syms.add(f[sym_col])
+              return sorted(syms), rows
+
+
+          def spark_url(symbols, rng="3mo"):
+              return "%s/v7/finance/spark?symbols=%s&range=%s&interval=1d" % (YAHOO, ",".join(symbols), rng)
+
+
+          def fetch_batch(symbols, rng="3mo"):
+              status, headers, body, dt = http_get(spark_url(symbols, rng), timeout=20)
+              rec = {"status": status, "seconds": dt, "bytes": len(body), "retry_after": headers.get("Retry-After"),
+                     "requested": len(symbols), "with_data": 0, "closes": []}
+              if status == 200:
+                  try:
+                      for item in json.loads(body.decode("utf-8", "replace"))["spark"]["result"]:
+                          closes = [c for c in item["response"][0]["indicators"]["quote"][0]["close"] if c is not None]
+                          if closes:
+                              rec["with_data"] += 1
+                              rec["closes"].append(len(closes))
+                  except Exception:
+                      rec["parse_error"] = True
+              return rec
+
+
+          def percentile(values, p):
+              if not values:
+                  return None
+              v = sorted(values)
+              return v[min(len(v) - 1, int(math.ceil(p / 100.0 * len(v))) - 1)]
+
+
+          def run_level(batches, concurrency, rng="3mo", pause=PAUSE):
+              """Issue `batches` with `concurrency` workers. Stops issuing new requests after any 429."""
+              work = queue.Queue()
+              for b in batches:
+                  work.put(b)
+              records, stop = [], threading.Event()
+
+              def worker():
+                  while not stop.is_set():
+                      try:
+                          b = work.get_nowait()
+                      except queue.Empty:
+                          return
+                      try:
+                          rec = fetch_batch(b, rng)
+                      except RuntimeError:
+                          stop.set()
+                          return
+                      records.append(rec)
+                      if rec["status"] == 429:
+                          stop.set()
+                      time.sleep(pause)
+
+              t = time.monotonic()
+              with concurrent.futures.ThreadPoolExecutor(max_workers=concurrency) as ex:
+                  for _ in range(concurrency):
+                      ex.submit(worker)
+              return records, time.monotonic() - t, stop.is_set()
+
+
+          def summarize(records, wall, concurrency, stopped=False):
+              lat = [r["seconds"] for r in records]
+              codes = {}
+              for r in records:
+                  codes[r["status"]] = codes.get(r["status"], 0) + 1
+              n = len(records)
+              requested = sum(r["requested"] for r in records)
+              return {"concurrency": concurrency, "requests": n, "wall_s": round(wall, 2), "status": codes,
+                      "n429": codes.get(429, 0), "n5xx": sum(v for k, v in codes.items() if 500 <= k < 600),
+                      "n_errors": codes.get(0, 0), "stopped_after_429": stopped,
+                      "mean_s": round(statistics.mean(lat), 3) if lat else None,
+                      "p50_s": round(percentile(lat, 50), 3) if lat else None,
+                      "p95_s": round(percentile(lat, 95), 3) if lat else None,
+                      "max_s": round(max(lat), 3) if lat else None,
+                      "kb_per_request": round(statistics.mean(r["bytes"] for r in records) / 1024, 1) if records else None,
+                      "pct_with_data": round(100.0 * sum(r["with_data"] for r in records) / requested, 1) if requested else None,
+                      "retry_after": sorted({r["retry_after"] for r in records if r["retry_after"]})}
+
+
+          def project_full_scan(universe_n, s, pause=PAUSE):
+              """Seconds a full scan would take at this level's measured mean latency."""
+              if not s or not s["mean_s"]:
+                  return None
+              requests = math.ceil(universe_n / float(SPARK_MAX))
+              return round(requests * (s["mean_s"] + pause) / s["concurrency"], 1)
+
+
+          def verdict(nasdaq_ok, l1, l4, universe_n):
+              """FULL / SAMPLED / KEEP_25_NAMES, with the reason."""
+              if not nasdaq_ok:
+                  return "KEEP_25_NAMES", "the Nasdaq Trader symbol lists could not be downloaded"
+              if l1 and (l1["n429"] or l1["n_errors"] > 2):
+                  return "KEEP_25_NAMES", "Yahoo throttled or failed even at concurrency 1"
+              if not l4:
+                  return "SAMPLED", "concurrency 4 was not measured"
+              proj = project_full_scan(universe_n, l4)
+              rate429 = 100.0 * l4["n429"] / max(1, l4["requests"])
+              if rate429 < 1.0 and l4["n5xx"] == 0 and (l4["p95_s"] or 99) < P95_LIMIT and proj is not None and proj <= FULL_SECONDS_BUDGET:
+                  return "FULL", "at concurrency 4: 429 rate %.1f%%, p95 %.2fs, projected full scan %.0fs" % (rate429, l4["p95_s"], proj)
+              return "SAMPLED", "at concurrency 4: 429 rate %.1f%%, p95 %s, projected full scan %s" % (rate429, l4["p95_s"], proj)
+
+
+          def write_summary(text):
+              path = os.environ.get("GITHUB_STEP_SUMMARY")
+              if path:
+                  with open(path, "a") as fh:
+                      fh.write(text + "\n")
+
+
+          def say(line=""):
+              print(line, flush=True)
+
+
+          def main(now=None):
+              now = now or datetime.datetime.now(datetime.timezone.utc)
+              if in_blocked_window(now):
+                  say("REFUSING TO RUN: %s UTC is inside (or within %d min of) a protected brief window %s." % (now.strftime("%H:%M"), MAX_RUN_MINUTES, BLOCKED_UTC))
+                  return 0
+              say("scan probe starting %s UTC on %s" % (now.strftime("%Y-%m-%d %H:%M"), os.environ.get("RUNNER_OS", "?")))
+              say("hosts allowed in code (not a firewall): %s" % (ALLOWED_HOSTS,))
+
+              # 1. Nasdaq Trader symbol lists
+              texts, nasdaq = {}, {"ok": True, "files": []}
+              for name in ("nasdaqlisted.txt", "otherlisted.txt"):
+                  status, headers, body, dt = http_get(NASDAQ_URL + name, timeout=60)
+                  nasdaq["files"].append({"file": name, "status": status, "seconds": round(dt, 2), "bytes": len(body)})
+                  if status != 200:
+                      nasdaq["ok"] = False
+                  texts[name] = body.decode("utf-8", "replace")
+                  time.sleep(PAUSE)
+              universe, rows = parse_universe(texts) if nasdaq["ok"] else ([], 0)
+              say("nasdaq trader: %s | %d rows, ~%d plain-ticker equities after a simplified filter" % (nasdaq["files"], rows, len(universe)))
+              if not universe:
+                  v = verdict(False, None, None, 0)
+                  say("VERDICT %s: %s" % v)
+                  write_summary("## Scan probe\nVERDICT **%s**: %s" % v)
+                  return 0
+
+              # 2. Yahoo spark at concurrency 1, 4, 8 on distinct random samples; stop escalating after any 429
+              levels, ok_so_far = {}, True
+              for i, c in enumerate((1, 4, 8)):
+                  if not ok_so_far:
+                      break
+                  sample = random.Random(1000 + i).sample(universe, min(SAMPLE, len(universe)))
+                  batches = [sample[j:j + SPARK_MAX] for j in range(0, len(sample), SPARK_MAX)]
+                  recs, wall, stopped = run_level(batches, c)
+                  levels[c] = summarize(recs, wall, c, stopped)
+                  say("concurrency %d: %s" % (c, json.dumps(levels[c])))
+                  ok_so_far = not (levels[c]["n429"] or levels[c]["n5xx"] >= 3)
+                  time.sleep(10)
+
+              # 3. 52-week feasibility: one-year range
+              year = None
+              if ok_so_far:
+                  sample = random.Random(2000).sample(universe, min(100, len(universe)))
+                  batches = [sample[j:j + SPARK_MAX] for j in range(0, len(sample), SPARK_MAX)]
+                  recs, wall, stopped = run_level(batches, 1, rng="1y")
+                  year = summarize(recs, wall, 1, stopped)
+                  closes = [n for r in recs for n in r["closes"]]
+                  year["median_closes_per_symbol"] = statistics.median(closes) if closes else None
+                  say("range=1y (concurrency 1): %s" % json.dumps(year))
+
+              # 4. does throttling build up? repeat concurrency 4 after a minute
+              repeat = None
+              if 4 in levels and ok_so_far and time.monotonic() - _budget["t0"] < DEADLINE_S - 90:
+                  time.sleep(60)
+                  sample = random.Random(3000).sample(universe, min(SAMPLE, len(universe)))
+                  batches = [sample[j:j + SPARK_MAX] for j in range(0, len(sample), SPARK_MAX)]
+                  recs, wall, stopped = run_level(batches, 4)
+                  repeat = summarize(recs, wall, 4, stopped)
+                  say("concurrency 4, repeated after 60s: %s" % json.dumps(repeat))
+
+              v = verdict(nasdaq["ok"], levels.get(1), levels.get(4), len(universe))
+              say("")
+              for c, s in sorted(levels.items()):
+                  say("projected FULL scan of ~%d symbols at concurrency %d: %ss" % (len(universe), c, project_full_scan(len(universe), s)))
+              say("requests made: %d of cap %d; wall %.0fs" % (_budget["requests"], MAX_REQUESTS, time.monotonic() - _budget["t0"]))
+              say("VERDICT %s: %s" % v)
+              write_summary("## Scan probe\n```json\n%s\n```\nVERDICT **%s**: %s" % (json.dumps({"nasdaq": nasdaq, "levels": levels, "range_1y": year, "repeat_c4": repeat}, indent=1), v[0], v[1]))
+              return 0
+
+
+          if __name__ == "__main__":
+              sys.exit(main())
