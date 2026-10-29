@@ -22,6 +22,8 @@ import urllib.error
 import yaml
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, "tests_seal"))
+from scratch_exec import run_in_scratch  # noqa: E402  (the only sanctioned way to execute altered code)
 PATH = os.path.join(HERE, ".github", "workflows", "scan_probe.yml")
 RAW = open(PATH, encoding="utf-8").read()
 DOC = yaml.safe_load(RAW)
@@ -85,11 +87,11 @@ class _SealedModule:
         raise AssertionError(f"sealed: the probe script tried to use {self._name}.{attr}")
 
 
-def load(script=None):
-    """Fresh namespace with the script's functions (not run: __name__ != '__main__'). The script's os (and any
-    process or socket module it imports) is replaced by a sealed stand-in after import."""
+def load():
+    """Fresh namespace with the UNALTERED inline script's functions (not run: __name__ != '__main__'). Altered or
+    generated variants must never be executed in-process: use tests_seal.scratch_exec.run_in_scratch()."""
     ns = {"__name__": "probe"}
-    exec(compile(script or SCRIPT, "scan_probe_inline", "exec"), ns)
+    exec(compile(SCRIPT, "scan_probe_inline", "exec"), ns)
     ns["os"] = _SealedOS(os)
     for mod in ("subprocess", "shutil", "socket", "smtplib", "ctypes"):
         if mod in ns:
@@ -423,47 +425,36 @@ def test_verdict_and_projection_arithmetic():
     check("percentile helper", p([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 95) == 10 and p([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 50) == 5 and p([], 50) is None)
 
 
-def test_the_test_harness_itself_cannot_be_used_to_run_a_git_push():
-    """The Oct 29 incident, reproduced safely: a script variant that shells out to git must be stopped."""
-    evil = SCRIPT.replace('say("scan probe starting', 'os.system("git push"); say("scan probe starting')
-    check("the variant really contains the shell-out", 'os.system("git push")' in evil)
-    ns = load(evil)
-    ns["say"] = lambda *a: None
-    ns["http_get"] = FakeNet()
-    ns["time"] = types.SimpleNamespace(monotonic=ns["time"].monotonic, sleep=lambda s: None)
-    try:
-        ns["main"](now=datetime.datetime(2026, 10, 27, 15, 30, tzinfo=datetime.timezone.utc))
-        stopped = False
-    except AssertionError as e:
-        stopped = "os.system" in str(e)
-    check("os.system is refused by the sealed os, so nothing ran", stopped)
-    ns = load(SCRIPT.replace('say("scan probe starting', 'import subprocess; subprocess.run(["git", "push"]); say("scan probe starting'))
-    ns["say"] = lambda *a: None
-    try:
-        ns["main"](now=datetime.datetime(2026, 10, 27, 15, 30, tzinfo=datetime.timezone.utc))
-        stopped = False
-    except AssertionError as e:
-        stopped = "subprocess" in str(e)
-    check("an import of subprocess inside a function is refused too", stopped)
-    try:
-        load(SCRIPT.replace("import json\n", "import json\n          import subprocess\n" if False else "import json\nimport subprocess\n", 1))
-        stopped = False
-    except AssertionError as e:
-        stopped = "subprocess" in str(e)
-    check("and so is a module-level import", stopped)
-    ns = load(SCRIPT.replace('say("scan probe starting', 'open("state.json", "w").write("x"); say("scan probe starting'))
-    ns["say"] = lambda *a: None
-    ns["http_get"] = FakeNet()
-    ns["time"] = types.SimpleNamespace(monotonic=ns["time"].monotonic, sleep=lambda s: None)
-    before = set(os.listdir("."))
-    try:
-        ns["main"](now=datetime.datetime(2026, 10, 27, 15, 30, tzinfo=datetime.timezone.utc))
-    except Exception:
-        pass
-    leftover = set(os.listdir(".")) - before
-    check("a stray file write lands in the throwaway temp directory, never in the repo", os.path.abspath(".").startswith(tempfile.gettempdir()) or "probe-test-" in os.getcwd(), os.getcwd())
-    check("and the repo has no new state.json", not os.path.exists(os.path.join(HERE, "state.json")))
-    check("git itself is pointed at nothing during the tests", os.environ.get("GIT_DIR", "").endswith("no-such-git-dir"))
+_DRIVER = """
+import datetime
+def http_get(url, timeout=20):
+    return 200, {}, b"", 0.0
+say = lambda *a: None
+main(now=datetime.datetime(2026, 10, 27, 15, 30, tzinfo=datetime.timezone.utc))
+"""
+
+
+def _altered(inject):
+    """The probe script with `inject` spliced in before its first message, plus a driver that runs main() with a fake
+    http_get. Returned as TEXT only: it is executed solely by run_in_scratch()."""
+    body = SCRIPT.replace('if __name__ == "__main__":\n    sys.exit(main())', "")
+    return body.replace('say("scan probe starting', inject + '; say("scan probe starting', 1) + _DRIVER
+
+
+def test_altered_probe_scripts_run_only_in_a_scratch_dir_with_no_git_and_no_credentials():
+    """The Oct 29 incident, reproduced safely: variants that shell out to git, spawn processes or write files."""
+    r = run_in_scratch(_altered('os.system("git push")'))
+    check("os.system('git push') inside the probe: refused by the seal, nothing ran, no fake git executed",
+          r["returncode"] != 0 and r["sealed"] and "os.system" in r["stderr"] and r["executed_fakes"] == [], str(r)[:300])
+    r = run_in_scratch(_altered('import subprocess; subprocess.run(["git", "push"])'))
+    check("subprocess git push, imported inside main(): refused too", r["returncode"] != 0 and r["sealed"] and r["executed_fakes"] == [], str(r)[:300])
+    r = run_in_scratch(_altered('import socket; socket.create_connection(("remote.example.invalid", 443))'))
+    check("a raw connection to a remote host: refused", r["returncode"] != 0 and r["sealed"] and "remote.example.invalid" in r["stderr"], str(r)[:300])
+    r = run_in_scratch(_altered('open("state.json", "w").write("x")'))
+    check("a stray file write succeeds only INSIDE the scratch directory", "state.json" in r["workdir_files"] and r["executed_fakes"] == [], str(r)[:300])
+    check("and never lands in the repo", not os.path.exists(os.path.join(HERE, "state.json")) and not os.path.exists("state.json"))
+    r = run_in_scratch(_altered("pass"))
+    check("control: the unaltered script (with a fake network) runs to completion in the scratch dir", r["returncode"] == 0 and not r["sealed"], str(r)[:300])
 
 
 if __name__ == "__main__":
