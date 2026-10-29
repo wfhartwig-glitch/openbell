@@ -325,3 +325,28 @@ def _find_headline_for_symbol(headlines: list, symbol: str, company_name: str = 
             return h, False, field
 
     return None, False, None
+
+
+# Mirrors pippy_mcp.SECTOR_ETFS (test_watchlist_brief asserts they match).
+SECTOR_ETFS = {
+    "Technology": "XLK", "Financials": "XLF", "Energy": "XLE", "Health Care": "XLV",
+    "Industrials": "XLI", "Consumer Discret.": "XLY", "Consumer Staples": "XLP",
+    "Materials": "XLB", "Real Estate": "XLRE", "Utilities": "XLU", "Comm. Services": "XLC",
+}
+
+# ── Advice-language guard (watchlist and every desk) ──────────────────────────
+ADVICE_PATTERNS = [
+    r"\bbuy(s|ing)?\b", r"\bbought\b", r"\bsell(s|ing)?\b", r"\bsold\b", r"\bhold(s|ing|ings)?\b",
+    r"\bthesis\b", r"\btargets?\b", r"\bupside\b", r"\bscores?\b", r"\bratings?\b", r"\brated\b",
+    r"\bsince entry\b", r"\brecommend\w*", r"\bupgrade[sd]?\b", r"\bdowngrade[sd]?\b",
+    r"\boutperform\w*", r"\bunderperform\w*", r"\boverweight\b", r"\bunderweight\b", r"\byou should\b",
+]
+
+
+def find_advice_language(text: str, mask: list = ()) -> list:
+    """Advice words in `text`. `mask` strings (company names, tickers — third-party text such as
+    'Best Buy' or 'Target Corporation') are removed first so a real company name can't trip it."""
+    t = text
+    for m in sorted({m for m in mask if m}, key=len, reverse=True):
+        t = re.sub(r"(?<![A-Za-z0-9])" + re.escape(m) + r"(?![A-Za-z0-9])", " ", t, flags=re.I if len(m) > 5 else 0)
+    return [m.group(0) for p in ADVICE_PATTERNS for m in re.finditer(p, t, flags=re.I)]

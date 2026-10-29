@@ -42,12 +42,8 @@ IN_LINE_PP = 0.5
 # A headline counts as "today's" if it was published within this many hours of the run.
 NEWS_MAX_AGE_HOURS = 24
 
-# Mirrors pippy_mcp.SECTOR_ETFS (a test asserts they match; this module does not import pippy_mcp).
-SECTOR_ETFS = {
-    "Technology": "XLK", "Financials": "XLF", "Energy": "XLE", "Health Care": "XLV",
-    "Industrials": "XLI", "Consumer Discret.": "XLY", "Consumer Staples": "XLP",
-    "Materials": "XLB", "Real Estate": "XLRE", "Utilities": "XLU", "Comm. Services": "XLC",
-}
+# Mirrors pippy_mcp.SECTOR_ETFS (a test asserts they match); defined once in brief_common.
+SECTOR_ETFS = bc.SECTOR_ETFS
 # Yahoo's sector names -> the names used for SECTOR_ETFS. Anything else (ETFs, funds) gets no sector.
 YAHOO_SECTOR_TO_OURS = {
     "Technology": "Technology", "Financial Services": "Financials", "Healthcare": "Health Care",
@@ -377,21 +373,8 @@ def ticker_text(td: TickerData, data: MarketData, edition: str) -> str:
 
 # ── Advice-language guard ─────────────────────────────────────────────────────
 
-_ADVICE_PATTERNS = [
-    r"\bbuy(s|ing)?\b", r"\bbought\b", r"\bsell(s|ing)?\b", r"\bsold\b", r"\bhold(s|ing|ings)?\b",
-    r"\bthesis\b", r"\btargets?\b", r"\bupside\b", r"\bscores?\b", r"\bratings?\b", r"\brated\b",
-    r"\bsince entry\b", r"\brecommend\w*", r"\bupgrade[sd]?\b", r"\bdowngrade[sd]?\b",
-    r"\boutperform\w*", r"\bunderperform\w*", r"\boverweight\b", r"\bunderweight\b", r"\byou should\b",
-]
-
-
-def find_advice_language(text: str, mask: list = ()) -> list:
-    """Advice words in `text`. `mask` strings (company names, tickers — third-party text such as
-    'Best Buy' or 'Target Corporation') are removed first so a real company name can't trip it."""
-    t = text
-    for m in sorted({m for m in mask if m}, key=len, reverse=True):
-        t = re.sub(r"(?<![A-Za-z0-9])" + re.escape(m) + r"(?![A-Za-z0-9])", " ", t, flags=re.I if len(m) > 5 else 0)
-    return [m.group(0) for p in _ADVICE_PATTERNS for m in re.finditer(p, t, flags=re.I)]
+_ADVICE_PATTERNS = bc.ADVICE_PATTERNS
+find_advice_language = bc.find_advice_language      # shared with every desk; defined in brief_common
 
 
 def _visible(html_str: str) -> str:
