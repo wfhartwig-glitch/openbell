@@ -1186,7 +1186,13 @@ def _rates_sentence(treasury: dict, mode: str, rotation_context: dict = None,
     return {"text": sentence, "has_chain": has_chain}
 
 
-def _commodity_sentence(commodities: list, tape_dir: str = None, energy_pct=None) -> dict:
+# Close mode: the brief goes out at ~4:01 PM ET but futures trade until 5 PM, so a commodity's
+# direction can flip after send (Oct 28: gold +0.07% at send, -0.56% at day end). Moves are worded
+# "so far today" and no direction is asserted unless the move is larger than this many points.
+_COMMODITY_DIRECTION_MIN = 0.5
+
+
+def _commodity_sentence(commodities: list, tape_dir: str = None, energy_pct=None, so_far: bool = False) -> dict:
     """
     AT LEAST ONE commodity (oil or gold), always (Step 4c) — whichever moved more,
     ties to oil. A meaningful move (>=1%) gets what it implies for stocks and the
@@ -1213,18 +1219,28 @@ def _commodity_sentence(commodities: list, tape_dir: str = None, energy_pct=None
 
     if pick_oil:
         price = _num(oil, "price")
+        if so_far and abs(oil_pct) <= _COMMODITY_DIRECTION_MIN:
+            return {"text": (f"Crude oil is little changed so far today at ${price:,.2f} a barrel, so energy "
+                             f"costs aren't adding pressure either way."), "has_chain": False}
+        if so_far and abs(oil_pct) < 1.0:
+            return {"text": f"Crude oil is {'up' if oil_pct > 0 else 'down'} {abs(oil_pct):.2f}% so far today, "
+                            f"at ${price:,.2f} a barrel.", "has_chain": False}
         if abs(oil_pct) < 1.0:
             return {"text": (f"Crude oil was little changed at ${price:,.2f} a barrel, so energy "
                              f"costs aren't adding pressure either way."), "has_chain": False}
         if oil_pct > 0:
-            text = (f"Crude oil rose {oil_pct:.2f}% to ${price:,.2f} a barrel. Pricier energy raises "
+            lead = (f"Crude oil is up {oil_pct:.2f}% so far today, at ${price:,.2f} a barrel." if so_far
+                    else f"Crude oil rose {oil_pct:.2f}% to ${price:,.2f} a barrel.")
+            text = (f"{lead} Pricier energy raises "
                     f"costs for airlines and shippers and can feed inflation (rising prices overall), "
                     f"while helping oil producers.")
             if energy_pct is not None:
                 text += (" Energy stocks rising is consistent with that." if energy_pct > 0 else
                          " Energy stocks fell anyway, a disconnect we can't explain from the data.")
         else:
-            text = (f"Crude oil fell {abs(oil_pct):.2f}% to ${price:,.2f} a barrel. Cheaper energy "
+            lead = (f"Crude oil is down {abs(oil_pct):.2f}% so far today, at ${price:,.2f} a barrel." if so_far
+                    else f"Crude oil fell {abs(oil_pct):.2f}% to ${price:,.2f} a barrel.")
+            text = (f"{lead} Cheaper energy "
                     f"lowers costs for airlines and shippers and can ease inflation, while squeezing "
                     f"oil producers.")
             if energy_pct is not None:
@@ -1233,17 +1249,26 @@ def _commodity_sentence(commodities: list, tape_dir: str = None, energy_pct=None
         return {"text": text, "has_chain": True}
 
     price = _num(gold, "price")
+    if so_far and abs(gold_pct) <= _COMMODITY_DIRECTION_MIN:
+        return {"text": f"Gold is little changed so far today at ${price:,.0f} an ounce.", "has_chain": False}
+    if so_far and abs(gold_pct) < 1.0:
+        return {"text": f"Gold is {'up' if gold_pct > 0 else 'down'} {abs(gold_pct):.2f}% so far today, "
+                        f"at ${price:,.0f} an ounce.", "has_chain": False}
     if abs(gold_pct) < 1.0:
         return {"text": f"Gold was little changed at ${price:,.0f} an ounce.", "has_chain": False}
     if gold_pct > 0:
         tail = (" — consistent with stocks falling as investors moved toward safer holdings."
                 if tape_dir == "lower" else ".")
-        text = (f"Gold rose {gold_pct:.2f}% to ${price:,.0f} an ounce. Investors often buy gold as "
+        lead = (f"Gold is up {gold_pct:.2f}% so far today, at ${price:,.0f} an ounce." if so_far
+                else f"Gold rose {gold_pct:.2f}% to ${price:,.0f} an ounce.")
+        text = (f"{lead} Investors often buy gold as "
                 f"a safe place to park money, so a rise can signal caution{tail}")
     else:
         tail = (", consistent with investors feeling comfortable taking more risk in stocks."
                 if tape_dir == "higher" else ".")
-        text = (f"Gold fell {abs(gold_pct):.2f}% to ${price:,.0f} an ounce. A drop can mean less "
+        lead = (f"Gold is down {abs(gold_pct):.2f}% so far today, at ${price:,.0f} an ounce." if so_far
+                else f"Gold fell {abs(gold_pct):.2f}% to ${price:,.0f} an ounce.")
+        text = (f"{lead} A drop can mean less "
                 f"demand for safe places to park money{tail}")
     return {"text": text, "has_chain": True}
 
@@ -1383,7 +1408,7 @@ def _divergence_note(sp: float, ndx: float, dow: float, treasury_chg, sectors: l
 
 
 def _flat_day_why(treasury_chg, oil_pct, gold_pct, events: list, yields_addressed: bool,
-                  used_headlines: set, other_chain: bool = False) -> dict:
+                  used_headlines: set, other_chain: bool = False, so_far: bool = False) -> dict:
     """
     A flat or directionless tape still needs a WHY: flat days happen because
     forces offset or because traders are waiting. Names the offsetting forces
@@ -1403,13 +1428,14 @@ def _flat_day_why(treasury_chg, oil_pct, gold_pct, events: list, yields_addresse
             down.append("rising yields")
         elif chg <= -0.04:
             up.append("falling yields")
+    sf = " so far today" if so_far else ""
     if isinstance(oil_pct, (int, float)):
         if oil_pct >= 1.5:
-            down.append("pricier oil")
+            down.append(f"pricier oil{sf}")
         elif oil_pct <= -1.5:
-            up.append("cheaper oil")
+            up.append(f"cheaper oil{sf}")
     if isinstance(gold_pct, (int, float)) and gold_pct >= 1.0:
-        down.append("a bid for safe-haven gold")
+        down.append(f"a bid for safe-haven gold{sf}")
 
     parts = []
     if down and up:
@@ -1502,7 +1528,8 @@ def _rotation_moves(sector_pct: dict, must_out: tuple = (), must_in: tuple = ())
     return (sorted(pick(True, must_out, 3), key=lambda t: t[1]), sorted(pick(False, must_in, 2), key=lambda t: -t[1]))
 
 
-def _rotation_interpretation_note(sector_pct: dict, treasury_chg, oil_pct, oil_price, merge_lists: bool = False) -> dict:
+def _rotation_interpretation_note(sector_pct: dict, treasury_chg, oil_pct, oil_price, merge_lists: bool = False,
+                                   so_far: bool = False) -> dict:
     """
     Names what a sector pairing MEANS, hedged ("consistent with", "the pattern
     suggests") because sector moves show co-movement, not intent. Checked in
@@ -1554,11 +1581,13 @@ def _rotation_interpretation_note(sector_pct: dict, treasury_chg, oil_pct, oil_p
                 f"consistent with money moving toward cheaper, older, economically sensitive companies "
                 f"and away from richly priced technology names.")
         mentions_commodity = False
-        if isinstance(oil_pct, (int, float)) and isinstance(oil_price, (int, float)):
+        if isinstance(oil_pct, (int, float)) and isinstance(oil_price, (int, float)) \
+           and not (so_far and abs(oil_pct) <= _COMMODITY_DIRECTION_MIN):
+            sf = " so far today" if so_far else ""
             if oil_pct >= 0:
-                text += f" Energy's gain fits crude oil's rise to ${oil_price:,.2f} a barrel ({_pct_words(oil_pct)})."
+                text += f" Energy's gain fits crude oil's rise{sf} to ${oil_price:,.2f} a barrel ({_pct_words(oil_pct)})."
             else:
-                text += (f" Energy rose even though crude oil fell to ${oil_price:,.2f} a barrel "
+                text += (f" Energy rose even though crude oil fell{sf} to ${oil_price:,.2f} a barrel "
                          f"({_pct_words(oil_pct)}), a disconnect we can't explain from the data.")
             mentions_commodity = True
         return {"text": text, "mentions_rates": False, "implies_falling_yields": False,
@@ -1574,16 +1603,20 @@ def _rotation_interpretation_note(sector_pct: dict, treasury_chg, oil_pct, oil_p
         return {"text": text, "mentions_rates": False, "implies_falling_yields": False, "mentions_commodity": False,
                 "names_sectors": True}
 
-    if nrg is not None and isinstance(oil_pct, (int, float)) and isinstance(oil_price, (int, float)):
+    if nrg is not None and isinstance(oil_pct, (int, float)) and isinstance(oil_price, (int, float)) \
+       and not (so_far and abs(oil_pct) <= _COMMODITY_DIRECTION_MIN):
         same = (nrg < 0 and oil_pct < 0) or (nrg > 0 and oil_pct > 0)
         opposite = (nrg < 0 and oil_pct > 0) or (nrg > 0 and oil_pct < 0)
         if same:
             text = (f"Energy stocks {'rose' if nrg > 0 else 'fell'} {abs(nrg):.2f}%, in step with crude oil, "
+                    f"which is {'up' if oil_pct > 0 else 'down'} {abs(oil_pct):.2f}% so far today at ${oil_price:,.2f} a barrel."
+                    if so_far else
+                    f"Energy stocks {'rose' if nrg > 0 else 'fell'} {abs(nrg):.2f}%, in step with crude oil, "
                     f"which {'rose' if oil_pct > 0 else 'fell'} {abs(oil_pct):.2f}% to ${oil_price:,.2f} a barrel.")
             return {"text": text, "mentions_rates": False, "implies_falling_yields": False, "mentions_commodity": True}
         if opposite:
             text = (f"Energy stocks {'rose' if nrg > 0 else 'fell'} {abs(nrg):.2f}% even though crude oil "
-                    f"moved the other way ({_pct_words(oil_pct)} to ${oil_price:,.2f} a barrel), a "
+                    f"moved the other way ({_pct_words(oil_pct)}{' so far today' if so_far else ''} to ${oil_price:,.2f} a barrel), a "
                     f"disconnect we can't explain from the data.")
             return {"text": text, "mentions_rates": False, "implies_falling_yields": False, "mentions_commodity": True}
 
@@ -2059,7 +2092,7 @@ def _build_market_narrative(
     rotation = {"text": "", "mentions_rates": False, "implies_falling_yields": False, "mentions_commodity": False}
     if mode == "close":
         rotation = _rotation_interpretation_note(_sector_pct_map(sectors), treasury_chg, oil_pct, oil_price,
-                                                 merge_lists=True)
+                                                 merge_lists=True, so_far=True)
         close_tape = _classify_close_tape(sp, ndx, dow, sectors)
         trio = _index_trio_words(sp, ndx, dow)
         if close_tape["kind"] == "rotation":
@@ -2139,7 +2172,7 @@ def _build_market_narrative(
     commodity = {"text": "", "has_chain": False}
     if not rotation["mentions_commodity"]:
         energy_pct = _sector_lookup(_sector_pct_map(sectors), "energy") if mode == "close" else None
-        commodity = _commodity_sentence(commodities, tape_dir=tape_dir, energy_pct=energy_pct)
+        commodity = _commodity_sentence(commodities, tape_dir=tape_dir, energy_pct=energy_pct, so_far=(mode == "close"))
         add(commodity["text"], 1)
         chain_found = chain_found or commodity["has_chain"]
 
@@ -2147,7 +2180,7 @@ def _build_market_narrative(
     # own signal; mention it even when oil already filled the commodity slot.
     if gold_c is not None and tape_dir in ("lower", "higher") and not commodity["text"].startswith("Gold") \
        and ((gold_pct >= 1.0 and tape_dir == "lower") or (gold_pct <= -1.0 and tape_dir == "higher")):
-        gold_extra = _commodity_sentence([gold_c], tape_dir=tape_dir)
+        gold_extra = _commodity_sentence([gold_c], tape_dir=tape_dir, so_far=(mode == "close"))
         add(gold_extra["text"], 2)
         chain_found = chain_found or gold_extra["has_chain"]
 
@@ -2155,7 +2188,8 @@ def _build_market_narrative(
     if flat:
         why = _flat_day_why(treasury_chg, oil_pct, gold_pct, events,
                             divergence["addressed_yields"], used_headlines,
-                            other_chain=divergence["has_chain"] or commodity["has_chain"] or rotation["mentions_commodity"])
+                            other_chain=divergence["has_chain"] or commodity["has_chain"] or rotation["mentions_commodity"],
+                            so_far=(mode == "close"))
         add(why["text"], 1)
         chain_found = chain_found or why["has_chain"]
     for ev in events:

@@ -1809,6 +1809,110 @@ def test_lookahead_window_and_wording():
     check("no holdings -> no lookahead sentence (the public edition's case)", "later this week" not in run(datetime.date(2026, 10, 27), [e("MSFT", "2026-10-28")], picks={"picks": [], "changes_from_last_week": []}))
 
 
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 18 — Close mode words commodity moves "so far today" (futures trade until 5 PM ET;
+# the close brief goes out at ~4:01 PM ET, so a direction can flip after send)
+# Oct 28: gold was +0.07% at send (4077.5 vs the Oct 27 settle of 4074.6) and -0.56% at day end.
+# ═══════════════════════════════════════════════════════════════════════════
+
+GOLD_AT_SEND = {"name": "Gold", "price": 4077.5, "change": 2.9, "pct": 0.07}
+GOLD_DAY_END = {"name": "Gold", "price": 4051.6, "change": -23.0, "pct": -0.56}
+OIL_AT_SEND = {"name": "WTI Crude Oil", "price": 102.55, "change": 2.65, "pct": 2.65}
+
+
+def _cs(commodities, so_far=True, tape="higher", energy=None):
+    return openbell._commodity_sentence(commodities, tape_dir=tape, energy_pct=energy, so_far=so_far)
+
+
+def test_oct28_gold_at_send_asserts_no_direction():
+    r = _cs([GOLD_AT_SEND])
+    check("gold +0.07% at send: 'little changed so far today'", r["text"] == "Gold is little changed so far today at $4,078 an ounce.", r["text"])
+    check("no direction word at all", not any(w in r["text"].lower() for w in (" up ", " down ", "rose", "fell", "rise", "drop")), r["text"])
+    check("and no story built on it", r["has_chain"] is False)
+    t = _oct28_close(commodities=[GOLD_AT_SEND], headlines=[])
+    check("the whole Oct 28 close, with gold as the only commodity, says the same",
+          "Gold is little changed so far today" in t and "Gold rose" not in t and "Gold fell" not in t, t)
+    check("the old past-tense wording is not used in close mode", "Gold was little changed" not in t)
+
+
+def test_gold_direction_only_beyond_half_a_point():
+    check("exactly +0.50: still no direction", "little changed so far today" in _cs([dict(GOLD_AT_SEND, pct=0.50)])["text"])
+    check("exactly -0.50: still no direction", "little changed so far today" in _cs([dict(GOLD_AT_SEND, pct=-0.50)])["text"])
+    up = _cs([dict(GOLD_AT_SEND, pct=0.51)])["text"]
+    check("+0.51: direction asserted, worded 'so far today'", up == "Gold is up 0.51% so far today, at $4,078 an ounce.", up)
+    dn = _cs([GOLD_DAY_END])["text"]
+    check("-0.56 (the day-end figure): 'down ... so far today', no safe-haven story below 1%", dn == "Gold is down 0.56% so far today, at $4,052 an ounce.", dn)
+    big = _cs([dict(GOLD_AT_SEND, pct=1.4)], tape="lower")["text"]
+    check("a 1%+ move keeps its meaning, hedged, and says 'so far today'",
+          big.startswith("Gold is up 1.40% so far today") and "can signal caution" in big and "consistent with stocks falling" in big, big)
+
+
+def test_crude_so_far_today_and_the_same_half_point_rule():
+    check("crude +2.65%: 'up ... so far today' with its general implication",
+          _cs([OIL_AT_SEND])["text"].startswith("Crude oil is up 2.65% so far today, at $102.55 a barrel. Pricier energy raises costs"), _cs([OIL_AT_SEND])["text"])
+    check("crude down", _cs([dict(OIL_AT_SEND, pct=-1.8)])["text"].startswith("Crude oil is down 1.80% so far today, at $102.55 a barrel. Cheaper energy"))
+    check("crude +0.30%: little changed so far today, no direction",
+          _cs([dict(OIL_AT_SEND, pct=0.30)])["text"].startswith("Crude oil is little changed so far today at $102.55 a barrel"))
+    check("crude +0.80%: direction allowed (beyond 0.5), no inflation story below 1%",
+          _cs([dict(OIL_AT_SEND, pct=0.80)])["text"] == "Crude oil is up 0.80% so far today, at $102.55 a barrel.")
+    check("energy stocks are compared with crude only when a direction is asserted",
+          "Energy stocks rising is consistent with that." in _cs([OIL_AT_SEND], energy=0.6)["text"])
+
+
+def test_morning_wording_is_unchanged():
+    check("morning gold keeps the original wording", _cs([dict(GOLD_AT_SEND, pct=1.4)], so_far=False)["text"].startswith("Gold rose 1.40% to $4,078 an ounce."))
+    check("morning crude keeps the original wording", _cs([OIL_AT_SEND], so_far=False)["text"].startswith("Crude oil rose 2.65% to $102.55 a barrel."))
+    check("morning 'little changed' keeps the past tense", _cs([GOLD_AT_SEND], so_far=False)["text"] == "Gold was little changed at $4,078 an ounce.")
+    m = _silent(morning, SNAPSHOT_UP, commodities=[dict(GOLD_AT_SEND, pct=1.4)])[0][0]
+    check("the morning narrative never says 'so far today'", "so far today" not in m, m)
+
+
+def test_rotation_and_flat_day_sentences_follow_the_same_rule():
+    cyc = {"Technology": -1.4, "Financials": 0.9, "Energy": 1.1, "Industrials": 0.8, "Health Care": -0.5, "Utilities": 0.2, "Real Estate": -0.3}
+    small = openbell._rotation_interpretation_note(cyc, 0.0, 0.3, 102.5, so_far=True)
+    check("cyclical rotation + crude +0.3%: no crude clause at all", "crude" not in small["text"].lower() and small["mentions_commodity"] is False, small["text"])
+    big = openbell._rotation_interpretation_note(cyc, 0.0, 2.65, 102.5, so_far=True)
+    check("cyclical rotation + crude +2.65%: the clause says 'so far today'", "crude oil's rise so far today to $102.50" in big["text"], big["text"])
+    opp = openbell._rotation_interpretation_note(cyc, 0.0, -2.0, 102.5, so_far=True)
+    check("energy up while crude is down: 'fell so far today'", "crude oil fell so far today" in opp["text"], opp["text"])
+    old = openbell._rotation_interpretation_note(cyc, 0.0, 0.3, 102.5)
+    check("without so_far the original behavior is untouched (clause present even for +0.3%)", "crude oil's rise to $102.50" in old["text"], old["text"])
+    only_energy = {"Energy": 0.6, "Technology": 0.1}
+    check("energy-vs-crude reading is skipped when crude is within 0.5", openbell._rotation_interpretation_note(only_energy, 0.0, 0.2, 100.0, so_far=True)["text"] == "")
+    check("and made, with 'so far today', when beyond it",
+          "which is up 1.10% so far today" in openbell._rotation_interpretation_note(only_energy, 0.0, 1.1, 100.0, so_far=True)["text"])
+    flat = openbell._flat_day_why(0.0, 2.0, 0.0, [], False, set(), so_far=True)
+    check("flat-day WHY names oil 'so far today' in close mode", "ricier oil so far today" in flat["text"], flat["text"])
+    check("and not in morning mode", "so far today" not in openbell._flat_day_why(0.0, 2.0, 0.0, [], False, set())["text"])
+
+
+def test_oct28_close_at_send_time_end_to_end():
+    comm = [OIL_AT_SEND, GOLD_AT_SEND]
+    t = _oct28_close(commodities=comm, headlines=[])
+    check("the close says crude is up so far today (the bigger mover) and asserts nothing about gold",
+          "Crude oil is up 2.65% so far today" in t and "Gold" not in t, t)
+    check("no commodity direction is stated in the past tense", "Crude oil rose" not in t and "Gold rose" not in t)
+
+
+def test_close_engine_applies_the_rule_to_rotation_and_flat_day_sentences():
+    cyc = [{"sector": k, "pct": v} for k, v in {"Technology": -1.4, "Financials": 0.9, "Energy": 1.1, "Industrials": 0.8, "Health Care": -0.5,
+           "Consumer Discret.": -0.6, "Materials": 0.1, "Consumer Staples": -0.2, "Comm. Services": -0.9, "Utilities": 0.2, "Real Estate": -0.3}.items()]
+    idx = [{"name": "S&P 500", "pct": -0.3}, {"name": "Nasdaq", "pct": -0.9}, {"name": "Dow", "pct": 0.3}]
+    quiet = _silent(close, idx, sectors=cyc, commodities=[dict(OIL_AT_SEND, pct=0.3)], treasury={})[0]
+    check("rotation close with crude +0.3%: no crude comparison in the rotation sentence",
+          "fits crude" not in quiet and "in step with crude" not in quiet and "Crude oil is little changed so far today" in quiet, quiet)
+    loud = _silent(close, idx, sectors=cyc, commodities=[OIL_AT_SEND], treasury={})[0]
+    check("rotation close with crude +2.65%: the comparison says 'so far today'", "crude oil's rise so far today" in loud, loud)
+    flat_idx = [{"name": "S&P 500", "pct": 0.02}, {"name": "Nasdaq", "pct": 0.0}, {"name": "Dow", "pct": 0.01}]
+    calm = [{"sector": k, "pct": v} for k, v in {"Technology": 0.1, "Financials": -0.1, "Energy": 0.1, "Industrials": -0.05, "Health Care": 0.05,
+            "Consumer Discret.": -0.05, "Materials": -0.02, "Consumer Staples": 0.02, "Comm. Services": -0.02, "Utilities": -0.03, "Real Estate": -0.04}.items()]
+    flat = _silent(close, flat_idx, sectors=calm, commodities=[dict(OIL_AT_SEND, pct=2.0)],
+                   treasury={"yield": 4.5, "change": -0.06})[0]
+    check("flat close, oil up and yields down (offsetting forces): the oil force is worded 'so far today'",
+          "Pricier oil so far today could weigh on stocks while falling yields could support them" in flat, flat)
+
+
 if __name__ == "__main__":
     tests = [
         test_sept3_fixture_runs_end_to_end,
@@ -1950,6 +2054,13 @@ if __name__ == "__main__":
         test_candidate_rank_is_only_stated_when_visible_in_the_top_five,
         test_morning_says_when_a_holding_reports_later_this_week,
         test_lookahead_window_and_wording,
+        test_oct28_gold_at_send_asserts_no_direction,
+        test_gold_direction_only_beyond_half_a_point,
+        test_crude_so_far_today_and_the_same_half_point_rule,
+        test_morning_wording_is_unchanged,
+        test_rotation_and_flat_day_sentences_follow_the_same_rule,
+        test_close_engine_applies_the_rule_to_rotation_and_flat_day_sentences,
+        test_oct28_close_at_send_time_end_to_end,
     ]
     print(f"Running {len(tests)} test groups...\n")
     for t in tests:
