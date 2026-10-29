@@ -283,25 +283,35 @@ def test_label_dates_come_from_the_data_and_both_modes_work():
     check("sources and the latest bar date are printed", "Sources: Yahoo Finance daily closes (via yfinance), latest bar Oct 23." in text(trends.build_section(f, "close")))
 
 
-def test_a_mid_session_run_is_labelled_as_in_progress():
-    def facts_at(utc_dt):
-        return trends.fetch(Client(world()), utc_dt)
-    D = datetime.datetime
-    utc = datetime.timezone.utc
-    # data's newest bar is Fri 2026-10-23.  EDT = UTC-4 that day.
-    cases = [("Fri 11:00 ET (mid-session)", D(2026, 10, 23, 15, 0, tzinfo=utc), True),
-             ("Fri 15:59 ET (still open)", D(2026, 10, 23, 19, 59, tzinfo=utc), True),
-             ("Fri 16:01 ET (the scheduled close run)", D(2026, 10, 23, 20, 1, tzinfo=utc), False),
-             ("Mon 08:30 ET (the scheduled morning run: newest bar is last session)", D(2026, 10, 26, 12, 30, tzinfo=utc), False)]
-    for name, when, expected in cases:
-        f = facts_at(when)
-        label = text(trends.build_section(f, "close"))[:80]
-        check(f"{name}: in_progress={expected}", f["session_in_progress"] is expected, label)
-    check("mid-session heading says so, and does not claim a close",
-          "as of Oct 23, session in progress" in text(trends.build_section(facts_at(D(2026, 10, 23, 15, 0, tzinfo=utc)), "close")) and
-          "close" not in text(trends.build_section(facts_at(D(2026, 10, 23, 15, 0, tzinfo=utc)), "close"))[:60])
-    check("the scheduled close run keeps 'as of the Oct 23 close'", "as of the Oct 23 close" in text(trends.build_section(facts_at(D(2026, 10, 23, 20, 1, tzinfo=utc)), "close")))
-    check("a weekend run is never 'in progress'", facts_at(D(2026, 10, 24, 15, 0, tzinfo=utc))["session_in_progress"] is False)
+def test_only_completed_sessions_are_used():
+    D, utc = datetime.datetime, datetime.timezone.utc
+    # world()'s newest bar is Fri 2026-10-23. EDT = UTC-4 that week.
+    def at(dt):
+        f = trends.fetch(Client(world()), dt)
+        return f, text(trends.build_section(f, "morning"))
+    f, t = at(D(2026, 10, 23, 13, 31, tzinfo=utc))          # 9:31 ET on Friday: the scheduled morning run, one minute after the open
+    check("the morning run (13:31 UTC = 9:31 ET) drops today's one-minute-old bar", f["partial_bar_dropped"] is True and f["as_of"] == "2026-10-22", str(f["as_of"]))
+    check("so the heading names the previous COMPLETED session", "Market Trends — as of the Oct 22 close" in t, t[:100])
+    check("and the S&P figures are those of Thursday's close (7480), not Friday's partial bar (7490)",
+          f["indexes"]["S&P 500"]["last"] == 7480 and "S&P 500: 7,480" in t, t[:300])
+    check("the footnote says why", "Today's session had not finished, so the latest completed session is used." in t)
+    f, t = at(D(2026, 10, 23, 19, 59, tzinfo=utc))          # 15:59 ET: still open
+    check("15:59 ET: still open, still dropped", f["partial_bar_dropped"] and f["as_of"] == "2026-10-22")
+    f, t = at(D(2026, 10, 23, 20, 0, tzinfo=utc))           # 16:00 ET: the scheduled close run
+    check("16:00 ET (the scheduled close run) keeps today's finished bar", not f["partial_bar_dropped"] and f["as_of"] == "2026-10-23" and "as of the Oct 23 close" in t, str(f["as_of"]))
+    check("and says nothing about a partial session", "had not finished" not in t)
+    f, t = at(D(2026, 10, 26, 12, 30, tzinfo=utc))          # Monday 8:30 ET: newest bar (Friday) is not today's
+    check("a pre-open run on a later day keeps Friday's bar (nothing to drop)", not f["partial_bar_dropped"] and f["as_of"] == "2026-10-23")
+    f, t = at(D(2026, 10, 24, 15, 0, tzinfo=utc))           # Saturday
+    check("a weekend run keeps the last bar", not f["partial_bar_dropped"] and f["as_of"] == "2026-10-23")
+    check("every symbol was trimmed together (indexes, sectors, macro, VIX all end on the same session)",
+          len({l["as_of"] for l in list(trends.fetch(Client(world()), D(2026, 10, 23, 13, 31, tzinfo=utc))["indexes"].values())
+               + trends.fetch(Client(world()), D(2026, 10, 23, 13, 31, tzinfo=utc))["sectors"]}) == 1)
+    one = trends.fetch(Client({"^GSPC": ramp(5000, 10), "^IXIC": ramp(15000, 40)}), D(2026, 10, 23, 13, 31, tzinfo=utc))
+    check("it works with partial data too", one["partial_bar_dropped"] and one["indexes"]["S&P 500"]["last"] == 7480)
+    check("the helper alone: only a bar dated today (ET) is dropped",
+          trends._completed_sessions_only({"X": series([1, 2, 3])}, D(2026, 10, 23, 15, 0, tzinfo=utc))[0]["X"] == series([1, 2, 3])[:-1]
+          and trends._completed_sessions_only({"X": series([1, 2, 3])}, D(2026, 10, 22, 15, 0, tzinfo=utc))[1] is False)
 
 
 def test_missing_timezone_data_cannot_drop_the_section():
@@ -316,8 +326,8 @@ def test_missing_timezone_data_cannot_drop_the_section():
         sec = trends.build_section(f, "close")
     finally:
         zoneinfo.ZoneInfo = real
-    check("without tz data the desk still produces its section, labelled as a normal close",
-          f["session_in_progress"] is False and sec and "as of the Oct 23 close" in text(sec))
+    check("without tz data nothing is dropped and the desk still produces its section, labelled as a normal close",
+          f["partial_bar_dropped"] is False and sec and "as of the Oct 23 close" in text(sec))
 
 
 def test_every_number_in_the_section_traces_to_a_fact():

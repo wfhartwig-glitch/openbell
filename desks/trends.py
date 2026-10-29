@@ -80,8 +80,9 @@ def fetch(client=None, now=None) -> dict:
     client = client or YFinanceCloses()
     now = now or datetime.datetime.now(datetime.timezone.utc)
     fetched = now.replace(microsecond=0).isoformat()
-    data = client.closes(symbols())
-    facts = {"desk": NAME, "source": SOURCE, "fetched_at": fetched, "indexes": {}, "sectors": [], "macro": {}, "vix": None}
+    data, dropped = _completed_sessions_only(client.closes(symbols()), now)
+    facts = {"desk": NAME, "source": SOURCE, "fetched_at": fetched, "indexes": {}, "sectors": [], "macro": {}, "vix": None,
+             "partial_bar_dropped": dropped}
 
     for name, sym in INDEXES.items():
         c = data.get(sym) or []
@@ -128,20 +129,27 @@ def fetch(client=None, now=None) -> dict:
         return {}
     dates = [f["as_of"] for f in list(facts["indexes"].values()) + facts["sectors"]]
     facts["as_of"] = max(dates) if dates else None
-    facts["session_in_progress"] = _session_in_progress(now, facts["as_of"])
     return facts
 
 
-def _session_in_progress(now, as_of) -> bool:
-    """True when the newest bar is today's and the US market has not closed yet (a manual mid-day run).
-    The scheduled morning run (before the open) and close run (after 4 PM ET) are never in progress."""
-    if not as_of:
-        return False
+def _completed_sessions_only(data: dict, now):
+    """Drop today's bar while the US session is still open (before 4 PM ET), so every figure describes the last
+    COMPLETED session. The scheduled morning run starts at 13:30 UTC = 9:30 ET, the opening minute, when Yahoo
+    already shows a one-minute-old bar for today; the close run (20:00 UTC = 4 PM ET) keeps its finished bar.
+    -> (data, dropped_any). Without timezone data nothing is dropped (never lose the section over a label)."""
     try:
         et = now.astimezone(zoneinfo.ZoneInfo("America/New_York"))
-    except Exception:                        # no tz database on the runner: never let a label drop the section
-        return False
-    return datetime.date.fromisoformat(as_of) == et.date() and et.weekday() < 5 and et.time() < datetime.time(16, 0)
+    except Exception:
+        return data, False
+    if et.weekday() >= 5 or et.time() >= datetime.time(16, 0):
+        return data, False
+    out, dropped = {}, False
+    for sym, closes in data.items():
+        if closes and closes[-1][0] == et.date():
+            out[sym], dropped = closes[:-1], True
+        else:
+            out[sym] = closes
+    return out, dropped
 
 
 # ── wording ──────────────────────────────────────────────────────────────────
@@ -276,8 +284,8 @@ def build_section(facts, mode="close"):
     when = datetime.date.fromisoformat(asof).strftime("%b %d") if asof else "the latest session"
     note = (f"A moving average is the average closing price over the last 50 or 200 trading days; being above it means recent prices are "
             f"higher than that average. Sources: {facts.get('source', SOURCE)}, latest bar {when}. Futures figures use the front-month "
-            f"contract, so contract rolls can distort multi-week changes.")
+            f"contract, so contract rolls can distort multi-week changes."
+            + (" Today's session had not finished, so the latest completed session is used." if facts.get("partial_bar_dropped") else ""))
     out.append(f'<p style="margin:12px 0 0;font-size:12px;line-height:1.5;color:#6b7280">{note}</p>')
-    label = (f"Market Trends — as of {when}, session in progress" if facts.get("session_in_progress")
-             else f"Market Trends — as of the {when} close")
+    label = f"Market Trends — as of the {when} close"
     return bc._section(label, "".join(out))
