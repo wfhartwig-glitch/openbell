@@ -2172,6 +2172,12 @@ def _build_market_narrative(
                           f"{close_tape['total']} sectors finished higher.")
                 if out_txt and in_txt and not sectors_named:
                     opener += f" {in_txt} led, while {out_txt} fell."
+            elif round(sp, 2) < -_NOT_A_SELLOFF_MAX_DECLINE:
+                # The S&P fell by more than 0.5%: don't deny a sell-off. Say what happened, plainly.
+                opener = (f"Stocks fell, with losses uneven across sectors — {trio}; {close_tape['up_count']} of "
+                          f"{close_tape['total']} sectors finished higher.")
+                if out_txt and in_txt and not sectors_named:
+                    opener += f" {in_txt} held up best, while {out_txt} fell most."
             else:
                 dow_word = "closed flat" if abs(dow) < 0.10 else f"closed {'up' if dow >= 0 else 'down'} {abs(dow):.2f}%"
                 ndx_verb = "gave up" if ndx < 0 else "gained"
@@ -2596,6 +2602,8 @@ def _classify_close_tape(sp: float, ndx: float, dow: float, sectors: list) -> di
     }
 
 
+# "Not a sell-off — a rotation" may only be said while the S&P 500's decline is no more than this many percent.
+_NOT_A_SELLOFF_MAX_DECLINE = 0.5
 _INDEX_BARELY_MOVED = 0.10     # both S&P and Nasdaq inside this: the indexes "barely moved"
 
 
@@ -2626,7 +2634,7 @@ def _broad_opener(kind: str, alignment: str, n: int, total: int, trio: str) -> s
     if alignment == "opposite":
         big, rest = ("fall", "rise") if rally else ("rise", "fall")
         return (f"Most sectors {sect} even as the major indexes {idx_dir} — {n} of {total} sectors finished "
-                f"{'higher' if rally else 'lower'}, yet {trio}. That can happen when the largest companies, which "
+                f"{'higher' if rally else 'lower'}, with {trio}. That can happen when the largest companies, which "
                 f"carry the most weight in the indexes, {big} while most others {rest}.")
     if alignment == "split":
         return f"Most sectors {sect} ({n} of {total}), but the major indexes were split — {trio}."

@@ -1947,7 +1947,7 @@ def test_most_sectors_up_but_indexes_down_says_so_plainly():
     t = _close_text(*TODAY, 8)
     p1 = t.split("\n\n")[0]
     check("today's numbers open by naming the disagreement",
-          p1.startswith("Most sectors rose even as the major indexes fell \u2014 8 of 11 sectors finished higher, yet the S&P 500 down 0.58%, the Nasdaq down 1.63% and the Dow down 0.51%."), p1[:220])
+          p1.startswith("Most sectors rose even as the major indexes fell \u2014 8 of 11 sectors finished higher, with the S&P 500 down 0.58%, the Nasdaq down 1.63% and the Dow down 0.51%."), p1[:220])
     check("with a hedged reason (can happen when the largest companies fall while most others rise)",
           "That can happen when the largest companies, which carry the most weight in the indexes, fall while most others rise." in p1, p1[:400])
     for bad in ("rallied", "wide rise", "carrying the index", "Stocks rose", "edged higher"):
@@ -1958,7 +1958,7 @@ def test_most_sectors_down_but_indexes_up_is_the_mirror():
     t = _close_text(0.4, 0.6, 0.3, 3)               # 3 of 11 up -> 8 of 11 down
     p1 = t.split("\n\n")[0]
     check("3 of 11 up with the indexes up: names the disagreement",
-          p1.startswith("Most sectors fell even as the major indexes rose \u2014 8 of 11 sectors finished lower, yet the S&P 500 up 0.40%, the Nasdaq up 0.60% and the Dow up 0.30%."), p1[:220])
+          p1.startswith("Most sectors fell even as the major indexes rose \u2014 8 of 11 sectors finished lower, with the S&P 500 up 0.40%, the Nasdaq up 0.60% and the Dow up 0.30%."), p1[:220])
     check("with the mirrored hedge", "which carry the most weight in the indexes, rise while most others fall." in p1, p1[:400])
     for bad in ("sold off", "wide decline", "dragging the index"):
         check(f"never '{bad}' when the S&P 500 and Nasdaq are up", bad not in t, t)
@@ -2132,6 +2132,77 @@ def test_sign_sweep_no_directional_word_contradicts_the_indexes():
     check("768 close narratives: no word contradicts the S&P 500 / Nasdaq direction, and mover words match their sign", not bad, str(bad[:3]))
 
 
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 20 — Opener grammar, and "Not a sell-off" only while the S&P's decline is 0.5% or less
+# Today's numbers: S&P -0.53%, Nasdaq -1.61%, Dow -0.44%.
+# ═══════════════════════════════════════════════════════════════════════════
+
+def _rotation_sectors():
+    """5 up / 6 down with a 2.6-point spread: classified as a rotation by breadth alone."""
+    # Technology, Financials, Energy, Industrials, Health Care, Discret., Materials, Staples, Comm., Utilities, Real Estate
+    pcts = [0.9, 0.7, 0.5, 0.4, -0.2, -0.4, -0.6, -0.9, -1.2, 0.3, -1.4]      # utilities UP: no rate-sensitive reading fires
+    return [{"sector": n, "pct": p} for n, p in zip(_SECTOR_NAMES, pcts)]
+
+
+def _rot_text(sp, ndx, dow, **kw):
+    snap = [{"name": "S&P 500", "pct": sp}, {"name": "Nasdaq", "pct": ndx}, {"name": "Dow", "pct": dow}]
+    kw.setdefault("commodities", [])
+    kw.setdefault("treasury", {})
+    return _silent(close, snap, sectors=kw.pop("sectors", _rotation_sectors()), **kw)[0]
+
+
+def test_disagreement_opener_has_a_verb():
+    p1 = _close_text(*TODAY, 8).split("\n\n")[0]
+    check("'... 8 of 11 sectors finished higher, with the S&P 500 down 0.58%, the Nasdaq down 1.63% and the Dow down 0.51%.'",
+          "8 of 11 sectors finished higher, with the S&P 500 down 0.58%, the Nasdaq down 1.63% and the Dow down 0.51%." in p1, p1[:260])
+    check("the clause fragment 'yet the S&P 500 down' is gone", "yet the" not in p1)
+    mirror = _close_text(0.4, 0.6, 0.3, 3).split("\n\n")[0]
+    check("mirror case reads the same way", "8 of 11 sectors finished lower, with the S&P 500 up 0.40%, the Nasdaq up 0.60% and the Dow up 0.30%." in mirror, mirror[:260])
+
+
+def test_not_a_sell_off_is_denied_only_when_the_sp_decline_is_half_a_percent_or_less():
+    plain = "Stocks fell, with losses uneven across sectors \u2014 the S&P 500 down 0.53%, the Nasdaq down 1.61% and the Dow down 0.44%; 5 of 11 sectors finished higher."
+    t = _rot_text(-0.53, -1.61, -0.44)
+    check("today's numbers (S&P -0.53%): plain wording, no denial of a sell-off", t.startswith(plain), t[:300])
+    check("and no 'Not a sell-off' / 'rotation' anywhere in it", "Not a sell-off" not in t and "a rotation, meaning" not in t, t[:300])
+    check("the sector sentence is descriptive, not 'Money left ... for ...'", "held up best, while" in t and "Money left" not in t, t[:500])
+    for sp, denied in ((-0.49, True), (-0.50, True), (-0.504, True), (-0.506, False), (-0.51, False), (-0.80, False), (-2.0, False), (-0.10, True), (0.05, True)):
+        t = _rot_text(sp, -1.61, -0.44)
+        has = t.startswith("Not a sell-off")
+        check(f"S&P {sp:+.3f}%: {'Not a sell-off' if denied else 'plain wording'}", has == denied, t[:120])
+        if not denied:
+            check(f"S&P {sp:+.3f}%: opens 'Stocks fell'", t.startswith("Stocks fell, with losses uneven across sectors"), t[:120])
+
+
+def test_the_boundary_follows_the_rounded_figure_the_reader_sees():
+    t = _rot_text(-0.504, -1.0, -0.4)
+    check("-0.504 is shown as 0.50% and keeps 'Not a sell-off'", t.startswith("Not a sell-off") and "the S&P" not in t.split(".")[0] or t.startswith("Not a sell-off"), t[:200])
+    t = _rot_text(-0.506, -1.0, -0.4)
+    check("-0.506 is shown as 0.51% and gets plain wording", t.startswith("Stocks fell") and "the S&P 500 down 0.51%" in t.split("\n\n")[0], t[:200])
+
+
+def test_mixed_and_up_days_are_unchanged():
+    t = _rot_text(0.10, -0.90, -0.20)
+    check("S&P up, Nasdaq down: 'Not a sell-off' stands", t.startswith("Not a sell-off \u2014 a rotation"), t[:160])
+    t = _rot_text(0.60, 1.10, 0.30)
+    check("all three up: 'Stocks edged higher...' stands", t.startswith("Stocks edged higher, with gains uneven across sectors") or t.startswith("Stocks rose"), t[:120])
+    t = _rot_text(-0.30, -0.50, 0.20)
+    check("S&P within 0.5% down, Dow up: 'Not a sell-off' stands", t.startswith("Not a sell-off"), t[:120])
+    t = _rot_text(-0.80, -1.20, 0.20)
+    check("S&P down 0.8% with the Dow up (mixed, but the S&P is the bar): plain wording", t.startswith("Stocks fell"), t[:120])
+
+
+def test_plain_wording_does_not_repeat_sectors_already_named():
+    secs = [{"sector": n, "pct": p} for n, p in zip(_SECTOR_NAMES, [1.2, 0.8, 0.5, 0.4, 0.3, -0.2, -0.4, -0.6, -0.9, -1.1, -1.3])]
+    secs = [dict(s, pct=(1.2 if s["sector"] == "Technology" else s["pct"])) for s in secs]
+    secs = [dict(s, pct={"Utilities": -1.1, "Real Estate": -1.3}.get(s["sector"], s["pct"])) for s in secs]
+    t = _rot_text(-0.9, -1.4, -0.7, sectors=secs)
+    p1 = t.split("\n\n")[0]
+    check("when the rotation reading already names the sectors, the plain opener does not list them again",
+          p1.startswith("Stocks fell") and "held up best" not in p1 and len(re.findall("Real Estate", p1)) == 1, p1[:400])
+
+
 if __name__ == "__main__":
     tests = [
         test_sept3_fixture_runs_end_to_end,
@@ -2293,6 +2364,11 @@ if __name__ == "__main__":
         test_mover_words_match_the_sign,
         test_todays_close_end_to_end,
         test_sign_sweep_no_directional_word_contradicts_the_indexes,
+        test_disagreement_opener_has_a_verb,
+        test_not_a_sell_off_is_denied_only_when_the_sp_decline_is_half_a_percent_or_less,
+        test_the_boundary_follows_the_rounded_figure_the_reader_sees,
+        test_mixed_and_up_days_are_unchanged,
+        test_plain_wording_does_not_repeat_sectors_already_named,
     ]
     print(f"Running {len(tests)} test groups...\n")
     for t in tests:
