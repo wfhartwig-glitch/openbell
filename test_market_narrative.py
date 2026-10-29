@@ -980,11 +980,11 @@ def test_unclassifiable_headline_says_so_instead_of_guessing():
 def test_event_clause_summarizes_never_quotes():
     h = {"title": "Fed Chair Expected To Speak Later Today Ahead Of Rate Decision", "snippet": "", "site": "B"}
     ev = openbell._extract_market_events([h], "morning")[0]
-    clause = openbell._event_clause(ev, "morning", set())
+    clause = openbell._event_clause(ev, "morning", set(), sp=0.3)
     check("a scheduled Fed event is described in the brief's words", "a Federal Reserve decision or comment" in clause, f"got: {clause!r}")
     check("none of the headline text appears", '"' not in clause and "Expected To Speak" not in clause, f"got: {clause!r}")
     inflation = openbell._extract_market_events([{"title": "CPI Report Due Tomorrow Morning", "snippet": "", "site": "A"}], "morning")[0]
-    check("a CPI headline becomes 'an inflation report'", "an inflation report" in openbell._event_clause(inflation, "morning", set()))
+    check("a CPI headline becomes 'an inflation report'", "an inflation report" in openbell._event_clause(inflation, "morning", set(), sp=0.3))
 
 
 def test_no_raw_headline_text_anywhere_in_a_rendered_brief():
@@ -1348,7 +1348,8 @@ def test_fed_inside_another_word_is_not_monetary_policy():
         check(f"'{title[:36]}' is not read as a central-bank event",
               not any(e["category"] == "MONETARY" for e in ev), f"got: {[(e['category'], e['term']) for e in ev]}")
     ev = openbell._extract_market_events(_hl("Federal Reserve Holds Interest Rates, Signals Patience"), "morning")
-    check("control: a real Fed headline is still classified", any(e["category"] == "MONETARY" for e in ev),
+    check("control: a real Fed headline is still classified (as a decision that already happened)",
+          any(e["category"] == "MONETARY_DECISION" for e in ev),
           f"got: {[(e['category'], e['term']) for e in ev]}")
 
 
@@ -1544,6 +1545,270 @@ def test_bogus_name_match_reaches_neither_narrative_nor_holdings_sentence():
           and "None of your holdings is in today's headlines" in text, text)
 
 
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 17 — Oct 27 morning / Oct 28 close fixes (events, opener, rotation, candidates, lookahead)
+# Inputs below are the data and headlines of the two emails as they were sent.
+# ═══════════════════════════════════════════════════════════════════════════
+
+H = lambda *rows: [{"title": t, "snippet": "", "site": s} for t, s in rows]
+OCT27_HEADLINES = H(("Stock Market Today: Dow Rises Ahead Of Fed Meet; Boeing Tumbles On Earnings Miss (Live Coverage)", "Investor's Business Daily"),
+    ("Prediction: The Stock Market Could Crash in 2027, and Elon Musk Just Explained Why", "Motley Fool"),
+    ("Stock market today: Dow, S&P 500, Nasdaq drift higher as tech bounces back", "Yahoo Finance"),
+    ("This Midterm’s Stock-Market Pattern Hasn’t Failed Since 1950, and It Kicks Off This Week", "Benzinga"),
+    ("US Stock Market Today: S&P 500 Futures Ease As Traders Weigh Fed Path", "Simply Wall St."))
+OCT28_HEADLINES = H(("Stock market today: Dow, S&P 500, Nasdaq rise as Fed holds rates steady, Big Tech earnings loom", "Yahoo Finance"),
+    ("Stock Market Today: Nasdaq, Small Caps Down After Fed Keeps Rates Steady (Live Coverage)", "Investor's Business Daily"),
+    ("American Households Own More of the Stock Market Than at Any Time Since the Dot-Com Era", "24/7 Wall St."),
+    ("Midterm Elections Could Set Up a 21% Stock Market Rally in 2027 — Here’s What 76 Years of History Show", "24/7 Wall St."),
+    ("If a Stock Market Crash Is Coming, Take This Advice From Charlie Munger", "Motley Fool"))
+OCT27 = dict(
+    date=datetime.date(2026, 10, 27),
+    snapshot=[{"name": "S&P 500", "pct": 0.29}, {"name": "Nasdaq", "pct": 0.48}, {"name": "Dow", "pct": 0.04}],
+    treasury={"yield": 4.99, "change": 0.004},
+    commodities=[{"name": "WTI Crude Oil", "price": 101.15, "change": 0.36, "pct": 0.36}, {"name": "Gold", "price": 4039.5, "change": 9.7, "pct": 0.24}],
+    global_indices=[{"name": "Nikkei 225", "session": "Asia (overnight)", "pct": 1.58}, {"name": "Shanghai", "session": "Asia (overnight)", "pct": -1.18},
+                    {"name": "Hang Seng", "session": "Asia (overnight)", "pct": -0.73}, {"name": "FTSE 100", "session": "Europe", "pct": -0.93},
+                    {"name": "DAX", "session": "Europe", "pct": 0.19}],
+    earnings=[{"symbol": "HOOD", "date": "2026-10-27", "eps_estimated": 0.64}, {"symbol": "GOOGL", "date": "2026-10-28", "eps_estimated": 2.97},
+              {"symbol": "NOW", "date": "2026-10-28", "eps_estimated": 1.02}, {"symbol": "VRT", "date": "2026-10-28", "eps_estimated": 1.82},
+              {"symbol": "MSFT", "date": "2026-10-28", "eps_estimated": 4.72}, {"symbol": "INTC", "date": "2026-10-29", "eps_estimated": 0.40}],
+    picks={"picks": [{"ticker": t, "company": c} for t, c in (("MSFT", "Microsoft Corporation"), ("META", "Meta Platforms, Inc."),
+           ("NVDA", "NVIDIA Corporation"), ("AXON", "Axon Enterprise, Inc."), ("AVGO", "Broadcom Inc."))], "changes_from_last_week": []},
+    mem={"briefing_history": [], "pick_performance_history": [
+        {"ticker": "MSFT", "sector": "Technology", "pct_change_since_pick": 40.0}, {"ticker": "META", "sector": "Communication Services", "pct_change_since_pick": 11.8},
+        {"ticker": "NVDA", "sector": "Technology", "pct_change_since_pick": 0.4}, {"ticker": "AXON", "sector": "Industrials", "pct_change_since_pick": 3.7},
+        {"ticker": "AVGO", "sector": "Technology", "pct_change_since_pick": -24.6}]},
+)
+OCT28 = dict(
+    date=datetime.date(2026, 10, 28),
+    snapshot=[{"name": "S&P 500", "pct": 0.28}, {"name": "Nasdaq", "pct": 0.28}, {"name": "Dow", "pct": 0.18}],
+    treasury={"yield": 5.04, "change": 0.052},
+    commodities=[{"name": "WTI Crude Oil", "price": 102.55, "change": 1.2, "pct": 1.19}, {"name": "Gold", "price": 4077.5, "change": 21.0, "pct": 0.52}],
+    sectors=[{"sector": k, "pct": v} for k, v in {"Technology": 0.83, "Financials": 0.66, "Energy": 0.62, "Industrials": 0.60, "Health Care": 0.39,
+             "Consumer Discret.": -0.11, "Materials": -0.15, "Consumer Staples": -0.66, "Comm. Services": -0.66, "Utilities": -0.78, "Real Estate": -0.79}.items()],
+    movers={"gainers": [{"symbol": "VRT", "name": "Vertiv Holdings, LLC", "pct": 15.18}, {"symbol": "HIMS", "name": "Hims & Hers Health, Inc.", "pct": 5.08},
+                        {"symbol": "HOOD", "name": "Robinhood Markets, Inc.", "pct": 4.68}],
+            "losers": [{"symbol": "NOW", "name": "ServiceNow, Inc.", "pct": -2.97}, {"symbol": "APP", "name": "Applovin Corporation", "pct": -1.26},
+                       {"symbol": "NVDA", "name": "NVIDIA Corporation", "pct": -1.26}]},
+    earnings=[{"symbol": s, "date": "2026-10-28", "eps_estimated": 1.0} for s in ("GOOGL", "NOW", "VRT", "MSFT")],
+    holdings_day=[{"ticker": "AVGO", "pct": 2.56}, {"ticker": "NVDA", "pct": -1.26}],
+    scan=[{"ticker": t, "score": sc} for t, sc in (("PARA", 7044), ("SOUN", 212), ("RGTI", 139), ("APP", 130), ("IONQ", 126), ("A1", 120), ("A2", 110),
+                                                 ("A3", 100), ("A4", 95), ("A5", 90), ("A6", 85), ("HOOD", 83))],
+    mem={"briefing_history": [{"date": "2026-10-28", "type": "morning", "direction_called": "higher", "sp_pct_called": 0.5}],
+         "pick_performance_history": [{"ticker": "AVGO", "sector": "Technology", "pct_change_since_pick": -24.57},
+                                      {"ticker": "NVDA", "sector": "Technology", "pct_change_since_pick": 0.37}]},
+)
+
+
+def _oct28_close(**over):
+    d = dict(OCT28)
+    d.update(over)
+    with _frozen_today(d["date"]):
+        return _silent(close, d["snapshot"], movers=d["movers"], sectors=d["sectors"], commodities=d["commodities"],
+                       treasury=d["treasury"], picks_day_performance=d["holdings_day"], scan_candidates=d["scan"],
+                       headlines=over.get("headlines", OCT28_HEADLINES), mem=d["mem"], earnings=d["earnings"])[0]
+
+
+def _oct27_morning(**over):
+    d = dict(OCT27)
+    d.update(over)
+    with _frozen_today(d["date"]):
+        return _silent(morning, d["snapshot"], headlines=OCT27_HEADLINES, picks_data=d["picks"], commodities=d["commodities"],
+                       treasury=d["treasury"], mem=d["mem"], earnings=d["earnings"], global_indices=d["global_indices"])[0][0]
+
+
+def _events(titles, mode="close", on=datetime.date(2026, 10, 28)):
+    with _frozen_today(on):
+        return openbell._extract_market_events([{"title": t, "snippet": "", "site": "x"} for t in titles], mode)
+
+
+# ── 1. events ────────────────────────────────────────────────────────────────
+
+def test_oct28_fed_hold_is_found_and_the_evergreen_election_piece_is_not():
+    ev = _events([h["title"] for h in OCT28_HEADLINES])
+    check("exactly one event survives the Oct 28 headlines", len(ev) == 1, str([(e["category"], e["term"]) for e in ev]))
+    check("it is the Fed's decision to hold rates", ev and ev[0]["category"] == "MONETARY_DECISION" and ev[0]["outcome"] == "hold" and ev[0]["actor"] == "the Fed", str(ev))
+    check("two headlines reporting the same decision give one event", sum(e["category"] == "MONETARY_DECISION" for e in ev) == 1)
+    check("the 'Midterm Elections Could Set Up a 21% Rally in 2027' piece yields no event",
+          not _events(["Midterm Elections Could Set Up a 21% Stock Market Rally in 2027 \u2014 Here\u2019s What 76 Years of History Show"]))
+
+
+def test_evergreen_and_forward_looking_opinion_pieces_are_excluded():
+    for t in [h["title"] for h in OCT27_HEADLINES if "Prediction" in h["title"] or "Pattern" in h["title"]] + [
+            "If a Stock Market Crash Is Coming, Take This Advice From Charlie Munger",
+            "The Fed Could Cut Rates In December, Analysts Say", "Fed To Cut Rates Next Month, Economists Expect",
+            "Will The Fed Hold Rates Steady In December?", "Tariffs Might Hit Stocks Next Year, Strategist Warns",
+            "Why The Election In 2027 Could Reshape Markets", "Here\u2019s What History Says About Fed Rate Decisions"]:
+        check(f"excluded: '{t[:60]}'", not _events([t]), str(_events([t])))
+    check("curly apostrophes are normalised ('Hasn\u2019t Failed')", not _events(["This Midterm\u2019s Pattern Hasn\u2019t Failed Since 1950, And Election Season Kicks Off This Week"]))
+    check("control: a genuine same-day tariff headline is still an event", any(e["term"] == "tariff" for e in _events(["New Tariff Announced On Chinese Imports, Stocks Slide"])))
+
+
+def test_decision_detection_covers_hold_cut_raise_and_other_central_banks():
+    cases = [("Fed Holds Rates Steady", "hold", "the Fed"), ("Federal Reserve Keeps Interest Rates Unchanged", "hold", "the Fed"),
+             ("Fed Cuts Interest Rates By Quarter Point", "cut", "the Fed"), ("Fed Raises Rates For Third Straight Meeting", "raise", "the Fed"),
+             ("ECB Leaves Rates Unchanged As Inflation Cools", "hold", "the European Central Bank"),
+             ("Bank Of England Cuts Rates For First Time In A Year", "cut", "the Bank of England"),
+             ("Nasdaq, Small Caps Down After Fed Keeps Rates Steady (Live Coverage)", "hold", "the Fed")]
+    for t, outcome, actor in cases:
+        ev = _events([t])
+        check(f"'{t[:48]}' -> {outcome} by {actor}", ev and ev[0].get("outcome") == outcome and ev[0].get("actor") == actor, str(ev))
+    check("a rate decision from a non-central-bank subject is not a decision", not any(e["category"] == "MONETARY_DECISION" for e in _events(["Mortgage Lender Cuts Rates On 30-Year Loans"])))
+
+
+def test_a_decision_that_happened_outranks_every_other_event():
+    titles = ["New Tariff Announced On Chinese Imports, Stocks Slide", "Fed Holds Rates Steady, Powell Says Data Dependent",
+              "Government Shutdown Looms As Talks Stall"]
+    for mode in ("close", "morning"):
+        ev = _events(titles, mode)
+        check(f"{mode}: the decision is first and the list is capped at two", ev[0]["category"] == "MONETARY_DECISION" and len(ev) == 2, str([(e["category"], e["term"]) for e in ev]))
+
+
+def test_oct28_close_reports_the_fed_hold_tied_to_prices_and_never_the_election():
+    t = _oct28_close()
+    p1 = t.split("\n\n")[0]
+    check("the Fed's hold is reported", "The Fed held interest rates steady, according to same-day headlines" in p1, p1)
+    check("it is tied to what prices did (S&P close and yields)", "the S&P 500 closed up 0.28%" in p1 and "the 10-year yield rose" in p1, p1)
+    check("it is hedged: can mean ... though the data can't confirm", "which can mean investors read the decision as less supportive of lower rates, though the data can't confirm that" in p1, p1)
+    check("it comes right after the opener, before the sector reading", p1.index("The Fed held") < p1.index("Real Estate"), p1)
+    check("no election sentence", "election" not in t.lower(), t)
+    check("no headline text is pasted", "Big Tech earnings loom" not in t and "21%" not in t and "Charlie Munger" not in t)
+
+
+def test_decision_sentence_variants_are_hedged_and_price_tied():
+    mk = lambda outcome: {"category": "MONETARY_DECISION", "outcome": outcome, "actor": "the Fed", "headline": {"title": "x"}, "scheduled": False}
+    f = openbell._decision_sentence
+    check("hold + flat yields: in stride", "yields were little changed, so markets appear to have taken the decision in stride" in f(mk("hold"), "close", 0.2, 0.01))
+    check("hold + yields down: friendlier to lower rates, hedged", "friendlier to lower rates, though the data can't confirm that" in f(mk("hold"), "close", 0.2, -0.06))
+    check("hold + yields up: less supportive, hedged", "less supportive of lower rates, though the data can't confirm that" in f(mk("hold"), "close", -0.4, 0.07))
+    check("cut: describes the reaction without explaining it", "a reaction we can describe but not explain from the data" in f(mk("cut"), "close", 0.4, -0.08))
+    check("raise: past tense", "raised interest rates" in f(mk("raise"), "close", -0.4, 0.08))
+    check("morning wording uses futures, not 'closed'", "S&P 500 futures are down 0.40%" in f(mk("hold"), "morning", -0.4, 0.0) and "closed" not in f(mk("hold"), "morning", -0.4, 0.0))
+    check("no yield data: still tied to the S&P", f(mk("hold"), "close", 0.3, None).endswith("the S&P 500 closed up 0.30%."))
+    check("never an unhedged 'because'", all("because" not in f(mk(o), "close", 0.3, c) for o in ("hold", "cut", "raise") for c in (None, 0.0, 0.06, -0.06)))
+
+
+def test_every_event_sentence_carries_a_price_and_none_is_emitted_without_one():
+    sched = {"category": "MONETARY", "term": "fomc", "scheduled": True, "headline": {"title": "a"}}
+    back = {"category": "MACRO_POLITICAL", "term": "tariff", "scheduled": False, "headline": {"title": "b"}}
+    corp = {"category": "CORPORATE", "term": "unveils", "scheduled": True, "headline": {"title": "c"}}
+    for ev in (sched, back, corp):
+        for mode in ("morning", "close"):
+            s = openbell._event_clause(dict(ev), mode, set(), sp=-0.42)
+            check(f"{ev['category']}/{ev['scheduled']}/{mode} names the S&P move", "0.42%" in s, s)
+        check(f"{ev['category']}/{ev['scheduled']}: with no price there is no sentence at all", openbell._event_clause(dict(ev), "close", set()) == "")
+    s = openbell._event_clause(dict(back), "close", set(), sp=0.5)
+    check("a backward-looking event admits the data can't show a connection", "though the data can't show whether the two are connected" in s, s)
+    check("the old price-free wording is gone", "Headlines today point to" not in openbell._event_clause(dict(back), "close", set()))
+
+
+# ── 2. opener ────────────────────────────────────────────────────────────────
+
+def test_all_up_rotation_opens_plainly():
+    t = _oct28_close(headlines=[])
+    p1 = t.split("\n\n")[0]
+    check("all three indices up: plain opener", p1.startswith("Stocks edged higher, with gains uneven across sectors"), p1)
+    check("it never says 'Not a sell-off'", "Not a sell-off" not in t and "sell-off" not in p1.split(".")[0], p1)
+    check("no 'while' between the two same-direction index numbers", "while the Nasdaq" not in p1, p1)
+    check("no arrow glyph in the opening sentence", "\u25b2" not in p1.split(". ")[0] and "\u25bc" not in p1.split(". ")[0])
+    big = _silent(close, [{"name": "S&P 500", "pct": 1.1}, {"name": "Nasdaq", "pct": 1.4}, {"name": "Dow", "pct": 0.9}],
+                  sectors=OCT28["sectors"], commodities=[], treasury={})[0]
+    check("a bigger all-up day says 'rose', not 'edged higher'", big.startswith("Stocks rose, with gains uneven across sectors"), big[:90])
+
+
+def test_not_a_sell_off_only_when_indices_are_down_or_mixed():
+    down = _silent(close, [{"name": "S&P 500", "pct": -0.3}, {"name": "Nasdaq", "pct": -0.5}, {"name": "Dow", "pct": -0.2}],
+                   sectors=OCT28["sectors"], commodities=[], treasury={})[0]
+    check("all down + rotation-shaped sectors: keeps the framing", down.startswith("Not a sell-off \u2014 a rotation"), down[:120])
+    check("both down: 'and', not 'while'", "closed down 0.20% and the Nasdaq gave up 0.50%" in down, down[:300])
+    mixed = _silent(close, [{"name": "S&P 500", "pct": -0.1}, {"name": "Nasdaq", "pct": -0.4}, {"name": "Dow", "pct": 0.3}],
+                    sectors=OCT28["sectors"], commodities=[], treasury={})[0]
+    check("mixed: keeps the framing", mixed.startswith("Not a sell-off"), mixed[:100])
+    check("opposite directions: 'while' is right", "closed up 0.30% while the Nasdaq gave up 0.40%" in mixed, mixed[:300])
+    check("no arrow glyph in the Dow/Nasdaq sentence", "\u25b2" not in mixed.split("sectors finished higher")[0])
+
+
+# ── 3. rotation: one sentence, each sector named once ────────────────────────
+
+def test_rotation_names_each_sector_once_in_one_merged_sentence():
+    t = _oct28_close(headlines=[])
+    p1 = t.split("\n\n")[0]
+    for name in ("Real Estate", "Utilities", "Consumer Staples", "Technology", "Financials"):
+        check(f"{name} is named exactly once", len(re.findall(name, p1, re.I)) == 1, f"{len(re.findall(name, p1, re.I))}x in {p1}")
+    sentence = next(x for x in re.split(r"(?<=[a-z%)])\. ", p1) if "Real Estate" in x)
+    check("the sector list and its reading are the same sentence", "Technology" in sentence and "consistent with investors moving out of" in sentence, sentence)
+    check("the reading is hedged", "consistent with" in sentence and "because" not in sentence)
+    check("no 'Money left ... for ...' list alongside it", "Money left" not in p1)
+    check("sector moves are in words, not glyphs", "(down 0.79%)" in p1 and "\u25bc" not in p1)
+    check("the explanation does not re-name the sectors", "Those income-paying sectors typically carry heavy debt" in p1)
+
+
+def test_other_rotation_readings_also_do_not_repeat_the_sector_list():
+    secs = [{"sector": k, "pct": v} for k, v in {"Technology": -1.4, "Financials": 0.9, "Energy": 1.1, "Industrials": 0.8, "Health Care": -0.5,
+            "Consumer Discret.": -0.6, "Materials": 0.1, "Consumer Staples": -0.2, "Comm. Services": -0.9, "Utilities": 0.2, "Real Estate": -0.3}.items()]
+    t = _silent(close, [{"name": "S&P 500", "pct": -0.3}, {"name": "Nasdaq", "pct": -0.9}, {"name": "Dow", "pct": 0.3}],
+                sectors=secs, commodities=[], treasury={})[0]
+    p1 = t.split("\n\n")[0]
+    check("cyclical reading present", "economically sensitive" in p1, p1)
+    check("Financials is named once", len(re.findall("financials", p1, re.I)) == 1, p1)
+    check("Energy is named once as a sector", len(re.findall(r"\benergy\b", p1, re.I)) == 1, p1)
+    check("no 'Money left' list on top of the reading", "Money left" not in p1)
+    plain = openbell._rotation_interpretation_note({"Utilities": -0.8, "Real Estate": -0.8, "Technology": 0.8}, 0.0, None, None)
+    check("called without merge_lists the original wording is unchanged", plain["text"].startswith("Utilities (down 0.80%) and real estate"), plain["text"])
+
+
+# ── 4. candidate cross-reference ─────────────────────────────────────────────
+
+def test_candidate_rank_is_only_stated_when_visible_in_the_top_five():
+    mv = {"gainers": [{"symbol": "HOOD", "name": "Robinhood Markets, Inc.", "pct": 4.68}], "losers": []}
+    cands = lambda rank: [{"ticker": f"T{i}", "score": 200 - i} for i in range(1, rank)] + [{"ticker": "HOOD", "score": 83}]
+    check("rank 12: omitted", openbell._candidate_cross_reference_note(mv, cands(12)) == "")
+    check("rank 6: omitted", openbell._candidate_cross_reference_note(mv, cands(6)) == "")
+    check("rank 5: stated", "ranks #5 among today's candidates" in openbell._candidate_cross_reference_note(mv, cands(5)))
+    check("rank 1: stated", "ranks #1" in openbell._candidate_cross_reference_note(mv, cands(1)))
+    dec = {"gainers": [], "losers": [{"symbol": "HOOD", "name": "Robinhood Markets, Inc.", "pct": -4.0}]}
+    check("a decliner outside the top 5 is omitted too", openbell._candidate_cross_reference_note(dec, cands(9)) == "")
+    check("a decliner inside the top 5 keeps its wording", "fell 4.00% but still scored 83 (ranked #3)" in openbell._candidate_cross_reference_note(dec, cands(3)))
+    two = {"gainers": [{"symbol": "HOOD", "name": "Robinhood Markets, Inc.", "pct": 4.68}, {"symbol": "T2", "name": "Two Inc", "pct": 3.0}], "losers": []}
+    check("an invisible rank is skipped in favour of a visible one", "Two" in openbell._candidate_cross_reference_note(two, cands(12)))
+    check("the Oct 28 close no longer says '#12'", "#12" not in _oct28_close() and "among today's candidates" not in _oct28_close())
+    check("the constant matches what _daily_scan renders", openbell._VISIBLE_CANDIDATES == 5 and "candidates[:5]" in open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "openbell.py")).read())
+
+
+# ── 6. morning lookahead ─────────────────────────────────────────────────────
+
+def test_morning_says_when_a_holding_reports_later_this_week():
+    t = _oct27_morning()
+    check("MSFT (Wednesday) is announced in the holdings paragraph",
+          "One of your holdings reports earnings later this week: MSFT on Wednesday (analysts expect $4.72 per share)." in t, t)
+    p2 = t.split("\n\n")[1]
+    check("it is in the same paragraph as the holdings sentence", "Your 5 holdings are unchanged this week" in p2 and "MSFT on Wednesday" in p2)
+    check("non-holdings reporting this week (GOOGL, NOW, VRT, INTC) are not mentioned there", not any(s in p2.split("later this week")[1] for s in ("GOOGL", "NOW", "VRT", "INTC")))
+    check("a holding reporting TODAY is not described as 'later this week'", "HOOD" not in p2.split("later this week")[1])
+
+
+def test_lookahead_window_and_wording():
+    base = dict(OCT27)
+    def run(today, earn, picks=None):
+        d = dict(base)
+        with _frozen_today(today):
+            return _silent(morning, d["snapshot"], headlines=[], picks_data=picks or d["picks"], commodities=[], treasury={}, mem=d["mem"],
+                           earnings=earn, global_indices=[])[0][0]
+    e = lambda sym, day, eps=1.5: {"symbol": sym, "date": day, "eps_estimated": eps}
+    check("two holdings: plural, in date order, with estimates",
+          "Two of your holdings report earnings later this week: MSFT on Wednesday (analysts expect $4.72 per share) and AVGO on Thursday (analysts expect $1.50 per share)."
+          in run(datetime.date(2026, 10, 27), [e("AVGO", "2026-10-29"), e("MSFT", "2026-10-28", 4.72)]))
+    check("Friday: a holding reporting next Monday is not 'this week'", "later this week" not in run(datetime.date(2026, 10, 30), [e("MSFT", "2026-11-02")]))
+    check("Friday: a holding reporting on Friday itself is today, not later", "later this week" not in run(datetime.date(2026, 10, 30), [e("MSFT", "2026-10-30")]))
+    check("a holding that already reported (yesterday) is not announced", "later this week" not in run(datetime.date(2026, 10, 29), [e("MSFT", "2026-10-28")]))
+    check("Sunday-boundary: Sunday still counts as this week", "MSFT on Sunday" in run(datetime.date(2026, 10, 26), [e("MSFT", "2026-11-01")]))
+    check("a missing estimate drops the parenthetical, not the sentence", "MSFT on Wednesday." in run(datetime.date(2026, 10, 27), [e("MSFT", "2026-10-28", None)]))
+    check("a malformed date is ignored, not fatal", "later this week" not in run(datetime.date(2026, 10, 27), [e("MSFT", "soon")]))
+    check("duplicate calendar rows give one mention", run(datetime.date(2026, 10, 27), [e("MSFT", "2026-10-28"), e("MSFT", "2026-10-28")]).count("MSFT on Wednesday") == 1)
+    check("no holdings -> no lookahead sentence (the public edition's case)", "later this week" not in run(datetime.date(2026, 10, 27), [e("MSFT", "2026-10-28")], picks={"picks": [], "changes_from_last_week": []}))
+
+
 if __name__ == "__main__":
     tests = [
         test_sept3_fixture_runs_end_to_end,
@@ -1671,6 +1936,20 @@ if __name__ == "__main__":
         test_dow_beating_nasdaq_gets_a_hedged_reading_mirroring_the_reverse,
         test_company_name_match_is_whole_word,
         test_bogus_name_match_reaches_neither_narrative_nor_holdings_sentence,
+        test_oct28_fed_hold_is_found_and_the_evergreen_election_piece_is_not,
+        test_evergreen_and_forward_looking_opinion_pieces_are_excluded,
+        test_decision_detection_covers_hold_cut_raise_and_other_central_banks,
+        test_a_decision_that_happened_outranks_every_other_event,
+        test_oct28_close_reports_the_fed_hold_tied_to_prices_and_never_the_election,
+        test_decision_sentence_variants_are_hedged_and_price_tied,
+        test_every_event_sentence_carries_a_price_and_none_is_emitted_without_one,
+        test_all_up_rotation_opens_plainly,
+        test_not_a_sell_off_only_when_indices_are_down_or_mixed,
+        test_rotation_names_each_sector_once_in_one_merged_sentence,
+        test_other_rotation_readings_also_do_not_repeat_the_sector_list,
+        test_candidate_rank_is_only_stated_when_visible_in_the_top_five,
+        test_morning_says_when_a_holding_reports_later_this_week,
+        test_lookahead_window_and_wording,
     ]
     print(f"Running {len(tests)} test groups...\n")
     for t in tests:
