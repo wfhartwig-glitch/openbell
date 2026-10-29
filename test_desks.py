@@ -54,8 +54,8 @@ def test_desks_run_concurrently_and_runtimes_are_logged():
     check("all three produced sections, in registry order", [r.name for r in results] == ["a", "b", "c"] and all(r.ok for r in results))
     check("each desk's runtime is measured", all(0.35 < r.runtime < 0.8 for r in results), str([r.runtime for r in results]))
     check("each desk logs '[DESK-<name>] ok <seconds>'", all(any(l.startswith(f"[DESK-{n}] ok 0.") for l in log) for n in "abc"), str(log))
-    check("a summary line gives wall time and the sum of desk runtimes",
-          any(l.startswith("[DESKS] close: 3 of 3 sections, wall 0.") and "sum of desk runtimes 1." in l for l in log), str(log))
+    check("a summary line gives the total desk runtime and how long the brief actually waited",
+          any(l.startswith("[DESKS] close: 3 of 3 sections; desks ran 1.") and "the brief waited 0." in l for l in log), str(log))
 
 
 def test_desk_time_overlaps_the_callers_own_work():
@@ -66,6 +66,7 @@ def test_desk_time_overlaps_the_callers_own_work():
     results = r.collect()
     waited = time.monotonic() - t0
     check("start_desks returns immediately and the desk worked during the caller's sleep", waited < 0.15 and results[0].ok, f"waited {waited:.2f}s")
+    check("and the summary line reports that the brief waited ~0s", any("the brief waited 0.0s" in l for l in log), str(log))
     t0 = time.monotonic()
     fw.start_desks([sleeper("a", 0.3)], "morning", log=log.append).collect()
     check("collect() right away waits only for the desk's own remaining time", 0.25 < time.monotonic() - t0 < 0.7)

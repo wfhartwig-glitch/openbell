@@ -104,6 +104,7 @@ class DeskRun:
     def collect(self) -> list:
         """Wait (never past each desk's own deadline), log, and return DeskResults in registry order."""
         results = []
+        t_collect = time.monotonic()
         for s in self.slots:
             remaining = s.started + s.desk.timeout - time.monotonic()
             finished = s.done.wait(max(0.0, remaining))
@@ -126,11 +127,11 @@ class DeskRun:
                 else:
                     self.log(f"[DESK-{name}] {status}: {detail} — section omitted ({rt:.1f}s)")
             results.append(r)
-        wall = time.monotonic() - self.t0
+        waited = time.monotonic() - t_collect          # the time the brief actually spent waiting on desks
         total = sum(r.runtime for r in results)
         ok = sum(r.ok for r in results)
-        self.log(f"[DESKS] {self.mode}: {ok} of {len(results)} sections, wall {wall:.1f}s "
-                 f"(sum of desk runtimes {total:.1f}s)")
+        self.log(f"[DESKS] {self.mode}: {ok} of {len(results)} sections; desks ran {total:.1f}s in total, "
+                 f"the brief waited {waited:.1f}s for them")
         return results
 
     @staticmethod
