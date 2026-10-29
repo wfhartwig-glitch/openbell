@@ -29,6 +29,28 @@ JOB = DOC["jobs"]["probe"]
 SCRIPT = JOB["steps"][0]["run"]
 TREE = ast.parse(SCRIPT)
 
+# SAFETY OF THE TEST ITSELF. This file executes the probe's script (and, when mutation-testing, deliberately
+# broken variants of it). On Oct 29 a variant containing os.system("git push") really pushed from the repo.
+# So: (1) run in an empty temp directory, (2) point git at nothing so any git command fails, and (3) give the
+# executed script a sealed `os` that raises on process or file-mutation calls (see _SealedOS / load()).
+os.chdir(tempfile.mkdtemp(prefix="probe-test-"))
+os.environ["GIT_DIR"] = os.path.join(os.getcwd(), "no-such-git-dir")
+os.environ["GIT_CEILING_DIRECTORIES"] = os.path.dirname(os.getcwd())
+
+# (4) from here on, importing a process / file-copy / mail module raises, wherever the import statement is
+# (module level OR inside a function). Everything this test file needs has already been imported above.
+_real_import = builtins.__import__
+_BANNED_IMPORTS = {"subprocess", "shutil", "smtplib", "ctypes", "ftplib", "telnetlib", "pty"}
+
+
+def _guarded_import(name, *args, **kwargs):
+    if name.split(".")[0] in _BANNED_IMPORTS:
+        raise AssertionError(f"sealed: the probe script tried to import {name}")
+    return _real_import(name, *args, **kwargs)
+
+
+builtins.__import__ = _guarded_import
+
 failures = []
 
 
@@ -38,10 +60,40 @@ def check(name, cond, detail=""):
         failures.append(name)
 
 
-def load():
-    """Fresh namespace with the script's functions (not run: __name__ != '__main__')."""
+_REFUSED = {"system", "popen", "remove", "unlink", "rename", "replace", "makedirs", "mkdir", "rmdir", "removedirs", "chmod", "chown",
+            "symlink", "link", "truncate", "execv", "execve", "execvp", "execl", "execlp", "spawnv", "spawnl", "fork", "forkpty", "kill", "killpg",
+            "putenv", "unsetenv", "chdir", "startfile", "posix_spawn"}
+
+
+class _SealedOS:
+    """What the executed script sees as `os`: reads are fine, process and file-mutation calls raise."""
+
+    def __init__(self, real):
+        self._real = real
+
+    def __getattr__(self, name):
+        if name in _REFUSED:
+            raise AssertionError(f"sealed: the probe script tried to use os.{name}")
+        return getattr(self._real, name)
+
+
+class _SealedModule:
+    def __init__(self, name):
+        self._name = name
+
+    def __getattr__(self, attr):
+        raise AssertionError(f"sealed: the probe script tried to use {self._name}.{attr}")
+
+
+def load(script=None):
+    """Fresh namespace with the script's functions (not run: __name__ != '__main__'). The script's os (and any
+    process or socket module it imports) is replaced by a sealed stand-in after import."""
     ns = {"__name__": "probe"}
-    exec(compile(SCRIPT, "scan_probe_inline", "exec"), ns)
+    exec(compile(script or SCRIPT, "scan_probe_inline", "exec"), ns)
+    ns["os"] = _SealedOS(os)
+    for mod in ("subprocess", "shutil", "socket", "smtplib", "ctypes"):
+        if mod in ns:
+            ns[mod] = _SealedModule(mod)
     return ns
 
 
@@ -369,6 +421,49 @@ def test_verdict_and_projection_arithmetic():
     check("concurrency 4 not measured -> SAMPLED", v(True, mk(1), None, 5942)[0] == "SAMPLED")
     p = ns["percentile"]
     check("percentile helper", p([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 95) == 10 and p([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 50) == 5 and p([], 50) is None)
+
+
+def test_the_test_harness_itself_cannot_be_used_to_run_a_git_push():
+    """The Oct 29 incident, reproduced safely: a script variant that shells out to git must be stopped."""
+    evil = SCRIPT.replace('say("scan probe starting', 'os.system("git push"); say("scan probe starting')
+    check("the variant really contains the shell-out", 'os.system("git push")' in evil)
+    ns = load(evil)
+    ns["say"] = lambda *a: None
+    ns["http_get"] = FakeNet()
+    ns["time"] = types.SimpleNamespace(monotonic=ns["time"].monotonic, sleep=lambda s: None)
+    try:
+        ns["main"](now=datetime.datetime(2026, 10, 27, 15, 30, tzinfo=datetime.timezone.utc))
+        stopped = False
+    except AssertionError as e:
+        stopped = "os.system" in str(e)
+    check("os.system is refused by the sealed os, so nothing ran", stopped)
+    ns = load(SCRIPT.replace('say("scan probe starting', 'import subprocess; subprocess.run(["git", "push"]); say("scan probe starting'))
+    ns["say"] = lambda *a: None
+    try:
+        ns["main"](now=datetime.datetime(2026, 10, 27, 15, 30, tzinfo=datetime.timezone.utc))
+        stopped = False
+    except AssertionError as e:
+        stopped = "subprocess" in str(e)
+    check("an import of subprocess inside a function is refused too", stopped)
+    try:
+        load(SCRIPT.replace("import json\n", "import json\n          import subprocess\n" if False else "import json\nimport subprocess\n", 1))
+        stopped = False
+    except AssertionError as e:
+        stopped = "subprocess" in str(e)
+    check("and so is a module-level import", stopped)
+    ns = load(SCRIPT.replace('say("scan probe starting', 'open("state.json", "w").write("x"); say("scan probe starting'))
+    ns["say"] = lambda *a: None
+    ns["http_get"] = FakeNet()
+    ns["time"] = types.SimpleNamespace(monotonic=ns["time"].monotonic, sleep=lambda s: None)
+    before = set(os.listdir("."))
+    try:
+        ns["main"](now=datetime.datetime(2026, 10, 27, 15, 30, tzinfo=datetime.timezone.utc))
+    except Exception:
+        pass
+    leftover = set(os.listdir(".")) - before
+    check("a stray file write lands in the throwaway temp directory, never in the repo", os.path.abspath(".").startswith(tempfile.gettempdir()) or "probe-test-" in os.getcwd(), os.getcwd())
+    check("and the repo has no new state.json", not os.path.exists(os.path.join(HERE, "state.json")))
+    check("git itself is pointed at nothing during the tests", os.environ.get("GIT_DIR", "").endswith("no-such-git-dir"))
 
 
 if __name__ == "__main__":
