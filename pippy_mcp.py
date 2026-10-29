@@ -194,6 +194,76 @@ SECTOR_ETFS = {
     "Comm. Services":    "XLC",
 }
 
+# ── Day change from daily closes ──────────────────────────────────────────────
+# yfinance's fast_info.previous_close is NOT the official prior close: it can include after-hours
+# trading, and for futures it matches neither the settlement nor the 5 PM ET last trade. Oct 28:
+# HOOD showed +4.68% when it actually closed -3.3% (the "previous close" was its post-earnings
+# after-hours price), gold showed +0.52% when it closed -0.56%, crude +1.19% vs +2.88%. Day changes
+# for stocks and commodities are therefore computed from the last two DAILY closes.
+PCT_DISAGREE_POINTS = 0.5     # log loudly when a computed move and the source's move differ by more than this
+
+
+def _clean_closes(pairs) -> list:
+    """[(date, close), ...] -> oldest-first list without NaN / non-positive closes."""
+    out = []
+    for d, c in pairs or []:
+        try:
+            c = float(c)
+        except Exception:
+            continue
+        if c == c and c > 0:
+            out.append((d, c))
+    return out
+
+
+def _closes_one(sym: str) -> list:
+    h = yf.Ticker(sym).history(period="10d", interval="1d", auto_adjust=False)
+    return _clean_closes((i.date(), v) for i, v in h["Close"].dropna().items())
+
+
+def _closes_batch(symbols) -> dict:
+    """One batched request for many symbols -> {sym: [(date, close), ...]}."""
+    df = yf.download(list(symbols), period="10d", interval="1d", auto_adjust=False,
+                     group_by="ticker", progress=False, threads=False)
+    out = {}
+    for s in symbols:
+        try:
+            out[s] = _clean_closes((i.date(), v) for i, v in df[s]["Close"].dropna().items())
+        except Exception:
+            out[s] = []
+    return out
+
+
+def _move_from_closes(closes: list):
+    """-> (last_close, prev_close, pct) from the last two daily closes, or None if fewer than two."""
+    if len(closes) < 2:
+        return None
+    (_, prev), (_, last) = closes[-2], closes[-1]
+    return last, prev, (last - prev) / prev * 100
+
+
+def _pct_guard(label: str, computed_pct, source_pct, closes=None) -> None:
+    """Log loudly (stderr) when the computed move and the source's move disagree by more than
+    PCT_DISAGREE_POINTS. The computed number is the one that is used."""
+    if computed_pct is None or source_pct is None:
+        return
+    if abs(computed_pct - source_pct) > PCT_DISAGREE_POINTS:
+        basis = ""
+        if closes and len(closes) >= 2:
+            basis = f" (daily closes {closes[-2][1]:.2f} -> {closes[-1][1]:.2f})"
+        print(f"[PCT-MISMATCH] {label}: computed {computed_pct:+.2f}%{basis} but the source says "
+              f"{source_pct:+.2f}% (differ by {abs(computed_pct - source_pct):.2f} points); using the computed move.",
+              file=__import__("sys").stderr)
+
+
+def _source_pct(fi):
+    try:
+        price, prev = fi.last_price, fi.previous_close
+        return (price - prev) / prev * 100 if price and prev else None
+    except Exception:
+        return None
+
+
 mcp = FastMCP("Pippy")
 
 
@@ -368,8 +438,18 @@ def fetch_stock_data(ticker: str) -> str:
             fi    = t.fast_info
             full  = t.info
             price = fi.last_price
-            prev  = fi.previous_close
-            pct   = ((price - prev) / prev * 100) if price and prev else None
+            src   = _source_pct(fi)
+            try:
+                closes = _closes_one(sym)
+                mv = _move_from_closes(closes)
+            except Exception:
+                closes, mv = [], None
+            if mv:
+                price, _, pct = mv
+                _pct_guard(sym, pct, src, closes)
+            else:
+                pct = src
+                print(f"[PCT-FALLBACK] {sym}: fewer than two daily closes available; using the source's move", file=__import__("sys").stderr)
             headline = ""
             for item in (t.news or [])[:2]:
                 h = item.get("content", {}).get("title") or item.get("title", "")
@@ -382,7 +462,7 @@ def fetch_stock_data(ticker: str) -> str:
                 "ticker":     sym,
                 "name":       full.get("longName", sym),
                 "price":      round(price, 2) if price else None,
-                "pct":        round(pct, 2) if pct else None,
+                "pct":        round(pct, 2) if pct is not None else None,
                 "52w_low":    full.get("fiftyTwoWeekLow"),
                 "52w_high":   full.get("fiftyTwoWeekHigh"),
                 "pe":         full.get("trailingPE"),
@@ -577,6 +657,11 @@ def fetch_sector_performance() -> str:
             return json.dumps({"source": "unavailable", "error": str(e), "timestamp": ts})
 
 
+MOVERS_UNIVERSE = ["AAPL","MSFT","NVDA","GOOGL","AMZN","META","TSLA","JPM",
+                   "AVGO","NOW","CRWD","PLTR","DDOG","CELH","AXON","HIMS",
+                   "APP","VRT","ANET","SOUN","TTD","MELI","HOOD","DECK","LULU"]
+
+
 @mcp.tool()
 def fetch_top_movers() -> str:
     """Fetch top 3 gainers and top 3 losers for the day. Returns JSON with 'gainers' and 'losers'."""
@@ -596,17 +681,28 @@ def fetch_top_movers() -> str:
                            "timestamp": ts})
     except Exception:
         try:
-            scan = ["AAPL","MSFT","NVDA","GOOGL","AMZN","META","TSLA","JPM",
-                    "AVGO","NOW","CRWD","PLTR","DDOG","CELH","AXON","HIMS",
-                    "APP","VRT","ANET","SOUN","TTD","MELI","HOOD","DECK","LULU"]
+            scan = MOVERS_UNIVERSE
+            try:
+                closes_by = _closes_batch(scan)
+            except Exception:
+                closes_by = {}
             results = []
             for ticker in scan:
-                fi    = yf.Ticker(ticker).fast_info
-                price = fi.last_price
-                prev  = fi.previous_close
-                if price and prev:
-                    pct = round((price - prev) / prev * 100, 2)
-                    results.append({"symbol": ticker, "pct": pct, "price": round(price, 2)})
+                try:
+                    fi   = yf.Ticker(ticker).fast_info
+                    src  = _source_pct(fi)
+                except Exception:
+                    fi, src = None, None
+                mv = _move_from_closes(closes_by.get(ticker, []))
+                if mv:
+                    price, _, pct = mv
+                    _pct_guard(ticker, pct, src, closes_by.get(ticker))
+                elif src is not None:
+                    price, pct = fi.last_price, src
+                    print(f"[PCT-FALLBACK] {ticker}: no daily closes; using the source's move", file=__import__("sys").stderr)
+                else:
+                    continue
+                results.append({"symbol": ticker, "pct": round(pct, 2), "price": round(price, 2)})
             results.sort(key=lambda x: x["pct"], reverse=True)
             gainers = results[:3]
             losers  = results[-3:][::-1]
@@ -734,8 +830,17 @@ def fetch_premarket_data(ticker: str) -> str:
         try:
             fi    = yf.Ticker(sym).fast_info
             price = fi.last_price
-            prev  = fi.previous_close
-            pct   = round((price - prev) / prev * 100, 2) if price and prev else None
+            src   = _source_pct(fi)
+            pct   = round(src, 2) if src is not None else None
+            try:
+                # Base = the last COMPLETED session's official close (never today's in-progress bar).
+                done = [(d, c) for d, c in _closes_one(sym) if d < _today_ct()]
+                if price and done:
+                    base = done[-1][1]
+                    pct = round((price - base) / base * 100, 2)
+                    _pct_guard(f"{sym} (pre-market)", pct, src, [(None, base), (None, price)])
+            except Exception:
+                print(f"[PCT-FALLBACK] {sym} (pre-market): using the source's move", file=__import__("sys").stderr)
             return json.dumps({"source": "fallback", "ticker": sym,
                                "price": price, "pct": pct, "timestamp": ts})
         except Exception as e:
@@ -870,19 +975,29 @@ def fetch_commodities() -> str:
     results = []
     for name, sym in items:
         try:
-            fi    = yf.Ticker(sym).fast_info
-            price = fi.last_price
-            prev  = fi.previous_close
-            if price and prev:
-                change = price - prev
-                pct    = change / prev * 100
-                results.append({
-                    "name":   name,
-                    "symbol": sym,
-                    "price":  round(price, 2),
-                    "change": round(change, 2),
-                    "pct":    round(pct, 2),
-                })
+            fi  = yf.Ticker(sym).fast_info
+            src = _source_pct(fi)
+            try:
+                closes = _closes_one(sym)
+                mv = _move_from_closes(closes)
+            except Exception:
+                closes, mv = [], None
+            if mv:
+                price, prev, pct = mv
+                _pct_guard(name, pct, src, closes)
+            elif src is not None:
+                price, prev = fi.last_price, fi.previous_close
+                pct = src
+                print(f"[PCT-FALLBACK] {name}: fewer than two daily closes; using the source's move", file=__import__("sys").stderr)
+            else:
+                continue
+            results.append({
+                "name":   name,
+                "symbol": sym,
+                "price":  round(price, 2),
+                "change": round(price - prev, 2),
+                "pct":    round(pct, 2),
+            })
         except Exception:
             continue
     return json.dumps({"source": "yfinance", "commodities": results, "timestamp": ts})
