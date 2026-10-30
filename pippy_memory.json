@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 277,
-  "last_session": "2026-10-29T20:02:01.363457",
+  "session_count": 278,
+  "last_session": "2026-10-30T13:31:18.153329",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 266,
-  "last_email_sent": "2026-10-29T20:02:01.361206",
-  "last_email_summary": "close sent Thursday, October 29, 2026",
+  "email_count": 267,
+  "last_email_sent": "2026-10-30T13:31:18.151108",
+  "last_email_summary": "morning sent Friday, October 30, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "close",
-      "actual_direction": "higher",
-      "actual_sp_pct": 0.66,
-      "best_sector": "Materials",
-      "worst_sector": "Real Estate",
-      "biggest_mover": "MELI +9.6%",
-      "date": "2026-10-05"
-    },
     {
       "type": "morning",
       "direction_called": "higher",
@@ -682,6 +673,17 @@
       "worst_sector": "Technology",
       "biggest_mover": "LULU +4.4%",
       "date": "2026-10-29"
+    },
+    {
+      "type": "morning",
+      "direction_called": "lower",
+      "sp_pct_called": -1.16,
+      "leading_index": "",
+      "lagging_index": "Nasdaq",
+      "headline_theme": "rate expectations",
+      "commodity_note": "Gold fell 1.92% to $3,954 an ounce. A drop can mean less demand for safe places to park money.",
+      "picks_status": "holding",
+      "date": "2026-10-30"
     }
   ],
   "lessons_learned": [
@@ -1122,7 +1124,7 @@
     "inflation data": 6,
     "earnings season": 7,
     "geopolitical tensions": 3,
-    "rate expectations": 23,
+    "rate expectations": 24,
     "commodities": 9
   }
 }
