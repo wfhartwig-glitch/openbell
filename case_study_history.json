@@ -423,6 +423,10 @@
     {
       "id": "crisis_2008_lehman",
       "date": "2026-10-29"
+    },
+    {
+      "id": "crash_1987_black_monday",
+      "date": "2026-10-30"
     }
   ],
   "low_inventory_alert_sent": true

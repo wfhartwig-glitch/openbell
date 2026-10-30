@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 278,
-  "last_session": "2026-10-30T13:31:18.153329",
+  "session_count": 279,
+  "last_session": "2026-10-30T17:00:41.896434",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 267,
-  "last_email_sent": "2026-10-30T13:31:18.151108",
-  "last_email_summary": "morning sent Friday, October 30, 2026",
+  "email_count": 268,
+  "last_email_sent": "2026-10-30T17:00:41.894373",
+  "last_email_summary": "casestudy sent Friday, October 30, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,17 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "morning",
-      "direction_called": "higher",
-      "sp_pct_called": 0.51,
-      "leading_index": "Nasdaq",
-      "lagging_index": "",
-      "headline_theme": "rate expectations",
-      "commodity_note": "Crude oil fell 2.02% to $87.94 a barrel. Cheaper energy lowers costs for airlines and shippers and can ease inflation, while squeezing oil producers.",
-      "picks_status": "holding",
-      "date": "2026-10-06"
-    },
     {
       "type": "case_study",
       "id": "investor_oprah_winfrey",
@@ -683,6 +672,15 @@
       "headline_theme": "rate expectations",
       "commodity_note": "Gold fell 1.92% to $3,954 an ounce. A drop can mean less demand for safe places to park money.",
       "picks_status": "holding",
+      "date": "2026-10-30"
+    },
+    {
+      "type": "case_study",
+      "id": "crash_1987_black_monday",
+      "category": "crisis",
+      "topic": "Black Monday, 1987 \u2014 The Day Computers Panicked",
+      "remaining_in_pass": 0,
+      "low_inventory_alert": false,
       "date": "2026-10-30"
     }
   ],
