@@ -5,8 +5,8 @@
   "frequent_questions": [],
   "flagged_tickers": [],
   "recurring_themes": {},
-  "session_count": 279,
-  "last_session": "2026-10-30T17:00:41.896434",
+  "session_count": 280,
+  "last_session": "2026-10-30T20:01:30.705813",
   "last_morning_brief": {},
   "last_close_summary": {},
   "last_deep_dive": {},
@@ -24,9 +24,9 @@
       "triggered_by": "\"Why JEPI Investors Gave Up $3,379 in Five-Year Gains\" via Yahoo Finance"
     }
   ],
-  "email_count": 268,
-  "last_email_sent": "2026-10-30T17:00:41.894373",
-  "last_email_summary": "casestudy sent Friday, October 30, 2026",
+  "email_count": 269,
+  "last_email_sent": "2026-10-30T20:01:30.703682",
+  "last_email_summary": "close sent Friday, October 30, 2026",
   "pick_performance_history": [
     {
       "ticker": "MSFT",
@@ -107,15 +107,6 @@
     }
   ],
   "briefing_history": [
-    {
-      "type": "case_study",
-      "id": "investor_oprah_winfrey",
-      "category": "investor",
-      "topic": "Oprah Winfrey Was Fired From Her First TV Job \u2014 and Built a Media Empire From the Comeback",
-      "remaining_in_pass": 20,
-      "low_inventory_alert": false,
-      "date": "2026-10-06"
-    },
     {
       "type": "close",
       "actual_direction": "higher",
@@ -682,6 +673,15 @@
       "remaining_in_pass": 0,
       "low_inventory_alert": false,
       "date": "2026-10-30"
+    },
+    {
+      "type": "close",
+      "actual_direction": "lower",
+      "actual_sp_pct": -1.83,
+      "best_sector": "Energy",
+      "worst_sector": "Technology",
+      "biggest_mover": "CELH +3.4%",
+      "date": "2026-10-30"
     }
   ],
   "lessons_learned": [
@@ -755,12 +755,6 @@
     }
   ],
   "prediction_accuracy": [
-    {
-      "date": "2026-08-05",
-      "called": "higher",
-      "actual": "mixed",
-      "accurate": false
-    },
     {
       "date": "2026-08-06",
       "called": "mixed",
@@ -1111,6 +1105,12 @@
     },
     {
       "date": "2026-10-29",
+      "called": "lower",
+      "actual": "lower",
+      "accurate": true
+    },
+    {
+      "date": "2026-10-30",
       "called": "lower",
       "actual": "lower",
       "accurate": true
